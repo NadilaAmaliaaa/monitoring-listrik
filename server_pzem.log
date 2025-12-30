@@ -1,0 +1,243 @@
+2025-12-30 19:38:10,968 - INFO - DB pool initialized successfully.
+2025-12-30 19:38:11,058 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-30 19:38:11,071 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-30 19:38:11,074 - INFO - Added job "Flush matured buckets" to job store "default"
+2025-12-30 19:38:11,075 - INFO - Added job "Cleanup old buckets" to job store "default"
+2025-12-30 19:38:11,076 - INFO - Scheduler started
+2025-12-30 19:38:11,993 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.5:5000
+2025-12-30 19:38:12,003 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-30 19:38:26,072 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:38:41 +07)" (scheduled at 2025-12-30 19:38:26.058299+07:00)
+2025-12-30 19:38:26,073 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:38:41 +07)" executed successfully
+2025-12-30 19:38:41,071 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:38:56 +07)" (scheduled at 2025-12-30 19:38:41.058299+07:00)
+2025-12-30 19:38:41,071 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:38:56 +07)" executed successfully
+2025-12-30 19:38:58,770 - INFO - DB pool initialized successfully.
+2025-12-30 19:38:58,811 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-30 19:38:58,812 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-30 19:38:58,815 - INFO - Added job "Flush matured buckets" to job store "default"
+2025-12-30 19:38:58,816 - INFO - Added job "Cleanup old buckets" to job store "default"
+2025-12-30 19:38:58,816 - INFO - Scheduler started
+2025-12-30 19:38:59,714 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.5:5000
+2025-12-30 19:38:59,715 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-30 19:39:58,688 - INFO - DB pool initialized successfully.
+2025-12-30 19:39:58,722 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-30 19:39:58,726 - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-30 19:39:58,729 - INFO - Added job "Flush matured buckets" to job store "default"
+2025-12-30 19:39:58,729 - INFO - Added job "Cleanup old buckets" to job store "default"
+2025-12-30 19:39:58,730 - INFO - Scheduler started
+2025-12-30 19:39:59,879 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.5:5000
+2025-12-30 19:39:59,881 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-30 19:40:13,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:40:28 +07)" (scheduled at 2025-12-30 19:40:13.722653+07:00)
+2025-12-30 19:40:13,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:40:28 +07)" executed successfully
+2025-12-30 19:40:28,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:40:43 +07)" (scheduled at 2025-12-30 19:40:28.722653+07:00)
+2025-12-30 19:40:28,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:40:43 +07)" executed successfully
+2025-12-30 19:40:43,731 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:40:58 +07)" (scheduled at 2025-12-30 19:40:43.722653+07:00)
+2025-12-30 19:40:44,026 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:40:58 +07)" executed successfully
+2025-12-30 19:40:58,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:13 +07)" (scheduled at 2025-12-30 19:40:58.722653+07:00)
+2025-12-30 19:40:58,899 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:13 +07)" executed successfully
+2025-12-30 19:41:13,737 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:28 +07)" (scheduled at 2025-12-30 19:41:13.722653+07:00)
+2025-12-30 19:41:14,413 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:28 +07)" executed successfully
+2025-12-30 19:41:28,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:43 +07)" (scheduled at 2025-12-30 19:41:28.722653+07:00)
+2025-12-30 19:41:28,877 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:43 +07)" executed successfully
+2025-12-30 19:41:43,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:58 +07)" (scheduled at 2025-12-30 19:41:43.722653+07:00)
+2025-12-30 19:41:43,859 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:41:58 +07)" executed successfully
+2025-12-30 19:41:58,728 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:13 +07)" (scheduled at 2025-12-30 19:41:58.722653+07:00)
+2025-12-30 19:41:58,887 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:13 +07)" executed successfully
+2025-12-30 19:42:13,730 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:28 +07)" (scheduled at 2025-12-30 19:42:13.722653+07:00)
+2025-12-30 19:42:13,870 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:28 +07)" executed successfully
+2025-12-30 19:42:28,736 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:43 +07)" (scheduled at 2025-12-30 19:42:28.722653+07:00)
+2025-12-30 19:42:29,393 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:43 +07)" executed successfully
+2025-12-30 19:42:43,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:58 +07)" (scheduled at 2025-12-30 19:42:43.722653+07:00)
+2025-12-30 19:42:43,899 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:42:58 +07)" executed successfully
+2025-12-30 19:42:58,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:13 +07)" (scheduled at 2025-12-30 19:42:58.722653+07:00)
+2025-12-30 19:42:58,811 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:13 +07)" executed successfully
+2025-12-30 19:43:13,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:28 +07)" (scheduled at 2025-12-30 19:43:13.722653+07:00)
+2025-12-30 19:43:14,361 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:28 +07)" executed successfully
+2025-12-30 19:43:28,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:43 +07)" (scheduled at 2025-12-30 19:43:28.722653+07:00)
+2025-12-30 19:43:28,883 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:43 +07)" executed successfully
+2025-12-30 19:43:43,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:58 +07)" (scheduled at 2025-12-30 19:43:43.722653+07:00)
+2025-12-30 19:43:43,848 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:43:58 +07)" executed successfully
+2025-12-30 19:43:58,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:13 +07)" (scheduled at 2025-12-30 19:43:58.722653+07:00)
+2025-12-30 19:43:58,930 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:13 +07)" executed successfully
+2025-12-30 19:44:13,731 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:28 +07)" (scheduled at 2025-12-30 19:44:13.722653+07:00)
+2025-12-30 19:44:13,966 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:28 +07)" executed successfully
+2025-12-30 19:44:28,735 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:43 +07)" (scheduled at 2025-12-30 19:44:28.722653+07:00)
+2025-12-30 19:44:28,735 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:43 +07)" executed successfully
+2025-12-30 19:44:43,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:58 +07)" (scheduled at 2025-12-30 19:44:43.722653+07:00)
+2025-12-30 19:44:43,727 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:44:58 +07)" executed successfully
+2025-12-30 19:44:58,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:13 +07)" (scheduled at 2025-12-30 19:44:58.722653+07:00)
+2025-12-30 19:44:58,727 - INFO - Running job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 19:49:58 +07)" (scheduled at 2025-12-30 19:44:58.726643+07:00)
+2025-12-30 19:44:58,728 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:13 +07)" executed successfully
+2025-12-30 19:44:58,728 - INFO - Job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 19:49:58 +07)" executed successfully
+2025-12-30 19:45:13,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:28 +07)" (scheduled at 2025-12-30 19:45:13.722653+07:00)
+2025-12-30 19:45:13,730 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:28 +07)" executed successfully
+2025-12-30 19:45:28,735 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:43 +07)" (scheduled at 2025-12-30 19:45:28.722653+07:00)
+2025-12-30 19:45:28,736 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:43 +07)" executed successfully
+2025-12-30 19:45:43,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:58 +07)" (scheduled at 2025-12-30 19:45:43.722653+07:00)
+2025-12-30 19:45:43,727 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:45:58 +07)" executed successfully
+2025-12-30 19:45:58,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:13 +07)" (scheduled at 2025-12-30 19:45:58.722653+07:00)
+2025-12-30 19:45:58,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:13 +07)" executed successfully
+2025-12-30 19:46:13,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:28 +07)" (scheduled at 2025-12-30 19:46:13.722653+07:00)
+2025-12-30 19:46:13,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:28 +07)" executed successfully
+2025-12-30 19:46:28,734 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:43 +07)" (scheduled at 2025-12-30 19:46:28.722653+07:00)
+2025-12-30 19:46:28,735 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:43 +07)" executed successfully
+2025-12-30 19:46:43,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:58 +07)" (scheduled at 2025-12-30 19:46:43.722653+07:00)
+2025-12-30 19:46:43,726 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:46:58 +07)" executed successfully
+2025-12-30 19:46:58,737 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:13 +07)" (scheduled at 2025-12-30 19:46:58.722653+07:00)
+2025-12-30 19:46:58,738 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:13 +07)" executed successfully
+2025-12-30 19:47:13,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:28 +07)" (scheduled at 2025-12-30 19:47:13.722653+07:00)
+2025-12-30 19:47:13,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:28 +07)" executed successfully
+2025-12-30 19:47:28,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:43 +07)" (scheduled at 2025-12-30 19:47:28.722653+07:00)
+2025-12-30 19:47:28,739 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:43 +07)" executed successfully
+2025-12-30 19:47:43,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:58 +07)" (scheduled at 2025-12-30 19:47:43.722653+07:00)
+2025-12-30 19:47:43,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:47:58 +07)" executed successfully
+2025-12-30 19:47:58,735 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:13 +07)" (scheduled at 2025-12-30 19:47:58.722653+07:00)
+2025-12-30 19:47:58,736 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:13 +07)" executed successfully
+2025-12-30 19:48:13,731 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:28 +07)" (scheduled at 2025-12-30 19:48:13.722653+07:00)
+2025-12-30 19:48:13,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:28 +07)" executed successfully
+2025-12-30 19:48:28,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:43 +07)" (scheduled at 2025-12-30 19:48:28.722653+07:00)
+2025-12-30 19:48:28,730 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:43 +07)" executed successfully
+2025-12-30 19:48:43,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:58 +07)" (scheduled at 2025-12-30 19:48:43.722653+07:00)
+2025-12-30 19:48:43,739 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:48:58 +07)" executed successfully
+2025-12-30 19:48:58,728 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:13 +07)" (scheduled at 2025-12-30 19:48:58.722653+07:00)
+2025-12-30 19:48:58,729 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:13 +07)" executed successfully
+2025-12-30 19:49:13,727 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:28 +07)" (scheduled at 2025-12-30 19:49:13.722653+07:00)
+2025-12-30 19:49:13,728 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:28 +07)" executed successfully
+2025-12-30 19:49:28,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:43 +07)" (scheduled at 2025-12-30 19:49:28.722653+07:00)
+2025-12-30 19:49:28,734 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:43 +07)" executed successfully
+2025-12-30 19:49:43,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:58 +07)" (scheduled at 2025-12-30 19:49:43.722653+07:00)
+2025-12-30 19:49:43,730 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:49:58 +07)" executed successfully
+2025-12-30 19:49:58,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:13 +07)" (scheduled at 2025-12-30 19:49:58.722653+07:00)
+2025-12-30 19:49:58,733 - INFO - Running job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 19:54:58 +07)" (scheduled at 2025-12-30 19:49:58.726643+07:00)
+2025-12-30 19:49:58,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:13 +07)" executed successfully
+2025-12-30 19:49:58,734 - INFO - Job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 19:54:58 +07)" executed successfully
+2025-12-30 19:50:13,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:28 +07)" (scheduled at 2025-12-30 19:50:13.722653+07:00)
+2025-12-30 19:50:13,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:28 +07)" executed successfully
+2025-12-30 19:50:28,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:43 +07)" (scheduled at 2025-12-30 19:50:28.722653+07:00)
+2025-12-30 19:50:28,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:43 +07)" executed successfully
+2025-12-30 19:50:43,731 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:58 +07)" (scheduled at 2025-12-30 19:50:43.722653+07:00)
+2025-12-30 19:50:43,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:50:58 +07)" executed successfully
+2025-12-30 19:50:58,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:13 +07)" (scheduled at 2025-12-30 19:50:58.722653+07:00)
+2025-12-30 19:50:58,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:13 +07)" executed successfully
+2025-12-30 19:51:13,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:28 +07)" (scheduled at 2025-12-30 19:51:13.722653+07:00)
+2025-12-30 19:51:13,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:28 +07)" executed successfully
+2025-12-30 19:51:28,731 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:43 +07)" (scheduled at 2025-12-30 19:51:28.722653+07:00)
+2025-12-30 19:51:28,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:43 +07)" executed successfully
+2025-12-30 19:51:43,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:58 +07)" (scheduled at 2025-12-30 19:51:43.722653+07:00)
+2025-12-30 19:51:43,734 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:51:58 +07)" executed successfully
+2025-12-30 19:51:58,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:13 +07)" (scheduled at 2025-12-30 19:51:58.722653+07:00)
+2025-12-30 19:51:58,723 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:13 +07)" executed successfully
+2025-12-30 19:52:13,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:28 +07)" (scheduled at 2025-12-30 19:52:13.722653+07:00)
+2025-12-30 19:52:13,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:28 +07)" executed successfully
+2025-12-30 19:52:28,727 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:43 +07)" (scheduled at 2025-12-30 19:52:28.722653+07:00)
+2025-12-30 19:52:28,727 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:43 +07)" executed successfully
+2025-12-30 19:52:43,727 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:58 +07)" (scheduled at 2025-12-30 19:52:43.722653+07:00)
+2025-12-30 19:52:43,728 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:52:58 +07)" executed successfully
+2025-12-30 19:52:58,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:13 +07)" (scheduled at 2025-12-30 19:52:58.722653+07:00)
+2025-12-30 19:52:58,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:13 +07)" executed successfully
+2025-12-30 19:53:13,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:28 +07)" (scheduled at 2025-12-30 19:53:13.722653+07:00)
+2025-12-30 19:53:13,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:28 +07)" executed successfully
+2025-12-30 19:53:28,730 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:43 +07)" (scheduled at 2025-12-30 19:53:28.722653+07:00)
+2025-12-30 19:53:28,731 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:43 +07)" executed successfully
+2025-12-30 19:53:43,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:58 +07)" (scheduled at 2025-12-30 19:53:43.722653+07:00)
+2025-12-30 19:53:43,725 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:53:58 +07)" executed successfully
+2025-12-30 19:53:58,735 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:13 +07)" (scheduled at 2025-12-30 19:53:58.722653+07:00)
+2025-12-30 19:53:58,736 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:13 +07)" executed successfully
+2025-12-30 19:54:13,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:28 +07)" (scheduled at 2025-12-30 19:54:13.722653+07:00)
+2025-12-30 19:54:13,738 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:28 +07)" executed successfully
+2025-12-30 19:54:28,734 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:43 +07)" (scheduled at 2025-12-30 19:54:28.722653+07:00)
+2025-12-30 19:54:28,735 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:43 +07)" executed successfully
+2025-12-30 19:54:43,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:58 +07)" (scheduled at 2025-12-30 19:54:43.722653+07:00)
+2025-12-30 19:54:43,731 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:54:58 +07)" executed successfully
+2025-12-30 19:54:58,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:13 +07)" (scheduled at 2025-12-30 19:54:58.722653+07:00)
+2025-12-30 19:54:58,726 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:13 +07)" executed successfully
+2025-12-30 19:54:58,741 - INFO - Running job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 19:59:58 +07)" (scheduled at 2025-12-30 19:54:58.726643+07:00)
+2025-12-30 19:54:58,742 - INFO - Job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 19:59:58 +07)" executed successfully
+2025-12-30 19:55:13,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:28 +07)" (scheduled at 2025-12-30 19:55:13.722653+07:00)
+2025-12-30 19:55:13,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:28 +07)" executed successfully
+2025-12-30 19:55:28,736 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:43 +07)" (scheduled at 2025-12-30 19:55:28.722653+07:00)
+2025-12-30 19:55:28,737 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:43 +07)" executed successfully
+2025-12-30 19:55:43,737 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:58 +07)" (scheduled at 2025-12-30 19:55:43.722653+07:00)
+2025-12-30 19:55:43,738 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:55:58 +07)" executed successfully
+2025-12-30 19:55:58,727 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:13 +07)" (scheduled at 2025-12-30 19:55:58.722653+07:00)
+2025-12-30 19:55:58,728 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:13 +07)" executed successfully
+2025-12-30 19:56:13,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:28 +07)" (scheduled at 2025-12-30 19:56:13.722653+07:00)
+2025-12-30 19:56:13,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:28 +07)" executed successfully
+2025-12-30 19:56:28,734 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:43 +07)" (scheduled at 2025-12-30 19:56:28.722653+07:00)
+2025-12-30 19:56:28,735 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:43 +07)" executed successfully
+2025-12-30 19:56:43,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:58 +07)" (scheduled at 2025-12-30 19:56:43.722653+07:00)
+2025-12-30 19:56:43,730 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:56:58 +07)" executed successfully
+2025-12-30 19:56:58,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:13 +07)" (scheduled at 2025-12-30 19:56:58.722653+07:00)
+2025-12-30 19:56:58,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:13 +07)" executed successfully
+2025-12-30 19:57:13,735 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:28 +07)" (scheduled at 2025-12-30 19:57:13.722653+07:00)
+2025-12-30 19:57:13,735 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:28 +07)" executed successfully
+2025-12-30 19:57:28,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:43 +07)" (scheduled at 2025-12-30 19:57:28.722653+07:00)
+2025-12-30 19:57:28,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:43 +07)" executed successfully
+2025-12-30 19:57:43,728 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:58 +07)" (scheduled at 2025-12-30 19:57:43.722653+07:00)
+2025-12-30 19:57:43,729 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:57:58 +07)" executed successfully
+2025-12-30 19:57:58,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:13 +07)" (scheduled at 2025-12-30 19:57:58.722653+07:00)
+2025-12-30 19:57:58,723 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:13 +07)" executed successfully
+2025-12-30 19:58:13,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:28 +07)" (scheduled at 2025-12-30 19:58:13.722653+07:00)
+2025-12-30 19:58:13,726 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:28 +07)" executed successfully
+2025-12-30 19:58:28,730 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:43 +07)" (scheduled at 2025-12-30 19:58:28.722653+07:00)
+2025-12-30 19:58:28,731 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:43 +07)" executed successfully
+2025-12-30 19:58:43,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:58 +07)" (scheduled at 2025-12-30 19:58:43.722653+07:00)
+2025-12-30 19:58:43,730 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:58:58 +07)" executed successfully
+2025-12-30 19:58:58,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:13 +07)" (scheduled at 2025-12-30 19:58:58.722653+07:00)
+2025-12-30 19:58:58,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:13 +07)" executed successfully
+2025-12-30 19:59:13,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:28 +07)" (scheduled at 2025-12-30 19:59:13.722653+07:00)
+2025-12-30 19:59:13,727 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:28 +07)" executed successfully
+2025-12-30 19:59:28,737 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:43 +07)" (scheduled at 2025-12-30 19:59:28.722653+07:00)
+2025-12-30 19:59:28,738 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:43 +07)" executed successfully
+2025-12-30 19:59:43,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:58 +07)" (scheduled at 2025-12-30 19:59:43.722653+07:00)
+2025-12-30 19:59:43,734 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 19:59:58 +07)" executed successfully
+2025-12-30 19:59:58,731 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:13 +07)" (scheduled at 2025-12-30 19:59:58.722653+07:00)
+2025-12-30 19:59:58,732 - INFO - Running job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 20:04:58 +07)" (scheduled at 2025-12-30 19:59:58.726643+07:00)
+2025-12-30 19:59:58,732 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:13 +07)" executed successfully
+2025-12-30 19:59:58,733 - INFO - Job "Cleanup old buckets (trigger: interval[0:05:00], next run at: 2025-12-30 20:04:58 +07)" executed successfully
+2025-12-30 20:00:13,723 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:28 +07)" (scheduled at 2025-12-30 20:00:13.722653+07:00)
+2025-12-30 20:00:13,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:28 +07)" executed successfully
+2025-12-30 20:00:28,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:43 +07)" (scheduled at 2025-12-30 20:00:28.722653+07:00)
+2025-12-30 20:00:28,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:43 +07)" executed successfully
+2025-12-30 20:00:43,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:58 +07)" (scheduled at 2025-12-30 20:00:43.722653+07:00)
+2025-12-30 20:00:43,734 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:00:58 +07)" executed successfully
+2025-12-30 20:00:58,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:13 +07)" (scheduled at 2025-12-30 20:00:58.722653+07:00)
+2025-12-30 20:00:58,729 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:13 +07)" executed successfully
+2025-12-30 20:01:13,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:28 +07)" (scheduled at 2025-12-30 20:01:13.722653+07:00)
+2025-12-30 20:01:13,887 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:28 +07)" executed successfully
+2025-12-30 20:01:28,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:43 +07)" (scheduled at 2025-12-30 20:01:28.722653+07:00)
+2025-12-30 20:01:28,881 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:43 +07)" executed successfully
+2025-12-30 20:01:43,725 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:58 +07)" (scheduled at 2025-12-30 20:01:43.722653+07:00)
+2025-12-30 20:01:43,926 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:01:58 +07)" executed successfully
+2025-12-30 20:01:58,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:13 +07)" (scheduled at 2025-12-30 20:01:58.722653+07:00)
+2025-12-30 20:01:59,107 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:13 +07)" executed successfully
+2025-12-30 20:02:13,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:28 +07)" (scheduled at 2025-12-30 20:02:13.722653+07:00)
+2025-12-30 20:02:13,825 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:28 +07)" executed successfully
+2025-12-30 20:02:28,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:43 +07)" (scheduled at 2025-12-30 20:02:28.722653+07:00)
+2025-12-30 20:02:28,739 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:43 +07)" executed successfully
+2025-12-30 20:02:43,735 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:58 +07)" (scheduled at 2025-12-30 20:02:43.722653+07:00)
+2025-12-30 20:02:43,735 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:02:58 +07)" executed successfully
+2025-12-30 20:02:58,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:13 +07)" (scheduled at 2025-12-30 20:02:58.722653+07:00)
+2025-12-30 20:02:58,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:13 +07)" executed successfully
+2025-12-30 20:03:13,729 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:28 +07)" (scheduled at 2025-12-30 20:03:13.722653+07:00)
+2025-12-30 20:03:13,730 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:28 +07)" executed successfully
+2025-12-30 20:03:28,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:43 +07)" (scheduled at 2025-12-30 20:03:28.722653+07:00)
+2025-12-30 20:03:28,734 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:43 +07)" executed successfully
+2025-12-30 20:03:43,733 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:58 +07)" (scheduled at 2025-12-30 20:03:43.722653+07:00)
+2025-12-30 20:03:43,734 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:03:58 +07)" executed successfully
+2025-12-30 20:03:58,724 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:13 +07)" (scheduled at 2025-12-30 20:03:58.722653+07:00)
+2025-12-30 20:03:58,724 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:13 +07)" executed successfully
+2025-12-30 20:04:13,726 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:28 +07)" (scheduled at 2025-12-30 20:04:13.722653+07:00)
+2025-12-30 20:04:13,726 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:28 +07)" executed successfully
+2025-12-30 20:04:28,732 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:43 +07)" (scheduled at 2025-12-30 20:04:28.722653+07:00)
+2025-12-30 20:04:28,733 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:43 +07)" executed successfully
+2025-12-30 20:04:43,738 - INFO - Running job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:58 +07)" (scheduled at 2025-12-30 20:04:43.722653+07:00)
+2025-12-30 20:04:43,739 - INFO - Job "Flush matured buckets (trigger: interval[0:00:15], next run at: 2025-12-30 20:04:58 +07)" executed successfully
