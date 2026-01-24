@@ -1,0 +1,382 @@
+<!-- templates/reports.html -->
+{% extends "base.html" %}
+
+{% block title %}Unduh Laporan{% endblock %}
+
+{% block page_title %}Unduh Laporan{% endblock %}
+{% block page_subtitle %}Generate and Download Energy Usage Reports{% endblock %}
+
+{% block extra_css %}
+<style>
+  .custom-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto flex flex-col gap-8">
+  
+  <!-- Report Generation Section -->
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 relative overflow-hidden">
+    <div class="absolute right-0 top-0 p-8 opacity-[0.03]">
+      <span class="material-symbols-outlined text-[140px] text-slate-900">summarize</span>
+    </div>
+    
+    <div class="relative z-10">
+      <h3 class="text-slate-900 text-lg font-bold mb-8 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">settings_applications</span>
+        Report Generation
+      </h3>
+      
+      <form id="reportForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+        <!-- Start Date -->
+        <div class="flex flex-col gap-2">
+          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Start Date</label>
+          <input 
+            id="startDate"
+            class="bg-white border border-slate-200 text-slate-900 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary w-full px-4 py-2.5 text-sm outline-none transition-all" 
+            type="date" 
+            value="2023-10-01"
+          />
+        </div>
+        
+        <!-- End Date -->
+        <div class="flex flex-col gap-2">
+          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">End Date</label>
+          <input 
+            id="endDate"
+            class="bg-white border border-slate-200 text-slate-900 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary w-full px-4 py-2.5 text-sm outline-none transition-all" 
+            type="date" 
+            value="2023-10-24"
+          />
+        </div>
+        
+        <!-- Parameters -->
+        <div class="flex flex-col gap-2">
+          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Parameters</label>
+          <select 
+            id="parameters"
+            class="custom-select bg-white border border-slate-200 text-slate-900 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary w-full px-4 py-2.5 text-sm outline-none transition-all"
+          >
+            <option value="all">All Parameters</option>
+            <option value="voltage">Voltage (V)</option>
+            <option value="current">Current (A)</option>
+            <option value="power">Power (kW)</option>
+            <option value="energy">Energy (kWh)</option>
+            <option value="frequency">Frequency (Hz)</option>
+            <option value="powerfactor">Power Factor</option>
+          </select>
+        </div>
+        
+        <!-- Format -->
+        <div class="flex flex-col gap-2">
+          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Format</label>
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <label class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all bg-white text-primary shadow-sm">
+              <input checked class="hidden" name="format" type="radio" value="pdf"/> 
+              PDF
+            </label>
+            <label class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all text-slate-500 hover:text-slate-700">
+              <input class="hidden" name="format" type="radio" value="csv"/> 
+              CSV
+            </label>
+            <label class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all text-slate-500 hover:text-slate-700">
+              <input class="hidden" name="format" type="radio" value="excel"/> 
+              Excel
+            </label>
+          </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="lg:col-span-4 flex justify-end mt-4">
+          <button 
+            class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-10 rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30" 
+            type="submit"
+          >
+            <span class="material-symbols-outlined">download</span>
+            Generate &amp; Download Report
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Download History Section -->
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-primary">history</span>
+        <h3 class="text-slate-900 text-base font-bold">Histori Unduh Laporan</h3>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-slate-500 text-xs font-medium">Menampilkan 5 unduhan terakhir</span>
+        <button class="text-primary text-sm font-bold hover:text-primary/80 transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">refresh</span>
+          Refresh
+        </button>
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200">
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Waktu Unduh
+            </th>
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Rentang Waktu Laporan
+            </th>
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Parameter
+            </th>
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">
+              Format
+            </th>
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Ukuran File
+            </th>
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Diunduh Oleh
+            </th>
+            <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">
+              Aksi
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          
+          <!-- Row 1 -->
+          <tr class="hover:bg-slate-50/50 transition-colors group">
+            <td class="px-6 py-4 text-sm text-slate-900 font-medium whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="font-bold">2023-10-24 14:20:15</span>
+                <span class="text-xs text-slate-500">2 jam yang lalu</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex flex-col">
+                <span class="font-semibold">01 Okt 2023 - 24 Okt 2023</span>
+                <span class="text-xs text-slate-500">24 hari</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-bold border border-blue-200">
+                <span class="material-symbols-outlined text-sm">bolt</span>
+                All Parameters
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 px-2.5 py-1 rounded-full text-xs font-bold border border-red-100">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+                PDF
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700 font-mono">
+              3.2 MB
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex items-center gap-2">
+                <div class="size-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn-71cxcqeXb-NXQeN0I6pXurlcCbQkNrRVoAFXqvqpGP_ZxTaWDwzwmdm3bCGaKYeRsZXyGU5E8zmgsCzy8nTVRleImEcZFrrFFD2LzfK3dDczjDY_6LR7_pm5iPRpJjfrzJ8mCLPc7h5oc6te-tTyq0UkL1fChyH42sYazsozvlo8_f26r84FmYoNgxYJGf3yeGwgLbn4YKFBzAFxSgF5yyQCAURwaZhr7pakZRc7svo1hTONH0Mcg1KSMPF9mCKnxkFp3tecVI" alt="User" class="w-full h-full object-cover">
+                </div>
+                <span class="font-medium">Admin User</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button class="inline-flex items-center gap-1 text-primary hover:text-primary/80 font-bold text-sm transition-colors">
+                <span class="material-symbols-outlined text-lg">download</span>
+                Unduh
+              </button>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr class="hover:bg-slate-50/50 transition-colors group">
+            <td class="px-6 py-4 text-sm text-slate-900 font-medium whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="font-bold">2023-10-24 10:45:30</span>
+                <span class="text-xs text-slate-500">6 jam yang lalu</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex flex-col">
+                <span class="font-semibold">16 Okt 2023 - 22 Okt 2023</span>
+                <span class="text-xs text-slate-500">7 hari</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md text-xs font-bold border border-purple-200">
+                <span class="material-symbols-outlined text-sm">flash_on</span>
+                Voltage & Current
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center gap-1 bg-green-50 text-green-600 px-2.5 py-1 rounded-full text-xs font-bold border border-green-100">
+                <span class="material-symbols-outlined text-sm">table_chart</span>
+                CSV
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700 font-mono">
+              1.8 MB
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex items-center gap-2">
+                <div class="size-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn-71cxcqeXb-NXQeN0I6pXurlcCbQkNrRVoAFXqvqpGP_ZxTaWDwzwmdm3bCGaKYeRsZXyGU5E8zmgsCzy8nTVRleImEcZFrrFFD2LzfK3dDczjDY_6LR7_pm5iPRpJjfrzJ8mCLPc7h5oc6te-tTyq0UkL1fChyH42sYazsozvlo8_f26r84FmYoNgxYJGf3yeGwgLbn4YKFBzAFxSgF5yyQCAURwaZhr7pakZRc7svo1hTONH0Mcg1KSMPF9mCKnxkFp3tecVI" alt="User" class="w-full h-full object-cover">
+                </div>
+                <span class="font-medium">Admin User</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button class="inline-flex items-center gap-1 text-primary hover:text-primary/80 font-bold text-sm transition-colors">
+                <span class="material-symbols-outlined text-lg">download</span>
+                Unduh
+              </button>
+            </td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr class="hover:bg-slate-50/50 transition-colors group">
+            <td class="px-6 py-4 text-sm text-slate-900 font-medium whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="font-bold">2023-10-23 16:30:22</span>
+                <span class="text-xs text-slate-500">Kemarin</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex flex-col">
+                <span class="font-semibold">01 Sep 2023 - 30 Sep 2023</span>
+                <span class="text-xs text-slate-500">30 hari</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">
+                <span class="material-symbols-outlined text-sm">energy_savings_leaf</span>
+                Energy & Power
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full text-xs font-bold border border-blue-100">
+                <span class="material-symbols-outlined text-sm">description</span>
+                Excel
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700 font-mono">
+              5.4 MB
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex items-center gap-2">
+                <div class="size-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn-71cxcqeXb-NXQeN0I6pXurlcCbQkNrRVoAFXqvqpGP_ZxTaWDwzwmdm3bCGaKYeRsZXyGU5E8zmgsCzy8nTVRleImEcZFrrFFD2LzfK3dDczjDY_6LR7_pm5iPRpJjfrzJ8mCLPc7h5oc6te-tTyq0UkL1fChyH42sYazsozvlo8_f26r84FmYoNgxYJGf3yeGwgLbn4YKFBzAFxSgF5yyQCAURwaZhr7pakZRc7svo1hTONH0Mcg1KSMPF9mCKnxkFp3tecVI" alt="User" class="w-full h-full object-cover">
+                </div>
+                <span class="font-medium">Admin User</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button class="inline-flex items-center gap-1 text-primary hover:text-primary/80 font-bold text-sm transition-colors">
+                <span class="material-symbols-outlined text-lg">download</span>
+                Unduh
+              </button>
+            </td>
+          </tr>
+
+          <!-- Row 4 -->
+          <tr class="hover:bg-slate-50/50 transition-colors group">
+            <td class="px-6 py-4 text-sm text-slate-900 font-medium whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="font-bold">2023-10-23 09:15:45</span>
+                <span class="text-xs text-slate-500">Kemarin</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex flex-col">
+                <span class="font-semibold">23 Okt 2023 - 23 Okt 2023</span>
+                <span class="text-xs text-slate-500">1 hari</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-700 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200">
+                <span class="material-symbols-oriented text-sm">analytics</span>
+                Power Factor
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center gap-1 bg-red-50 text-red-600 px-2.5 py-1 rounded-full text-xs font-bold border border-red-100">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+                PDF
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700 font-mono">
+              524 KB
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-700">
+              <div class="flex items-center gap-2">
+                <div class="size-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn-71cxcqeXb-NXQeN0I6pXurlcCbQkNrRVoAFXqvqpGP_ZxTaWDwzwmdm3bCGaKYeRsZXyGU5E8zmgsCzy8nTVRleImEcZFrrFFD2LzfK3dDczjDY_6LR7_pm5iPRpJjfrzJ8mCLPc7h5oc6te-tTyq0UkL1fChyH42sYazsozvlo8_f26r84FmYoNgxYJGf3yeGwgLbn4YKFBzAFxSgF5yyQCAURwaZhr7pakZRc7svo1hTONH0Mcg1KSMPF9mCKnxkFp3tecVI" alt="User" class="w-full h-full object-cover">
+                </div>
+                <span class="font-medium">Admin User</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button class="inline-flex items-center gap-1 text-primary hover:text-primary/80 font-bold text-sm transition-colors">
+                <span class="material-symbols-outlined text-lg">download</span>
+                Unduh
+              </button>
+            </td>
+          </tr>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Handle form submission
+  document.getElementById('reportForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const parameters = document.getElementById('parameters').value;
+    const format = document.querySelector('input[name="format"]:checked').value;
+    
+    console.log('Generating report:', { startDate, endDate, parameters, format });
+    
+    // Show loading state
+    const button = e.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Generating...';
+    button.disabled = true;
+    
+    // Simulate report generation
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.disabled = false;
+      alert('Report generated successfully! Download will start shortly.');
+    }, 2000);
+  });
+  
+  // Handle format radio button styling
+  document.querySelectorAll('input[name="format"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('input[name="format"]').forEach(r => {
+        const label = r.parentElement;
+        if (r.checked) {
+          label.classList.add('bg-white', 'text-primary', 'shadow-sm');
+          label.classList.remove('text-slate-500');
+        } else {
+          label.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+          label.classList.add('text-slate-500');
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

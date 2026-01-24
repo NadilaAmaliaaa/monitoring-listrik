@@ -14,7 +14,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 app = Flask(__name__)
 
-BROKER = "192.168.1.5"
+BROKER = "10.1.1.55"
 PORT = 1883
 TOPIC_PATTERN = "sensor/#"
 TOPIC_PREDICT = "predict/pub"
@@ -151,7 +151,7 @@ def save_sensor_data(sensor_id: int, data: dict):
     - Menghilangkan kolom 'cost' dari tabel sensor_readings (dihitung di view)
     - Menambahkan peak_voltage dan peak_current
     """
-    required = ('tegangan', 'arus', 'daya', 'energi', 'frekuensi', 'pf', 'peak_voltage', 'peak_current')
+    required = ('tegangan', 'arus', 'daya', 'energi', 'frekuensi', 'pf')
     if not all(k in data for k in required):
         logger.warning(f"Incomplete data for sensor {sensor_id}, skipping save. Missing: {[k for k in required if k not in data]}")
         return

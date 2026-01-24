@@ -1,0 +1,348 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Dashboard Utama{% endblock %}
+{% block page_subtitle %}Real-time 3-Phase Monitoring System{% endblock %}
+
+{% block extra_css %}
+<style>
+  .chart-grid {
+    background-image:
+      linear-gradient(#f1f5f9 1px, transparent 1px),
+      linear-gradient(90deg, #f1f5f9 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: -1px -1px;
+  }
+  @keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .animate-live-pulse {
+    animation: pulse-live 1.5s ease-in-out infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto flex flex-col gap-6">
+  
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Frequency Card -->
+    <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+      <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+        <span class="material-symbols-outlined text-6xl text-primary">show_chart</span>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-slate-400 text-xl">speed</span>
+        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Frequency</h3>
+      </div>
+      <div>
+        <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
+          50.02
+          <span class="text-lg text-slate-400 font-normal">Hz</span>
+        </p>
+        <p class="text-slate-500 text-sm mt-1">Grid Standard Stability</p>
+      </div>
+    </div>
+
+    <!-- Total Power Card -->
+    <div class="bg-primary rounded-xl p-5 border border-primary flex flex-col justify-between shadow-lg shadow-primary/30 relative overflow-hidden">
+      <div class="absolute -right-6 -top-6 bg-white/10 rounded-full size-32 blur-2xl"></div>
+      <div class="flex items-center gap-2 mb-2 relative z-10">
+        <span class="material-symbols-outlined text-white/80 text-xl">offline_bolt</span>
+        <h3 class="text-white/80 text-sm font-medium uppercase tracking-wider">Total Power</h3>
+      </div>
+      <div class="relative z-10">
+        <p class="text-white text-3xl font-bold tracking-tight tabular-nums">
+          145.8
+          <span class="text-lg text-white/70 font-normal">kW</span>
+        </p>
+        <div class="w-full bg-black/10 rounded-full h-1 mt-3 overflow-hidden">
+          <div class="bg-white h-full rounded-full" style="width: 65%"></div>
+        </div>
+        <p class="text-white/70 text-xs mt-1 text-right">65% Load</p>
+      </div>
+    </div>
+
+    <!-- Total Energy Card -->
+    <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+      <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+        <span class="material-symbols-outlined text-6xl text-emerald-500">energy_savings_leaf</span>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-slate-400 text-xl">savings</span>
+        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Energy</h3>
+      </div>
+      <div>
+        <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
+          12,450
+          <span class="text-lg text-slate-400 font-normal">kWh</span>
+        </p>
+        <p class="text-slate-500 text-sm mt-1 flex items-center gap-1">
+          <span class="text-emerald-600 font-bold">+12%</span> vs last month
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voltage and Current Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Voltage Section -->
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-slate-900 text-lg font-bold flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">bolt</span>
+          Voltage (Phase-Neutral)
+        </h3>
+        <div class="flex items-center gap-2 bg-red-50 px-2 py-1 rounded-md border border-red-100">
+          <span class="size-1.5 rounded-full bg-red-500 animate-live-pulse"></span>
+          <span class="text-[10px] text-red-600 font-bold uppercase tracking-widest">Live Stream</span>
+        </div>
+      </div>
+      
+      <!-- Voltage Cards -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-r shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase R</span>
+            <span class="bg-red-50 text-phase-r text-[10px] px-1.5 py-0.5 rounded font-bold border border-red-100">L1</span>
+          </div>
+          <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
+            220.4
+            <span class="text-sm font-normal text-slate-400">V</span>
+          </p>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-s shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase S</span>
+            <span class="bg-yellow-50 text-phase-s text-[10px] px-1.5 py-0.5 rounded font-bold border border-yellow-100">L2</span>
+          </div>
+          <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
+            219.8
+            <span class="text-sm font-normal text-slate-400">V</span>
+          </p>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-t shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase T</span>
+            <span class="bg-blue-50 text-phase-t text-[10px] px-1.5 py-0.5 rounded font-bold border border-blue-100">L3</span>
+          </div>
+          <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
+            221.1
+            <span class="text-sm font-normal text-slate-400">V</span>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Oscilloscope Chart -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 h-64 flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-slate-500 text-sm font-medium">Live Voltage Stream (Oscilloscope View)</span>
+          <div class="flex gap-4">
+            <div class="flex items-center gap-1.5">
+              <span class="size-2 rounded-full bg-phase-r"></span>
+              <span class="text-[10px] text-slate-500 font-bold">R</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="size-2 rounded-full bg-phase-s"></span>
+              <span class="text-[10px] text-slate-500 font-bold">S</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="size-2 rounded-full bg-phase-t"></span>
+              <span class="text-[10px] text-slate-500 font-bold">T</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 w-full relative chart-grid rounded overflow-hidden">
+          <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+            <path d="M0,80 L20,78 L40,82 L60,75 L80,85 L100,77 L120,83 L140,80 L160,88 L180,82 L200,85 L220,78 L240,82 L260,79 L280,84 L300,80 L320,86 L340,81 L360,84 L380,78 L400,85 L420,82 L440,88 L460,81 L480,85 L500,79 L520,83 L540,80 L560,87 L580,82 L600,86 L620,79 L640,83 L660,80 L680,88 L700,82 L720,85 L740,78 L760,82 L780,79 L800,84 L820,80 L840,86 L860,81 L880,84 L900,78 L920,85 L940,82 L960,88 L980,81 L1000,85 L1020,79 L1040,83" fill="none" stroke="#ef4444" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+            <path d="M0,105 L20,108 L40,102 L60,110 L80,105 L100,107 L120,103 L140,106 L160,108 L180,102 L200,105 L220,108 L240,102 L260,109 L280,104 L300,108 L320,103 L340,107 L360,105 L380,108 L400,102 L420,110 L440,105 L460,107 L480,103 L500,106 L520,108 L540,102 L560,105 L580,108 L600,102 L620,109 L640,104 L660,108 L680,103 L700,107 L720,105 L740,108 L760,102 L780,110 L800,105 L820,107 L840,103 L860,106 L880,108 L900,102 L920,105 L940,108 L960,102 L980,109 L1000,104 L1020,108 L1040,103" fill="none" stroke="#ca8a04" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+            <path d="M0,130 L20,128 L40,132 L60,125 L80,135 L100,127 L120,133 L140,130 L160,138 L180,132 L200,135 L220,128 L240,132 L260,129 L280,134 L300,130 L320,136 L340,131 L360,134 L380,128 L400,135 L420,132 L440,138 L460,131 L480,135 L500,129 L520,133 L540,130 L560,137 L580,132 L600,136 L620,129 L640,133 L660,130 L680,138 L700,132 L720,135 L740,128 L760,132 L780,129 L800,134 L820,130 L840,136 L860,131 L880,134 L900,128 L920,135 L940,132 L960,138 L980,131 L1000,135 L1020,129 L1040,133" fill="none" stroke="#2563eb" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+            <rect fill="rgba(19, 109, 236, 0.05)" height="100%" width="3%" x="97%" y="0"></rect>
+          </svg>
+          <div class="absolute left-2 top-2 text-[10px] text-slate-400 font-bold">240V</div>
+          <div class="absolute left-2 bottom-2 text-[10px] text-slate-400 font-bold">200V</div>
+          <div class="absolute right-2 bottom-2 text-[10px] text-emerald-600 font-bold bg-white/90 border border-emerald-100 px-1.5 py-0.5 rounded">STREAMING</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Section -->
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-slate-900 text-lg font-bold flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">electrical_services</span>
+          Current (Amperage)
+        </h3>
+        <span class="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded uppercase">Real-time</span>
+      </div>
+      
+      <!-- Current Cards -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-r shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase R</span>
+          </div>
+          <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
+            45.2
+            <span class="text-sm font-normal text-slate-400">A</span>
+          </p>
+          <div class="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-phase-r h-full rounded-full" style="width: 45%"></div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-s shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase S</span>
+          </div>
+          <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
+            42.8
+            <span class="text-sm font-normal text-slate-400">A</span>
+          </p>
+          <div class="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-phase-s h-full rounded-full" style="width: 42%"></div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-t shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase T</span>
+          </div>
+          <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
+            46.5
+            <span class="text-sm font-normal text-slate-400">A</span>
+          </p>
+          <div class="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-phase-t h-full rounded-full" style="width: 46%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Power Factor Card -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex items-center justify-between h-64">
+        <div class="flex flex-col gap-4">
+          <div>
+            <h4 class="text-slate-500 text-[10px] uppercase font-bold mb-1">Power Factor Summary</h4>
+            <p class="text-slate-900 text-3xl font-bold tabular-nums">0.95</p>
+            <span class="text-emerald-600 text-sm font-medium flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">trending_up</span>
+              Optimized
+            </span>
+          </div>
+          <div class="flex gap-4">
+            <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+              <p class="text-slate-400 text-[10px] uppercase font-bold">Type</p>
+              <p class="text-slate-900 text-sm font-medium">Lagging</p>
+            </div>
+            <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+              <p class="text-slate-400 text-[10px] uppercase font-bold">Target</p>
+              <p class="text-slate-900 text-sm font-medium">&gt; 0.90</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative size-40 flex items-center justify-center">
+          <svg class="size-full -rotate-90" viewBox="0 0 36 36">
+            <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2.5"></path>
+            <path class="text-emerald-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="95, 100" stroke-linecap="round" stroke-width="2.5"></path>
+          </svg>
+          <div class="absolute flex flex-col items-center">
+            <span class="text-3xl font-bold text-slate-900 tabular-nums">95%</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Efficiency</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Table -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <h3 class="text-slate-900 text-base font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">analytics</span>
+        Phase Statistics Summary (24h)
+      </h3>
+      <div class="flex gap-4">
+        <span class="flex items-center gap-2 text-[10px] font-bold text-phase-r">
+          <span class="size-2 rounded-full bg-phase-r"></span> PHASE R
+        </span>
+        <span class="flex items-center gap-2 text-[10px] font-bold text-phase-s">
+          <span class="size-2 rounded-full bg-phase-s"></span> PHASE S
+        </span>
+        <span class="flex items-center gap-2 text-[10px] font-bold text-phase-t">
+          <span class="size-2 rounded-full bg-phase-t"></span> PHASE T
+        </span>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50">
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">Parameter</th>
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">Phase</th>
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Minimum</th>
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Maximum</th>
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Average</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-sm">bolt</span>
+                Voltage (V)
+              </div>
+            </td>
+            <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">218.4</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">222.1</td>
+            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">220.5</td>
+          </tr>
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">217.9</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">221.8</td>
+            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">219.9</td>
+          </tr>
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">219.2</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">223.5</td>
+            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">221.2</td>
+          </tr>
+          <tr class="hover:bg-slate-50/50 transition-colors border-t-2 border-slate-100">
+            <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-sm">electrical_services</span>
+                Current (A)
+              </div>
+            </td>
+            <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">12.5</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">48.2</td>
+            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">34.6</td>
+          </tr>
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">10.2</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">46.5</td>
+            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">32.1</td>
+          </tr>
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">11.8</td>
+            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">49.8</td>
+            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">35.4</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
