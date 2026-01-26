@@ -1,209 +1,256 @@
 <!-- templates/base.html -->
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>{% block title %}Dashboard{% endblock %}</title>
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect" />
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script id="tailwind-config">
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#136dec",
-            "background-light": "#f8fafc",
-            "sidebar-bg": "#ffffff",
-            "phase-r": "#ef4444",
-            "phase-s": "#ca8a04",
-            "phase-t": "#2563eb",
-          },
-          fontFamily: {
-            display: ["Space Grotesk", "sans-serif"],
-          },
-          borderRadius: {
-            DEFAULT: "0.25rem",
-            lg: "0.5rem",
-            xl: "0.75rem",
-            "2xl": "1rem",
-            full: "9999px",
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{% block title %}Dashboard{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#136dec",
+              "background-light": "#f8fafc",
+              "sidebar-bg": "#ffffff",
+              "phase-r": "#ef4444",
+              "phase-s": "#ca8a04",
+              "phase-t": "#2563eb",
+            },
+            fontSize: {
+              monitor: "42px",
+              monitorSm: "28px",
+              monitorLg: "56px",
+            },
+            fontFamily: {
+              display: ["Space Grotesk", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
+              full: "9999px",
+            },
           },
         },
-      },
-    };
-  </script>
-  
-  <!-- Sidebar CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
-  
-  <!-- Custom CSS -->
-  <style type="text/tailwindcss">
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    
-    /* Main content margin adjustment */
-    .main-wrapper {
-      margin-left: 256px;
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .main-wrapper.sidebar-minimized {
-      margin-left: 80px;
-    }
-    
-    @media (max-width: 1023px) {
+      };
+    </script>
+
+    <!-- Sidebar CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/sidebar.css') }}"
+    />
+
+    <!-- Custom CSS -->
+    <style type="text/tailwindcss">
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Main content margin adjustment */
       .main-wrapper {
-        margin-left: 0 !important;
+        margin-left: 256px;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-  </style>
-  
-  {% block extra_css %}{% endblock %}
-</head>
-<body class="bg-background-light font-display text-slate-900 overflow-hidden h-screen flex">
-  
-  <!-- Include Sidebar Component -->
-  {% include 'sidebar.html' %}
-  
-  <!-- Main Content Wrapper -->
-  <div id="mainWrapper" class="main-wrapper flex flex-col flex-1 h-full min-w-0 overflow-hidden relative">
-    
-    <!-- Header -->
-    <header class="flex items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 py-3 sticky top-0 z-20">
-      <div class="flex items-center gap-4">
-        <!-- Mobile Menu Button -->
-        <button id="mobileMenuBtn" class="lg:hidden text-slate-600 p-2 -ml-2">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-        
-        <div>
-          <h2 class="text-slate-900 text-xl font-bold leading-tight tracking-tight">
-            {% block page_title %}Dashboard Utama{% endblock %}
-          </h2>
-          <p class="text-slate-500 text-xs font-normal">
-            {% block page_subtitle %}Real-time 3-Phase Monitoring System{% endblock %}
-          </p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-4 md:gap-6">
-        <!-- System Status -->
-        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span class="text-emerald-600 text-[10px] font-bold uppercase tracking-wide">System Online</span>
-        </div>
-        
-        <!-- Time Display -->
-        <div class="hidden md:block text-right">
-          <p id="currentTime" class="text-slate-900 text-sm font-bold tabular-nums">--:--:--</p>
-          <p id="currentDate" class="text-slate-500 text-xs">---</p>
-        </div>
-        
-        <!-- Notifications -->
-        <div class="flex gap-2">
-          <button class="flex items-center justify-center rounded-lg size-9 hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors relative">
-            <span class="material-symbols-outlined text-[20px]">notifications</span>
-            <span class="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white"></span>
+
+      .main-wrapper.sidebar-minimized {
+        margin-left: 80px;
+      }
+
+      @media (max-width: 1023px) {
+        .main-wrapper {
+          margin-left: 0 !important;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body
+    class="bg-background-light font-display text-slate-900 overflow-hidden h-screen flex"
+  >
+    <!-- Include Sidebar Component -->
+    {% include 'sidebar.html' %}
+
+    <!-- Main Content Wrapper -->
+    <div
+      id="mainWrapper"
+      class="main-wrapper flex flex-col flex-1 h-full min-w-0 overflow-hidden relative"
+    >
+      <!-- Header -->
+      <header
+        class="flex items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 py-3 sticky top-0 z-20"
+      >
+        <div class="flex items-center gap-4">
+          <!-- Mobile Menu Button -->
+          <button id="mobileMenuBtn" class="lg:hidden text-slate-600 p-2 -ml-2">
+            <span class="material-symbols-outlined">menu</span>
           </button>
+
+          <div>
+            <h2
+              class="text-slate-900 text-xl font-bold leading-tight tracking-tight"
+            >
+              {% block page_title %}Dashboard Utama{% endblock %}
+            </h2>
+            <p class="text-slate-500 text-xs font-normal">
+              {% block page_subtitle %}Real-time 3-Phase Monitoring System{%
+              endblock %}
+            </p>
+          </div>
         </div>
-      </div>
-    </header>
-    
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
-      {% block content %}{% endblock %}
-    </main>
-    
-  </div>
-  
-  <!-- Sidebar JS -->
-  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
-  
-  <!-- Common Scripts -->
-  <script>
-    // Update time display
-    function updateTime() {
-      const now = new Date();
-      const timeEl = document.getElementById('currentTime');
-      const dateEl = document.getElementById('currentDate');
-      
-      if (timeEl) {
-        timeEl.textContent = now.toLocaleTimeString('en-US', { 
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
+
+        <div class="flex items-center gap-4 md:gap-6">
+          <!-- System Status -->
+          <div
+            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100"
+          >
+            <span class="relative flex h-2 w-2">
+              <span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+              ></span>
+              <span
+                class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
+              ></span>
+            </span>
+            <span
+              class="text-emerald-600 text-[10px] font-bold uppercase tracking-wide"
+              >System Online</span
+            >
+          </div>
+
+          <!-- Time Display -->
+          <div class="hidden md:block text-right">
+            <p
+              id="currentTime"
+              class="text-slate-900 text-sm font-bold tabular-nums"
+            >
+              --:--:--
+            </p>
+            <p id="currentDate" class="text-slate-500 text-xs">---</p>
+          </div>
+
+          <!-- Notifications -->
+          <div class="flex gap-2">
+            <button
+              class="flex items-center justify-center rounded-lg size-9 hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors relative"
+            >
+              <span class="material-symbols-outlined text-[20px]"
+                >notifications</span
+              >
+              <span
+                class="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white"
+              ></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <!-- Sidebar JS -->
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+
+    <!-- Common Scripts -->
+    <script>
+      // Update time display
+      function updateTime() {
+        const now = new Date();
+        const timeEl = document.getElementById("currentTime");
+        const dateEl = document.getElementById("currentDate");
+
+        if (timeEl) {
+          timeEl.textContent = now.toLocaleTimeString("en-US", {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+        }
+
+        if (dateEl) {
+          dateEl.textContent = now.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+        }
+      }
+
+      updateTime();
+      setInterval(updateTime, 1000);
+
+      // Handle sidebar state changes
+      window.addEventListener("sidebarToggle", function (e) {
+        const mainWrapper = document.getElementById("mainWrapper");
+        if (e.detail.isMinimized) {
+          mainWrapper.classList.add("sidebar-minimized");
+        } else {
+          mainWrapper.classList.remove("sidebar-minimized");
+        }
+      });
+
+      // Mobile menu toggle
+      document
+        .getElementById("mobileMenuBtn")
+        ?.addEventListener("click", function () {
+          if (window.sidebarInstance) {
+            window.sidebarInstance.openMobile();
+          }
         });
-      }
-      
-      if (dateEl) {
-        dateEl.textContent = now.toLocaleDateString('en-US', { 
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-      }
-    }
-    
-    updateTime();
-    setInterval(updateTime, 1000);
-    
-    // Handle sidebar state changes
-    window.addEventListener('sidebarToggle', function(e) {
-      const mainWrapper = document.getElementById('mainWrapper');
-      if (e.detail.isMinimized) {
-        mainWrapper.classList.add('sidebar-minimized');
-      } else {
-        mainWrapper.classList.remove('sidebar-minimized');
-      }
-    });
-    
-    // Mobile menu toggle
-    document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
-      if (window.sidebarInstance) {
-        window.sidebarInstance.openMobile();
-      }
-    });
-    
-    // Set initial sidebar state
-    document.addEventListener('DOMContentLoaded', function() {
-      const sidebar = document.getElementById('sidebar');
-      const mainWrapper = document.getElementById('mainWrapper');
-      
-      if (sidebar.classList.contains('minimized')) {
-        mainWrapper.classList.add('sidebar-minimized');
-      }
-    });
-  </script>
-  
-  {% block extra_js %}{% endblock %}
-</body>
+
+      // Set initial sidebar state
+      document.addEventListener("DOMContentLoaded", function () {
+        const sidebar = document.getElementById("sidebar");
+        const mainWrapper = document.getElementById("mainWrapper");
+
+        if (sidebar.classList.contains("minimized")) {
+          mainWrapper.classList.add("sidebar-minimized");
+        }
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
 </html>
