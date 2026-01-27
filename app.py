@@ -22,5 +22,9 @@ def alarms():
 def settings():
     return render_template('settings.html')
 
+@app.route('/view')
+def view():
+    return render_template('viewmode.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
