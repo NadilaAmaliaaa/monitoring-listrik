@@ -130,6 +130,7 @@ def migrate():
         GROUP BY date, sensor_id
         WITH NO DATA;
     """)
+    # SUM(power) * (1.0/60) / 1000 AS energy_kwh
 
     # 🔟 Buat continuous aggregate view_hourly_energy
     print("📈 Membuat continuous aggregate view_hourly_energy...")
