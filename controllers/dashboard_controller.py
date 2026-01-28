@@ -11,23 +11,44 @@ class DashboardController:
         
     def get_voltage(self):
         data = get_all()
+        # Handle empty data
+        if not data["R"]:
+            return {
+                "R": 0,
+                "S": 0,
+                "T": 0,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
         return {
-            "R": round(data["R"]["voltage"], 2),
-            "S": round(data["S"]["voltage"], 2),
-            "T": round(data["T"]["voltage"], 2),
-            "timestamp": data["R"]["timestamp"]
+            "R": round(data["R"].get("voltage", 0), 2),
+            "S": round(data["S"].get("voltage", 0), 2),
+            "T": round(data["T"].get("voltage", 0), 2),
+            "timestamp": data["R"].get("timestamp", datetime.utcnow().isoformat())
         }
 
     def get_current(self):
         data = get_all()
+        # Handle empty data
+        if not data["R"]:
+            return {
+                "R": 0,
+                "S": 0,
+                "T": 0,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
         return {
-            "R": round(data["R"]["current"], 2),
-            "S": round(data["S"]["current"], 2),
-            "T": round(data["T"]["current"], 2),
-            "timestamp": data["R"]["timestamp"]
+            "R": round(data["R"].get("current", 0), 2),
+            "S": round(data["S"].get("current", 0), 2),
+            "T": round(data["T"].get("current", 0), 2),
+            "timestamp": data["R"].get("timestamp", datetime.utcnow().isoformat())
         }
 
     def get_summary(self):
+        if not self.db:
+            return {"error": "Database session required"}
+            
         start_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0)
 
         rows = (
@@ -48,13 +69,15 @@ class DashboardController:
             }
 
         return {
-            "frequency": round(rows.freq_avg, 2),
-            "power": round(rows.power_sum, 2),
-            "energy": round(rows.energy_sum, 4)
+            "frequency": round(rows.freq_avg or 0, 2),
+            "power": round(rows.power_sum or 0, 2),
+            "energy": round(rows.energy_sum or 0, 4)
         }
     
     def get_monthly_power_factor(self):
-        """Rata-rata PF bulan berjalan per phase"""
+        if not self.db:
+            return {"error": "Database session required"}
+            
         start_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0)
 
         rows = (
@@ -75,7 +98,9 @@ class DashboardController:
         }
 
     def get_24h_statistics(self):
-        """Min, Max, Avg Voltage & Current per phase (24 jam)"""
+        if not self.db:
+            return {"error": "Database session required"}
+            
         since = datetime.utcnow() - timedelta(hours=24)
 
         stats = (
