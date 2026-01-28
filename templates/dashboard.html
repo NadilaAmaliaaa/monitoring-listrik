@@ -1,4 +1,4 @@
-<!-- templates/dashboard.html -->
+<!-- templates/dashboard.html dengan Real-time MQTT Fetching -->
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
@@ -22,13 +22,22 @@
   .animate-live-pulse {
     animation: pulse-live 1.5s ease-in-out infinite;
   }
+  
+  /* Number update animation */
+  @keyframes flash-update {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(59, 130, 246, 0.1); }
+  }
+  .value-updated {
+    animation: flash-update 0.3s ease-in-out;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
   
-  <!-- Summary Cards -->
+  <!-- Summary Cards (Data dari Database - Agregasi) -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Frequency Card -->
     <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between relative overflow-hidden group">
@@ -41,7 +50,7 @@
       </div>
       <div>
         <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
-          50.02
+          <span id="frequency-value" class="transition-all">--</span>
           <span class="text-lg text-slate-400 font-normal">Hz</span>
         </p>
         <p class="text-slate-500 text-sm mt-1">Grid Standard Stability</p>
@@ -57,13 +66,15 @@
       </div>
       <div class="relative z-10">
         <p class="text-white text-3xl font-bold tracking-tight tabular-nums">
-          145.8
+          <span id="power-value" class="transition-all">--</span>
           <span class="text-lg text-white/70 font-normal">kW</span>
         </p>
         <div class="w-full bg-black/10 rounded-full h-1 mt-3 overflow-hidden">
-          <div class="bg-white h-full rounded-full" style="width: 65%"></div>
+          <div id="power-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 0%"></div>
         </div>
-        <p class="text-white/70 text-xs mt-1 text-right">65% Load</p>
+        <p class="text-white/70 text-xs mt-1 text-right">
+          <span id="power-percentage">0</span>% Load
+        </p>
       </div>
     </div>
 
@@ -78,7 +89,7 @@
       </div>
       <div>
         <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
-          12,450
+          <span id="energy-value" class="transition-all">--</span>
           <span class="text-lg text-slate-400 font-normal">kWh</span>
         </p>
         <p class="text-slate-500 text-sm mt-1 flex items-center gap-1">
@@ -88,7 +99,7 @@
     </div>
   </div>
 
-  <!-- Voltage and Current Section -->
+  <!-- Voltage and Current Section (REALTIME dari MQTT via realtime_store) -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Voltage Section -->
     <div class="flex flex-col gap-4">
@@ -99,11 +110,11 @@
         </h3>
         <div class="flex items-center gap-2 bg-red-50 px-2 py-1 rounded-md border border-red-100">
           <span class="size-1.5 rounded-full bg-red-500 animate-live-pulse"></span>
-          <span class="text-[10px] text-red-600 font-bold uppercase tracking-widest">Live Stream</span>
+          <span class="text-[10px] text-red-600 font-bold uppercase tracking-widest">Live MQTT</span>
         </div>
       </div>
       
-      <!-- Voltage Cards -->
+      <!-- Voltage Cards (REALTIME) -->
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-r shadow-sm">
           <div class="flex justify-between items-start mb-2">
@@ -111,7 +122,7 @@
             <span class="bg-red-50 text-phase-r text-[10px] px-1.5 py-0.5 rounded font-bold border border-red-100">L1</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
-            220.4
+            <span id="voltage-r" class="transition-all">--</span>
             <span class="text-sm font-normal text-slate-400">V</span>
           </p>
         </div>
@@ -122,7 +133,7 @@
             <span class="bg-yellow-50 text-phase-s text-[10px] px-1.5 py-0.5 rounded font-bold border border-yellow-100">L2</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
-            219.8
+            <span id="voltage-s" class="transition-all">--</span>
             <span class="text-sm font-normal text-slate-400">V</span>
           </p>
         </div>
@@ -133,67 +144,67 @@
             <span class="bg-blue-50 text-phase-t text-[10px] px-1.5 py-0.5 rounded font-bold border border-blue-100">L3</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
-            221.1
+            <span id="voltage-t" class="transition-all">--</span>
             <span class="text-sm font-normal text-slate-400">V</span>
           </p>
         </div>
       </div>
       
-      <!-- Oscilloscope Chart -->
+      <!-- Power Usage Chart (Realtime) -->
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 h-64 flex flex-col">
         <div class="flex justify-between items-center mb-4">
-          <span class="text-slate-500 text-sm font-medium">Live Voltage Stream (Oscilloscope View)</span>
+          <span class="text-slate-500 text-sm font-medium">Realtime Power Usage (W)</span>
           <div class="flex gap-4">
             <div class="flex items-center gap-1.5">
               <span class="size-2 rounded-full bg-phase-r"></span>
-              <span class="text-[10px] text-slate-500 font-bold">R</span>
+              <span class="text-[10px] text-slate-500 font-bold">R: <span id="power-r-display">--</span>W</span>
             </div>
             <div class="flex items-center gap-1.5">
               <span class="size-2 rounded-full bg-phase-s"></span>
-              <span class="text-[10px] text-slate-500 font-bold">S</span>
+              <span class="text-[10px] text-slate-500 font-bold">S: <span id="power-s-display">--</span>W</span>
             </div>
             <div class="flex items-center gap-1.5">
               <span class="size-2 rounded-full bg-phase-t"></span>
-              <span class="text-[10px] text-slate-500 font-bold">T</span>
+              <span class="text-[10px] text-slate-500 font-bold">T: <span id="power-t-display">--</span>W</span>
             </div>
           </div>
         </div>
         <div class="flex-1 w-full relative chart-grid rounded overflow-hidden">
-          <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-            <path d="M0,80 L20,78 L40,82 L60,75 L80,85 L100,77 L120,83 L140,80 L160,88 L180,82 L200,85 L220,78 L240,82 L260,79 L280,84 L300,80 L320,86 L340,81 L360,84 L380,78 L400,85 L420,82 L440,88 L460,81 L480,85 L500,79 L520,83 L540,80 L560,87 L580,82 L600,86 L620,79 L640,83 L660,80 L680,88 L700,82 L720,85 L740,78 L760,82 L780,79 L800,84 L820,80 L840,86 L860,81 L880,84 L900,78 L920,85 L940,82 L960,88 L980,81 L1000,85 L1020,79 L1040,83" fill="none" stroke="#ef4444" stroke-width="2" vector-effect="non-scaling-stroke"></path>
-            <path d="M0,105 L20,108 L40,102 L60,110 L80,105 L100,107 L120,103 L140,106 L160,108 L180,102 L200,105 L220,108 L240,102 L260,109 L280,104 L300,108 L320,103 L340,107 L360,105 L380,108 L400,102 L420,110 L440,105 L460,107 L480,103 L500,106 L520,108 L540,102 L560,105 L580,108 L600,102 L620,109 L640,104 L660,108 L680,103 L700,107 L720,105 L740,108 L760,102 L780,110 L800,105 L820,107 L840,103 L860,106 L880,108 L900,102 L920,105 L940,108 L960,102 L980,109 L1000,104 L1020,108 L1040,103" fill="none" stroke="#ca8a04" stroke-width="2" vector-effect="non-scaling-stroke"></path>
-            <path d="M0,130 L20,128 L40,132 L60,125 L80,135 L100,127 L120,133 L140,130 L160,138 L180,132 L200,135 L220,128 L240,132 L260,129 L280,134 L300,130 L320,136 L340,131 L360,134 L380,128 L400,135 L420,132 L440,138 L460,131 L480,135 L500,129 L520,133 L540,130 L560,137 L580,132 L600,136 L620,129 L640,133 L660,130 L680,138 L700,132 L720,135 L740,128 L760,132 L780,129 L800,134 L820,130 L840,136 L860,131 L880,134 L900,128 L920,135 L940,132 L960,138 L980,131 L1000,135 L1020,129 L1040,133" fill="none" stroke="#2563eb" stroke-width="2" vector-effect="non-scaling-stroke"></path>
-            <rect fill="rgba(19, 109, 236, 0.05)" height="100%" width="3%" x="97%" y="0"></rect>
-          </svg>
-          <div class="absolute left-2 top-2 text-[10px] text-slate-400 font-bold">240V</div>
-          <div class="absolute left-2 bottom-2 text-[10px] text-slate-400 font-bold">200V</div>
-          <div class="absolute right-2 bottom-2 text-[10px] text-emerald-600 font-bold bg-white/90 border border-emerald-100 px-1.5 py-0.5 rounded">STREAMING</div>
+          <canvas id="power-chart" class="absolute inset-0 w-full h-full"></canvas>
+          <div class="absolute left-2 top-2 text-[10px] text-slate-400 font-bold">Max</div>
+          <div class="absolute left-2 bottom-2 text-[10px] text-slate-400 font-bold">0W</div>
+          <div class="absolute right-2 bottom-2 text-[10px] text-emerald-600 font-bold bg-white/90 border border-emerald-100 px-1.5 py-0.5 rounded">
+            <span class="animate-live-pulse inline-block">●</span> LIVE
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Current Section -->
+    <!-- Current Section (REALTIME dari MQTT) -->
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <h3 class="text-slate-900 text-lg font-bold flex items-center gap-2">
           <span class="material-symbols-outlined text-primary">electrical_services</span>
           Current (Amperage)
         </h3>
-        <span class="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded uppercase">Real-time</span>
+        <div class="flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">
+          <span class="size-1.5 rounded-full bg-emerald-500 animate-live-pulse"></span>
+          <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Real-time</span>
+        </div>
       </div>
       
-      <!-- Current Cards -->
+      <!-- Current Cards (REALTIME) -->
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-r shadow-sm">
           <div class="flex justify-between items-start mb-2">
             <span class="text-slate-400 text-[10px] font-bold uppercase">Phase R</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
-            45.2
+            <span id="current-r" class="transition-all">--</span>
             <span class="text-sm font-normal text-slate-400">A</span>
           </p>
           <div class="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-            <div class="bg-phase-r h-full rounded-full" style="width: 45%"></div>
+            <div id="current-bar-r" class="bg-phase-r h-full rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
         
@@ -202,11 +213,11 @@
             <span class="text-slate-400 text-[10px] font-bold uppercase">Phase S</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
-            42.8
+            <span id="current-s" class="transition-all">--</span>
             <span class="text-sm font-normal text-slate-400">A</span>
           </p>
           <div class="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-            <div class="bg-phase-s h-full rounded-full" style="width: 42%"></div>
+            <div id="current-bar-s" class="bg-phase-s h-full rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
         
@@ -215,11 +226,11 @@
             <span class="text-slate-400 text-[10px] font-bold uppercase">Phase T</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
-            46.5
+            <span id="current-t" class="transition-all">--</span>
             <span class="text-sm font-normal text-slate-400">A</span>
           </p>
           <div class="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-            <div class="bg-phase-t h-full rounded-full" style="width: 46%"></div>
+            <div id="current-bar-t" class="bg-phase-t h-full rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
       </div>
@@ -229,8 +240,10 @@
         <div class="flex flex-col gap-4">
           <div>
             <h4 class="text-slate-500 text-[10px] uppercase font-bold mb-1">Power Factor Summary</h4>
-            <p class="text-slate-900 text-3xl font-bold tabular-nums">0.95</p>
-            <span class="text-emerald-600 text-sm font-medium flex items-center gap-1">
+            <p class="text-slate-900 text-3xl font-bold tabular-nums">
+              <span id="pf-value" class="transition-all">--</span>
+            </p>
+            <span id="pf-status" class="text-emerald-600 text-sm font-medium flex items-center gap-1">
               <span class="material-symbols-outlined text-sm">trending_up</span>
               Optimized
             </span>
@@ -249,10 +262,10 @@
         <div class="relative size-40 flex items-center justify-center">
           <svg class="size-full -rotate-90" viewBox="0 0 36 36">
             <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2.5"></path>
-            <path class="text-emerald-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="95, 100" stroke-linecap="round" stroke-width="2.5"></path>
+            <path id="pf-circle" class="text-emerald-500 transition-all duration-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-linecap="round" stroke-width="2.5"></path>
           </svg>
           <div class="absolute flex flex-col items-center">
-            <span class="text-3xl font-bold text-slate-900 tabular-nums">95%</span>
+            <span id="pf-percentage" class="text-3xl font-bold text-slate-900 tabular-nums transition-all">--</span>
             <span class="text-[10px] text-slate-500 uppercase font-bold">Efficiency</span>
           </div>
         </div>
@@ -260,7 +273,7 @@
     </div>
   </div>
 
-  <!-- Statistics Table -->
+  <!-- Statistics Table (Data dari Database - 24h Agregasi) -->
   <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
     <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
       <h3 class="text-slate-900 text-base font-bold flex items-center gap-2">
@@ -290,54 +303,17 @@
             <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Average</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-sm">bolt</span>
-                Voltage (V)
+        <tbody id="statistics-tbody" class="divide-y divide-slate-100">
+          <tr>
+            <td colspan="5" class="px-6 py-8 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-slate-500">Loading statistics...</span>
               </div>
             </td>
-            <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">218.4</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">222.1</td>
-            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">220.5</td>
-          </tr>
-          <tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">217.9</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">221.8</td>
-            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">219.9</td>
-          </tr>
-          <tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">219.2</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">223.5</td>
-            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">221.2</td>
-          </tr>
-          <tr class="hover:bg-slate-50/50 transition-colors border-t-2 border-slate-100">
-            <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-sm">electrical_services</span>
-                Current (A)
-              </div>
-            </td>
-            <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">12.5</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">48.2</td>
-            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">34.6</td>
-          </tr>
-          <tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">10.2</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">46.5</td>
-            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">32.1</td>
-          </tr>
-          <tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">11.8</td>
-            <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">49.8</td>
-            <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">35.4</td>
           </tr>
         </tbody>
       </table>
@@ -345,4 +321,377 @@
   </div>
 
 </div>
+
+<script>
+// ==================== CONFIGURATION ====================
+
+const API = {
+  // REALTIME data dari MQTT (via realtime_store)
+  voltage: '/api/dashboard/voltage',
+  current: '/api/dashboard/current',
+  
+  // AGREGASI data dari Database
+  summary: '/api/dashboard/summary',
+  powerFactor: '/api/dashboard/power-factor',
+  statistics: '/api/dashboard/statistics'
+};
+
+const INTERVALS = {
+  realtime: 1000,    // 1 second - untuk voltage/current dari MQTT
+  summary: 5000,     // 5 seconds - untuk summary dari DB
+  statistics: 30000  // 30 seconds - untuk statistics dari DB
+};
+
+// ==================== REALTIME VOLTAGE UPDATE (dari MQTT) ====================
+
+async function fetchRealtimeVoltage() {
+  try {
+    const response = await fetch(API.voltage);
+    if (!response.ok) throw new Error('Failed to fetch voltage');
+    
+    const data = await response.json();
+    
+    // Update voltage displays dengan animasi
+    updateValueWithAnimation('voltage-r', data.R);
+    updateValueWithAnimation('voltage-s', data.S);
+    updateValueWithAnimation('voltage-t', data.T);
+    
+    // Calculate power (V × I × PF) untuk masing-masing phase
+    // Ini akan di-update dari data current
+    
+  } catch (error) {
+    console.error('Error fetching realtime voltage:', error);
+    // Keep showing last value, don't reset to --
+  }
+}
+
+// ==================== REALTIME CURRENT UPDATE (dari MQTT) ====================
+
+async function fetchRealtimeCurrent() {
+  try {
+    const response = await fetch(API.current);
+    if (!response.ok) throw new Error('Failed to fetch current');
+    
+    const data = await response.json();
+    
+    // Update current displays dengan animasi
+    updateValueWithAnimation('current-r', data.R);
+    updateValueWithAnimation('current-s', data.S);
+    updateValueWithAnimation('current-t', data.T);
+    
+    // Update current bars (max 100A for scale)
+    const maxCurrent = 100;
+    updateProgressBar('current-bar-r', (data.R / maxCurrent) * 100);
+    updateProgressBar('current-bar-s', (data.S / maxCurrent) * 100);
+    updateProgressBar('current-bar-t', (data.T / maxCurrent) * 100);
+    
+    // Calculate and display power per phase
+    // P = V × I × PF (simplified, assume PF ≈ 0.95)
+    const voltageR = parseFloat(document.getElementById('voltage-r').textContent) || 220;
+    const voltageS = parseFloat(document.getElementById('voltage-s').textContent) || 220;
+    const voltageT = parseFloat(document.getElementById('voltage-t').textContent) || 220;
+    
+    const powerR = (voltageR * data.R * 0.95).toFixed(0);
+    const powerS = (voltageS * data.S * 0.95).toFixed(0);
+    const powerT = (voltageT * data.T * 0.95).toFixed(0);
+    
+    document.getElementById('power-r-display').textContent = powerR;
+    document.getElementById('power-s-display').textContent = powerS;
+    document.getElementById('power-t-display').textContent = powerT;
+    
+    // Update power chart
+    updatePowerChart([parseFloat(powerR), parseFloat(powerS), parseFloat(powerT)]);
+    
+  } catch (error) {
+    console.error('Error fetching realtime current:', error);
+  }
+}
+
+// ==================== SUMMARY UPDATE (dari Database) ====================
+
+async function fetchSummary() {
+  try {
+    const response = await fetch(API.summary);
+    if (!response.ok) throw new Error('Failed to fetch summary');
+    
+    const data = await response.json();
+    
+    // Update frequency
+    updateValueWithAnimation('frequency-value', data.frequency ? data.frequency.toFixed(2) : '--');
+    
+    // Update power (convert W to kW)
+    const powerKW = data.power ? (data.power / 1000).toFixed(1) : '0.0';
+    updateValueWithAnimation('power-value', powerKW);
+    
+    // Update power bar (max 250kW)
+    const maxPower = 250;
+    const powerPercentage = Math.min((data.power / 1000 / maxPower) * 100, 100);
+    updateProgressBar('power-bar', powerPercentage);
+    document.getElementById('power-percentage').textContent = powerPercentage.toFixed(0);
+    
+    // Update energy
+    if (data.energy) {
+      const energyFormatted = data.energy >= 1000 
+        ? (data.energy / 1000).toFixed(1) + 'k' 
+        : data.energy.toFixed(0);
+      updateValueWithAnimation('energy-value', energyFormatted);
+    }
+    
+  } catch (error) {
+    console.error('Error fetching summary:', error);
+  }
+}
+
+// ==================== POWER FACTOR UPDATE (dari Database) ====================
+
+async function fetchPowerFactor() {
+  try {
+    const response = await fetch(API.powerFactor);
+    if (!response.ok) throw new Error('Failed to fetch power factor');
+    
+    const data = await response.json();
+    
+    // Calculate average PF
+    const avgPF = ((data.R + data.S + data.T) / 3).toFixed(2);
+    
+    // Update PF display
+    updateValueWithAnimation('pf-value', avgPF);
+    
+    // Update PF percentage circle
+    const pfPercentage = (avgPF * 100).toFixed(0);
+    document.getElementById('pf-percentage').textContent = pfPercentage + '%';
+    document.getElementById('pf-circle').setAttribute('stroke-dasharray', `${pfPercentage}, 100`);
+    
+    // Update status
+    let status, statusColor;
+    if (avgPF >= 0.95) {
+      status = 'Excellent';
+      statusColor = 'text-emerald-600';
+    } else if (avgPF >= 0.90) {
+      status = 'Optimized';
+      statusColor = 'text-blue-600';
+    } else {
+      status = 'Need Improvement';
+      statusColor = 'text-orange-600';
+    }
+    
+    const statusEl = document.getElementById('pf-status');
+    statusEl.className = `${statusColor} text-sm font-medium flex items-center gap-1`;
+    statusEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span>${status}`;
+    
+  } catch (error) {
+    console.error('Error fetching power factor:', error);
+  }
+}
+
+// ==================== STATISTICS UPDATE (dari Database) ====================
+
+async function fetchStatistics() {
+  try {
+    const response = await fetch(API.statistics);
+    if (!response.ok) throw new Error('Failed to fetch statistics');
+    
+    const data = await response.json();
+    
+    const tbody = document.getElementById('statistics-tbody');
+    tbody.innerHTML = `
+      <!-- Voltage Rows -->
+      <tr class="hover:bg-slate-50/50 transition-colors">
+        <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-sm">bolt</span>
+            Voltage (V)
+          </div>
+        </td>
+        <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.voltage?.min || '--'}</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.voltage?.max || '--'}</td>
+        <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.R?.voltage?.avg || '--'}</td>
+      </tr>
+      <tr class="hover:bg-slate-50/50 transition-colors">
+        <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.voltage?.min || '--'}</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.voltage?.max || '--'}</td>
+        <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.S?.voltage?.avg || '--'}</td>
+      </tr>
+      <tr class="hover:bg-slate-50/50 transition-colors">
+        <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.voltage?.min || '--'}</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.voltage?.max || '--'}</td>
+        <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.T?.voltage?.avg || '--'}</td>
+      </tr>
+      
+      <!-- Current Rows -->
+      <tr class="hover:bg-slate-50/50 transition-colors border-t-2 border-slate-100">
+        <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-sm">electrical_services</span>
+            Current (A)
+          </div>
+        </td>
+        <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.current?.min || '--'}</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.current?.max || '--'}</td>
+        <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.R?.current?.avg || '--'}</td>
+      </tr>
+      <tr class="hover:bg-slate-50/50 transition-colors">
+        <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.current?.min || '--'}</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.current?.max || '--'}</td>
+        <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.S?.current?.avg || '--'}</td>
+      </tr>
+      <tr class="hover:bg-slate-50/50 transition-colors">
+        <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.current?.min || '--'}</td>
+        <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.current?.max || '--'}</td>
+        <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.T?.current?.avg || '--'}</td>
+      </tr>
+    `;
+    
+  } catch (error) {
+    console.error('Error fetching statistics:', error);
+    document.getElementById('statistics-tbody').innerHTML = `
+      <tr>
+        <td colspan="5" class="px-6 py-8 text-center text-red-500">
+          Error loading statistics. Please refresh the page.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+// ==================== POWER CHART ====================
+
+let powerChartData = {
+  R: [],
+  S: [],
+  T: []
+};
+const MAX_CHART_POINTS = 60; // 60 points = 1 minute of data
+
+function updatePowerChart(newData) {
+  // Add new data
+  powerChartData.R.push(newData[0]);
+  powerChartData.S.push(newData[1]);
+  powerChartData.T.push(newData[2]);
+  
+  // Keep only last N points
+  if (powerChartData.R.length > MAX_CHART_POINTS) {
+    powerChartData.R.shift();
+    powerChartData.S.shift();
+    powerChartData.T.shift();
+  }
+  
+  drawPowerChart();
+}
+
+function drawPowerChart() {
+  const canvas = document.getElementById('power-chart');
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  
+  canvas.width = width;
+  canvas.height = height;
+  
+  ctx.clearRect(0, 0, width, height);
+  
+  // Find max value for scaling
+  const allValues = [...powerChartData.R, ...powerChartData.S, ...powerChartData.T];
+  const maxPower = Math.max(...allValues, 1000); // Min 1000W for scale
+  
+  const drawLine = (data, color) => {
+    if (data.length < 2) return;
+    
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    
+    const step = width / MAX_CHART_POINTS;
+    
+    data.forEach((power, i) => {
+      const x = i * step;
+      const y = height - (power / maxPower * height);
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    
+    ctx.stroke();
+  };
+  
+  drawLine(powerChartData.R, '#ef4444');
+  drawLine(powerChartData.S, '#ca8a04');
+  drawLine(powerChartData.T, '#2563eb');
+}
+
+// ==================== HELPER FUNCTIONS ====================
+
+function updateValueWithAnimation(elementId, newValue) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  
+  const oldValue = element.textContent;
+  if (oldValue !== String(newValue)) {
+    element.classList.add('value-updated');
+    element.textContent = newValue;
+    
+    setTimeout(() => {
+      element.classList.remove('value-updated');
+    }, 300);
+  }
+}
+
+function updateProgressBar(elementId, percentage) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
+  }
+}
+
+// ==================== INITIALIZATION ====================
+
+async function initDashboard() {
+  console.log('🚀 Initializing dashboard...');
+  console.log('📡 Realtime data: Voltage & Current from MQTT');
+  console.log('📊 Agregasi data: Summary & Statistics from Database');
+  
+  // Initial fetch
+  await Promise.all([
+    fetchRealtimeVoltage(),
+    fetchRealtimeCurrent(),
+    fetchSummary(),
+    fetchPowerFactor(),
+    fetchStatistics()
+  ]);
+  
+  // Setup intervals
+  setInterval(fetchRealtimeVoltage, INTERVALS.realtime);
+  setInterval(fetchRealtimeCurrent, INTERVALS.realtime);
+  setInterval(fetchSummary, INTERVALS.summary);
+  setInterval(fetchPowerFactor, INTERVALS.summary);
+  setInterval(fetchStatistics, INTERVALS.statistics);
+  
+  console.log('✅ Dashboard initialized');
+  console.log(`   Realtime update: ${INTERVALS.realtime}ms`);
+  console.log(`   Summary update: ${INTERVALS.summary}ms`);
+  console.log(`   Statistics update: ${INTERVALS.statistics}ms`);
+}
+
+// Start when page loads
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+// Handle visibility change
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    console.log('▶️  Dashboard resumed - refreshing data');
+    initDashboard();
+  }
+});
+</script>
 {% endblock %}
