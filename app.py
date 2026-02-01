@@ -1,8 +1,3 @@
-"""
-Flask Application dengan MQTT Integration
-Sistem monitoring sensor listrik 3 phase
-"""
-
 from flask import Flask
 from config import Config
 from database import close_db
@@ -131,18 +126,9 @@ def create_app():
         app.register_blueprint(dashboard_bp)
         logger.info("✓ Dashboard blueprint registered")
         
-        # Uncomment ketika blueprint lain sudah siap
-        # from views.alarms import alarms_bp
-        # app.register_blueprint(alarms_bp, url_prefix="/alarms")
-        # logger.info("✓ Alarms blueprint registered")
-        
-        # from views.reports import reports_bp
-        # app.register_blueprint(reports_bp, url_prefix="/reports")
-        # logger.info("✓ Reports blueprint registered")
-        
-        # from views.thresholds import thresholds_bp
-        # app.register_blueprint(thresholds_bp, url_prefix="/thresholds")
-        # logger.info("✓ Thresholds blueprint registered")
+        from views.reports import reports_bp
+        app.register_blueprint(reports_bp, url_prefix='/reports')
+        logger.info("✓ Reports blueprint registered")
         
     except Exception as e:
         logger.error(f"✗ Failed to register blueprints: {e}")

@@ -1,25 +1,3 @@
-#!/usr/bin/env python3
-"""
-MQTT Sensor Dummy Publisher - ADVANCED VERSION
-Berbagai mode simulasi untuk testing yang lebih realistis
-
-Features:
-- Normal mode: Data normal dengan variasi kecil
-- Spike mode: Simulasi lonjakan arus/tegangan
-- Fluctuation mode: Fluktuasi besar (simulasi unstable)
-- Scenario mode: Pattern tertentu (pagi, siang, malam)
-
-Usage:
-    python mqtt_dummy_publisher_advanced.py [mode]
-    
-Modes:
-    normal       - Mode normal (default)
-    spike        - Simulasi spike random
-    fluctuation  - Fluktuasi besar
-    scenario     - Pattern berdasarkan waktu
-    stress       - Stress test (publish cepat)
-"""
-
 import json
 import time
 import random
@@ -29,27 +7,27 @@ import sys
 import argparse
 
 # ==================== CONFIGURATION ====================
-BROKER = "192.168.1.9"
+BROKER = "10.10.43.33"
 PORT = 1883
 KEEPALIVE = 60
 
 SENSORS = {
     "PZEM1": {
-        "topic": "sensor/department3/PZEM1",
+        "topic": "sensor/department6/PZEM1",
         "phase": "R",
         "base_voltage": 220.0,
         "base_current": 5.0,
         "load_type": "constant"  # constant, variable, heavy
     },
     "PZEM2": {
-        "topic": "sensor/department3/PZEM2",
+        "topic": "sensor/department6/PZEM2",
         "phase": "S",
         "base_voltage": 219.0,
         "base_current": 5.2,
         "load_type": "variable"
     },
     "PZEM3": {
-        "topic": "sensor/department3/PZEM3",
+        "topic": "sensor/department6/PZEM3",
         "phase": "T",
         "base_voltage": 221.0,
         "base_current": 4.8,

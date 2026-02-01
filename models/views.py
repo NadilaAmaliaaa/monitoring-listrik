@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, Date, Float
-from database import db
+from database import Base
 
 
-class HourlyEnergyView(db.Model):
+class HourlyEnergyView(Base):
     __tablename__ = "view_hourly_energy"
     __table_args__ = {"info": {"is_view": True}}
 
@@ -15,8 +15,11 @@ class HourlyEnergyView(db.Model):
     total_kwh = Column(Float)
     total_cost = Column(Float)
 
+    def __repr__(self):
+        return f"<HourlyEnergyView(date={self.date}, sensor_id={self.sensor_id})>"
 
-class DailyEnergyView(db.Model):
+
+class DailyEnergyView(Base):
     __tablename__ = "view_daily_energy"
     __table_args__ = {"info": {"is_view": True}}
 
@@ -27,3 +30,6 @@ class DailyEnergyView(db.Model):
     avg_power = Column(Float)
     peak_power = Column(Float)
     total_cost = Column(Float)
+
+    def __repr__(self):
+        return f"<DailyEnergyView(date={self.date}, sensor_id={self.sensor_id})>"
