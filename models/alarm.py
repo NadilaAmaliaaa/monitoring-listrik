@@ -1,10 +1,10 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
-from database import db
+from database import Base
 
 
-class AlarmEvent(db.Model):
+class AlarmEvent(Base):
     __tablename__ = "alarm_events"
 
     id = Column(Integer, primary_key=True)

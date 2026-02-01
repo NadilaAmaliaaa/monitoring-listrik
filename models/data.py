@@ -40,6 +40,8 @@ class Sensor(Base):
     readings = relationship("SensorReading", back_populates="sensor", cascade="all, delete-orphan")
     thresholds = relationship("SensorThreshold", back_populates="sensor", cascade="all, delete-orphan")
     alarms = relationship("AlarmEvent", back_populates="sensor", cascade="all, delete-orphan")
+    # daily = relationship("DailyEnergyView", back_populates="sensor", cascade="all, delete-orphan")
+    # hourly = relationship("HourlyEnergyView", back_populates="sensor", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Sensor(id={self.id}, name='{self.name}', phase='{self.phase}')>"
