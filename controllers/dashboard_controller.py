@@ -107,10 +107,10 @@ class DashboardController:
             self.db.query(
                 Sensor.phase,
                 func.min(SensorReading.voltage),
-                func.max(SensorReading.voltage),
+                func.max(SensorReading.peak_voltage),
                 func.avg(SensorReading.voltage),
                 func.min(SensorReading.current),
-                func.max(SensorReading.current),
+                func.max(SensorReading.peak_current),
                 func.avg(SensorReading.current),
             )
             .join(Sensor, Sensor.id == SensorReading.sensor_id)
