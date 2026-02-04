@@ -1,19 +1,74 @@
-from flask import Blueprint, render_template, jsonify, request, send_file
+# views/reports.py
+from flask import Blueprint, render_template, jsonify, request, send_file, session
 from controllers.reports_controller import ReportsController
 from database import get_session
+from models.building import Building
 import csv
 import io
 
 reports_bp = Blueprint('reports', __name__)
 
+def get_current_building_id():
+    """Get current active building from session"""
+    return session.get('building_id')
+
+def set_current_building(building_id):
+    """Set active building in session"""
+    session['building_id'] = building_id
+
 @reports_bp.route('/')
 def index():
-    return render_template('reports.html')
+    """Render reports page with building context"""
+    db_session = get_session()
+    try:
+        buildings = db_session.query(Building).all()
+        current_building_id = get_current_building_id()
+        
+        # Set default building if none selected
+        if not current_building_id and buildings:
+            current_building_id = buildings[0].id
+            set_current_building(current_building_id)
+        
+        current_building = None
+        if current_building_id:
+            current_building = db_session.query(Building).get(current_building_id)
+        
+        return render_template(
+            'reports.html',
+            buildings=buildings,
+            current_building=current_building
+        )
+    finally:
+        db_session.close()
+
+
+@reports_bp.route('/switch-building/<int:building_id>', methods=['POST'])
+def switch_building(building_id):
+    """Switch active building/department"""
+    db_session = get_session()
+    try:
+        building = db_session.query(Building).get(building_id)
+        if not building:
+            return jsonify({'error': 'Building not found'}), 404
+        
+        set_current_building(building_id)
+        
+        return jsonify({
+            'success': True,
+            'building': {
+                'id': building.id,
+                'name': building.name,
+                'code': building.code
+            }
+        })
+    finally:
+        db_session.close()
 
 
 @reports_bp.route('/history')
 def get_history():
-    session = get_session()
+    """Get history data for current building"""
+    db_session = get_session()
     try:
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
@@ -22,47 +77,61 @@ def get_history():
         if period not in ['hourly', 'daily', 'monthly']:
             return jsonify({'error': 'Invalid period'}), 400
 
-        controller = ReportsController(session)
+        # Get current building from session
+        building_id = get_current_building_id()
+        
+        controller = ReportsController(db_session, building_id=building_id)
         data = controller.get_history(page, per_page, period)
 
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        session.close()
+        db_session.close()
 
 
 @reports_bp.route('/generate-report', methods=['POST'])
 def generate_report():
-    session = get_session()
+    """Generate report for current building"""
+    db_session = get_session()
     try:
         payload = request.get_json()
 
         start_date = payload.get('start_date')
         end_date = payload.get('end_date')
+        parameters = payload.get('parameters', 'all')
         period = payload.get('period', 'daily')
         format_type = payload.get('format', 'csv')
 
-        if period not in ['daily', 'monthly']:
-            return jsonify({'error': 'Report only supports daily or monthly'}), 400
+        if period not in ['hourly', 'daily', 'monthly']:
+            return jsonify({'error': 'Invalid period'}), 400
 
-        controller = ReportsController(session)
+        # Get current building
+        building_id = get_current_building_id()
+        if not building_id:
+            return jsonify({'error': 'No building selected'}), 400
 
-        report = controller.get_history(
-            page=1,
-            per_page=10_000,
+        controller = ReportsController(db_session, building_id=building_id)
+        
+        # Get data for report
+        data = controller.get_data_for_report(
+            start_date=start_date,
+            end_date=end_date,
+            parameters=parameters,
             period=period
         )
 
-        if not report['data']:
+        if not data:
             return jsonify({'error': 'No data available'}), 404
 
         if format_type == 'csv':
+            building = db_session.query(Building).get(building_id)
             return generate_csv_report(
-                report['data'],
+                data,
                 start_date,
                 end_date,
-                period
+                period,
+                building.name
             )
 
         return jsonify({'error': 'Invalid format'}), 400
@@ -70,20 +139,44 @@ def generate_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        session.close()
+        db_session.close()
 
 
-def generate_csv_report(data, start_date, end_date, period):
+def generate_csv_report(data, start_date, end_date, period, building_name):
+    """Generate CSV report with building info"""
     output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=data[0].keys())
-    writer.writeheader()
-    writer.writerows(data)
+    
+    if data:
+        writer = csv.DictWriter(output, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
 
     output.seek(0)
+
+    filename = f'energy-report-{building_name.replace(" ", "-")}-{period}-{start_date}-to-{end_date}.csv'
 
     return send_file(
         io.BytesIO(output.getvalue().encode()),
         mimetype='text/csv',
         as_attachment=True,
-        download_name=f'energy-report-{period}-{start_date}-to-{end_date}.csv'
+        download_name=filename
     )
+
+
+# API endpoint to get all buildings
+@reports_bp.route('/api/buildings')
+def get_buildings():
+    """Get list of all buildings"""
+    db_session = get_session()
+    try:
+        buildings = db_session.query(Building).all()
+        return jsonify({
+            'buildings': [{
+                'id': b.id,
+                'name': b.name,
+                'code': b.code
+            } for b in buildings],
+            'current_building_id': get_current_building_id()
+        })
+    finally:
+        db_session.close()

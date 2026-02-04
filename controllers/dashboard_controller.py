@@ -2,47 +2,53 @@ from datetime import datetime, timedelta
 from sqlalchemy import func
 from database import db
 from models.data import Sensor, SensorReading
-from mqtt.realtime_store import get_all
+from mqtt.realtime_store import get_all, get_by_building
 
 
 class DashboardController:
-    def __init__(self, session):
+    def __init__(self, session, building_id=None, building_code=None):
         self.db = session
+        self.building_id = building_id
+        self.building_code = building_code
+    
+    def _get_base_query_filter(self, query):
+        """Apply building filter to query"""
+        if self.building_id:
+            query = query.filter(Sensor.building_id == self.building_id)
+        return query
         
     def get_voltage(self):
-        data = get_all()
-        # Handle empty data
-        if not data["R"]:
-            return {
-                "R": 0,
-                "S": 0,
-                "T": 0,
-                "timestamp": datetime.utcnow().isoformat()
-            }
-        
+        if not self.building_code:
+            return {"R": 0, "S": 0, "T": 0}
+
+        data = get_by_building(self.building_code)
+
         return {
-            "R": round(data["R"].get("voltage", 0), 2),
-            "S": round(data["S"].get("voltage", 0), 2),
-            "T": round(data["T"].get("voltage", 0), 2),
-            "timestamp": data["R"].get("timestamp", datetime.utcnow().isoformat())
+            "R": round(data.get("R", {}).get("voltage", 0), 2),
+            "S": round(data.get("S", {}).get("voltage", 0), 2),
+            "T": round(data.get("T", {}).get("voltage", 0), 2),
+            "timestamp": (
+                data.get("R", {}).get("timestamp")
+                or data.get("S", {}).get("timestamp")
+                or data.get("T", {}).get("timestamp")
+            )
         }
 
     def get_current(self):
-        data = get_all()
-        # Handle empty data
-        if not data["R"]:
-            return {
-                "R": 0,
-                "S": 0,
-                "T": 0,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+        if not self.building_code:
+            return {"R": 0, "S": 0, "T": 0}
+
+        data = get_by_building(self.building_code)
         
         return {
-            "R": round(data["R"].get("current", 0), 2),
-            "S": round(data["S"].get("current", 0), 2),
-            "T": round(data["T"].get("current", 0), 2),
-            "timestamp": data["R"].get("timestamp", datetime.utcnow().isoformat())
+            "R": round(data.get("R", {}).get("current", 0), 2),
+            "S": round(data.get("S", {}).get("current", 0), 2),
+            "T": round(data.get("T", {}).get("current", 0), 2),
+            "timestamp": (
+                data.get("R", {}).get("timestamp")
+                or data.get("S", {}).get("timestamp")
+                or data.get("T", {}).get("timestamp")
+            )
         }
 
     def get_summary(self):
@@ -51,17 +57,20 @@ class DashboardController:
             
         start_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0)
 
-        rows = (
+        query = (
             self.db.query(
                 func.avg(SensorReading.frequency).label("freq_avg"),
                 func.sum(SensorReading.power).label("power_sum"),
                 func.sum(SensorReading.energy).label("energy_sum"),
             )
+            .join(Sensor, Sensor.id == SensorReading.sensor_id)
             .filter(SensorReading.timestamp >= start_month)
-            .one()
         )
 
-        if rows.energy_sum is None:
+        query = self._get_base_query_filter(query)
+        rows = query.one()
+
+        if not rows or rows.energy_sum is None:
             return {
                 "frequency": 0,
                 "power": 0,
@@ -77,33 +86,41 @@ class DashboardController:
     def get_monthly_power_factor(self):
         if not self.db:
             return {"error": "Database session required"}
-            
-        start_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0)
 
-        rows = (
+        start_month = datetime.utcnow().replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+
+        query = (
             self.db.query(
                 Sensor.phase,
                 func.avg(SensorReading.power_factor).label("pf_avg")
             )
             .join(Sensor, Sensor.id == SensorReading.sensor_id)
             .filter(SensorReading.timestamp >= start_month)
+        )
+
+        query = self._get_base_query_filter(query)
+
+        rows = (
+            query
             .group_by(Sensor.phase)
             .order_by(Sensor.phase)
             .all()
         )
 
         return {
-            r.phase: round(r.pf_avg, 4)
+            r.phase: round(r.pf_avg or 0, 4)
             for r in rows
         }
 
     def get_24h_statistics(self):
         if not self.db:
             return {"error": "Database session required"}
-            
+
         since = datetime.utcnow() - timedelta(hours=24)
 
-        stats = (
+        query = (
             self.db.query(
                 Sensor.phase,
                 func.min(SensorReading.voltage),
@@ -115,6 +132,12 @@ class DashboardController:
             )
             .join(Sensor, Sensor.id == SensorReading.sensor_id)
             .filter(SensorReading.timestamp >= since)
+        )
+
+        query = self._get_base_query_filter(query)
+
+        stats = (
+            query
             .group_by(Sensor.phase)
             .order_by(Sensor.phase)
             .all()
@@ -126,14 +149,14 @@ class DashboardController:
             phase = s[0]
             result[phase] = {
                 "voltage": {
-                    "min": round(s[1], 2),
-                    "max": round(s[2], 2),
-                    "avg": round(s[3], 2),
+                    "min": round(s[1] or 0, 2),
+                    "max": round(s[2] or 0, 2),
+                    "avg": round(s[3] or 0, 2),
                 },
                 "current": {
-                    "min": round(s[4], 2),
-                    "max": round(s[5], 2),
-                    "avg": round(s[6], 2),
+                    "min": round(s[4] or 0, 2),
+                    "max": round(s[5] or 0, 2),
+                    "avg": round(s[6] or 0, 2),
                 }
             }
 

@@ -169,7 +169,8 @@ class HybridMQTTClient:
                 logger.debug(f"Invalid topic format: {topic} (expected 3 parts, got {len(parts)})")
                 return False
             
-            sensor_name = parts[2]  # Extract sensor name (PZEM1, PZEM2, PZEM3)
+            building_code = parts[1]
+            sensor_name = parts[2]
             phase = SENSOR_PHASE_MAP.get(sensor_name)
             
             if not phase:
@@ -201,7 +202,7 @@ class HybridMQTTClient:
             # ========================================
             # STEP 3: Update realtime store
             # ========================================
-            update_realtime(phase, realtime_data)
+            update_realtime(building_code, phase, realtime_data)
             
             # Log success with key metrics
             logger.info(

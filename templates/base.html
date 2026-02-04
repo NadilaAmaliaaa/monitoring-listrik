@@ -138,6 +138,26 @@
         </div>
 
         <div class="flex items-center gap-4 md:gap-6">
+            <!-- BUILDING SELECTOR -->
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+            <span class="material-symbols-outlined text-slate-600 text-[18px]">apartment</span>
+            <select 
+              id="globalBuildingSelector" 
+              class="bg-transparent border-none text-slate-900 text-sm font-semibold outline-none cursor-pointer pr-6"
+              style="background-image: url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;); background-position: right 0rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em;"
+            >
+              {% if buildings %}
+                {% for building in buildings %}
+                <option value="{{ building.id }}" 
+                        {% if current_building and building.id == current_building.id %}selected{% endif %}>
+                  {{ building.name }}
+                </option>
+                {% endfor %}
+              {% else %}
+                <option value="">No Building</option>
+              {% endif %}
+            </select>
+          </div>
           <!-- System Status -->
           <div
             class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100"
@@ -247,6 +267,43 @@
 
         if (sidebar.classList.contains("minimized")) {
           mainWrapper.classList.add("sidebar-minimized");
+        }
+      });
+
+      // GLOBAL BUILDING SELECTOR
+      document.addEventListener('DOMContentLoaded', function() {
+        const buildingSelector = document.getElementById('globalBuildingSelector');
+        
+        if (buildingSelector) {
+          buildingSelector.addEventListener('change', function(e) {
+            const buildingId = e.target.value;
+            
+            // Show loading state
+            const originalHTML = buildingSelector.innerHTML;
+            buildingSelector.disabled = true;
+            
+            fetch(`/api/switch-building/${buildingId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Reload halaman untuk update semua data
+                window.location.reload();
+              } else {
+                alert('Failed to switch building');
+                buildingSelector.disabled = false;
+              }
+            })
+            .catch(error => {
+              console.error('Error switching building:', error);
+              alert('Failed to switch building');
+              buildingSelector.disabled = false;
+            });
+          });
         }
       });
     </script>

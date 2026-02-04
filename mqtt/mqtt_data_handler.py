@@ -6,7 +6,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import func
 from database import get_session
-from models.data import Sensor, SensorReading, Building
+from models.data import Sensor, SensorReading
+from models.building import Building
 from config import Config
 
 # -------------------- CONFIGURATIONS FROM ENV --------------------

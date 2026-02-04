@@ -39,7 +39,9 @@ def close_db(exception=None):
 
 def init_db():
     # Import all models to ensure they are registered
-    from models.data import Sensor, SensorReading, SensorThreshold, AlarmEvent, Building
+    from models.data import Sensor, SensorReading, SensorThreshold, AlarmEvent
+    from models.building import Building
+    from models.views import HourlyEnergyView, DailyEnergyView
     
     # Create all tables
     Base.metadata.create_all(bind=engine)

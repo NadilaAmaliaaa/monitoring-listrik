@@ -1,11 +1,20 @@
+# controllers/reports_controller.py
 from datetime import datetime, timedelta
-from sqlalchemy import func, text, extract
+from sqlalchemy import func, text
 from models.views import HourlyEnergyView, DailyEnergyView
 from models.data import Sensor
+from models.building import Building
 
 class ReportsController:
-    def __init__(self, session):
+    def __init__(self, session, building_id=None):
         self.session = session
+        self.building_id = building_id
+    
+    def _get_base_query_filter(self, query):
+        """Apply building filter to query"""
+        if self.building_id:
+            query = query.filter(Sensor.building_id == self.building_id)
+        return query
     
     def get_history(self, page=1, per_page=10, period='hourly'):
         offset = (page - 1) * per_page
@@ -19,6 +28,7 @@ class ReportsController:
                 self.session.query(
                     HourlyEnergyView.date,
                     Sensor.phase,
+                    Sensor.building_id,
                     HourlyEnergyView.avg_power,
                     HourlyEnergyView.peak_power,
                     HourlyEnergyView.total_kwh
@@ -26,16 +36,15 @@ class ReportsController:
                 .join(Sensor, Sensor.id == HourlyEnergyView.sensor_id)
                 .filter(HourlyEnergyView.date >= start_date)
                 .filter(HourlyEnergyView.date < end_date)
-                .order_by(HourlyEnergyView.date.desc())
             )
+            
+            # Apply building filter
+            query = self._get_base_query_filter(query)
+            query = query.order_by(HourlyEnergyView.date.desc())
 
         elif period == 'daily':
             start_date = now.replace(
-                day=1,
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0
+                day=1, hour=0, minute=0, second=0, microsecond=0
             )
             end_date = now
 
@@ -43,6 +52,7 @@ class ReportsController:
                 self.session.query(
                     DailyEnergyView.date,
                     Sensor.phase,
+                    Sensor.building_id,
                     DailyEnergyView.avg_power,
                     DailyEnergyView.peak_power,
                     DailyEnergyView.total_energy_kwh
@@ -50,17 +60,14 @@ class ReportsController:
                 .join(Sensor, Sensor.id == DailyEnergyView.sensor_id)
                 .filter(DailyEnergyView.date >= start_date)
                 .filter(DailyEnergyView.date <= end_date)
-                .order_by(DailyEnergyView.date.desc())
             )
+            
+            query = self._get_base_query_filter(query)
+            query = query.order_by(DailyEnergyView.date.desc())
 
         elif period == 'monthly':
             start_date = now.replace(
-                month=1,
-                day=1,
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0
+                month=1, day=1, hour=0, minute=0, second=0, microsecond=0
             )
             end_date = now
 
@@ -68,6 +75,7 @@ class ReportsController:
                 self.session.query(
                     func.date_trunc('month', DailyEnergyView.date).label('date'),
                     Sensor.phase,
+                    Sensor.building_id,
                     func.avg(DailyEnergyView.avg_power).label('avg_power'),
                     func.max(DailyEnergyView.peak_power).label('peak_power'),
                     func.sum(DailyEnergyView.total_energy_kwh).label('total_kwh')
@@ -75,19 +83,19 @@ class ReportsController:
                 .join(Sensor, Sensor.id == DailyEnergyView.sensor_id)
                 .filter(DailyEnergyView.date >= start_date)
                 .filter(DailyEnergyView.date <= end_date)
-                .group_by(
-                    func.date_trunc('month', DailyEnergyView.date),
-                    Sensor.phase
-                )
-                .order_by(text('date DESC'))
             )
+            
+            query = self._get_base_query_filter(query)
+            query = query.group_by(
+                func.date_trunc('month', DailyEnergyView.date),
+                Sensor.phase,
+                Sensor.building_id
+            ).order_by(text('date DESC'))
 
         total = query.count()
         results = query.offset(offset).limit(per_page).all()
 
-        # =====================
-        # SERIALIZATION
-        # =====================
+        # Serialization
         if period == 'hourly':
             data = [{
                 'date': row.date.strftime('%H:%M'),
@@ -125,74 +133,63 @@ class ReportsController:
             'pages': pages
         }
 
-    
-def get_data_for_report(self, start_date, end_date, parameters='all', period='daily'):
-    # =====================
-    # PARSE DATE
-    # =====================
-    if isinstance(start_date, str):
-        start_date = datetime.fromisoformat(start_date).date()
-    if isinstance(end_date, str):
-        end_date = datetime.fromisoformat(end_date).date()
+    def get_data_for_report(self, start_date, end_date, parameters='all', period='daily'):
+        # Parse dates
+        if isinstance(start_date, str):
+            start_date = datetime.fromisoformat(start_date).date()
+        if isinstance(end_date, str):
+            end_date = datetime.fromisoformat(end_date).date()
 
-    # =====================
-    # QUERY SOURCE
-    # =====================
-    if period == 'hourly':
-        query = (
-            self.session.query(
-                HourlyEnergyView.date,
-                Sensor.phase,
-                HourlyEnergyView.avg_power,
-                HourlyEnergyView.peak_power,
-                HourlyEnergyView.total_kwh
+        # Query based on period
+        if period == 'hourly':
+            query = (
+                self.session.query(
+                    HourlyEnergyView.date,
+                    Sensor.phase,
+                    HourlyEnergyView.avg_power,
+                    HourlyEnergyView.peak_power,
+                    HourlyEnergyView.total_kwh
+                )
+                .join(Sensor, Sensor.id == HourlyEnergyView.sensor_id)
+                .filter(HourlyEnergyView.date.between(start_date, end_date))
             )
-            .join(Sensor, Sensor.id == HourlyEnergyView.sensor_id)
-            .filter(HourlyEnergyView.date.between(start_date, end_date))
-            .order_by(HourlyEnergyView.date.asc())
+        else:  # daily
+            query = (
+                self.session.query(
+                    DailyEnergyView.date,
+                    Sensor.phase,
+                    DailyEnergyView.avg_power,
+                    DailyEnergyView.peak_power,
+                    DailyEnergyView.total_energy_kwh
+                )
+                .join(Sensor, Sensor.id == DailyEnergyView.sensor_id)
+                .filter(DailyEnergyView.date.between(start_date, end_date))
+            )
+
+        # Apply building filter
+        query = self._get_base_query_filter(query)
+        query = query.order_by(
+            DailyEnergyView.date.asc() if period == 'daily' else HourlyEnergyView.date.asc()
         )
 
-    else:  # daily (default)
-        query = (
-            self.session.query(
-                DailyEnergyView.date,
-                Sensor.phase,
-                DailyEnergyView.avg_power,
-                DailyEnergyView.peak_power,
-                DailyEnergyView.total_energy_kwh
-            )
-            .join(Sensor, Sensor.id == DailyEnergyView.sensor_id)
-            .filter(DailyEnergyView.date.between(start_date, end_date))
-            .order_by(DailyEnergyView.date.asc())
-        )
+        results = query.all()
 
-    results = query.all()
+        # Serialization
+        data = []
+        for row in results:
+            record = {
+                'date': row.date.isoformat(),
+                'phase': row.phase,
+            }
 
-    # =====================
-    # SERIALIZATION
-    # =====================
-    data = []
+            if parameters in ['all', 'power']:
+                record['avg_power'] = float(row.avg_power or 0)
+                record['peak_power'] = float(row.peak_power or 0)
 
-    for row in results:
-        record = {
-            'date': row.date.isoformat(),
-            'phase': row.phase,
-        }
+            if parameters in ['all', 'energy']:
+                total_kwh = row.total_kwh if period == 'hourly' else row.total_energy_kwh
+                record['total_kwh'] = float(total_kwh or 0)
 
-        # Power
-        if parameters in ['all', 'power']:
-            record['avg_power'] = float(row.avg_power or 0)
-            record['peak_power'] = float(row.peak_power or 0)
+            data.append(record)
 
-        # Energy
-        if parameters in ['all', 'energy']:
-            total_kwh = (
-                row.total_kwh
-                if period == 'hourly'
-                else row.total_energy_kwh
-            )
-            record['total_kwh'] = float(total_kwh or 0)
-
-        data.append(record)
-
-    return data
+        return data

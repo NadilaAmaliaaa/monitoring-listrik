@@ -1,17 +1,21 @@
-import threading
+from threading import Lock
 
-_lock = threading.Lock()
+_store = {}
+_lock = Lock()
 
-latest = {
-    "R": {},
-    "S": {},
-    "T": {}
-}
-
-def update(phase, data):
+def update(building_code: str, phase: str, data: dict):
     with _lock:
-        latest[phase] = data
+        if building_code not in _store:
+            _store[building_code] = {}
+
+        _store[building_code][phase] = data
+
+
+def get_by_building(building_code: str):
+    with _lock:
+        return _store.get(building_code, {})
+
 
 def get_all():
     with _lock:
-        return latest.copy()
+        return _store.copy()

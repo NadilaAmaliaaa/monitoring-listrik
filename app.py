@@ -4,6 +4,9 @@ from database import close_db
 import threading
 import logging
 import time
+from flask import session
+from database import get_session
+from models.building import Building
 
 # Setup logging
 logging.basicConfig(
@@ -130,10 +133,42 @@ def create_app():
         app.register_blueprint(reports_bp, url_prefix='/reports')
         logger.info("✓ Reports blueprint registered")
         
+        from views.common import common_bp
+        app.register_blueprint(common_bp)
+        
     except Exception as e:
         logger.error(f"✗ Failed to register blueprints: {e}")
         import traceback
         logger.error(traceback.format_exc())
+        
+    @app.context_processor
+    def inject_building_context():
+        """Inject building data ke semua template"""
+        db_session = get_session()
+        try:
+            buildings = db_session.query(Building).all()
+            current_building_id = session.get('building_id')
+            
+            # Set default jika belum ada
+            if not current_building_id and buildings:
+                current_building_id = buildings[0].id
+                session['building_id'] = current_building_id
+            
+            current_building = None
+            if current_building_id:
+                current_building = db_session.get(Building, current_building_id)
+            
+            return {
+                'buildings': buildings,
+                'current_building': current_building
+            }
+        except:
+            return {
+                'buildings': [],
+                'current_building': None
+            }
+        finally:
+            db_session.close()
 
     # ================================
     # Database Cleanup Handler

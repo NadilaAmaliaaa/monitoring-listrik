@@ -8,22 +8,6 @@ from sqlalchemy.orm import relationship
 from database import Base  # Import Base, bukan db
 
 
-class Building(Base):
-    __tablename__ = "buildings"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    code = Column(String(50), nullable=False, unique=True)
-    address = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    sensors = relationship("Sensor", back_populates="building", cascade="all, delete-orphan")
-    
-    def __repr__(self):
-        return f"<Building(id={self.id}, name='{self.name}', code='{self.code}')>"
-
-
 class Sensor(Base):
     """Model untuk sensor"""
     __tablename__ = "sensors"
@@ -103,28 +87,3 @@ class SensorThreshold(Base):
     
     def __repr__(self):
         return f"<SensorThreshold(id={self.id}, sensor_id={self.sensor_id})>"
-
-
-class AlarmEvent(Base):
-    """Model untuk alarm events"""
-    __tablename__ = "alarm_events"
-
-    id = Column(Integer, primary_key=True)
-    sensor_id = Column(Integer, ForeignKey("sensors.id"), nullable=False)
-
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
-    parameter = Column(String(50))  # voltage, current, power, etc.
-    actual_value = Column(Float)
-    threshold_min = Column(Float)
-    threshold_max = Column(Float)
-    status = Column(String(20))  # LOW, HIGH, NORMAL
-    message = Column(String(255))
-    acknowledged = Column(Integer, default=0)  # 0=not ack, 1=acknowledged
-    acknowledged_at = Column(DateTime)
-    acknowledged_by = Column(String(100))
-
-    # Relationships
-    sensor = relationship("Sensor", back_populates="alarms")
-    
-    def __repr__(self):
-        return f"<AlarmEvent(id={self.id}, sensor_id={self.sensor_id}, parameter='{self.parameter}', status='{self.status}')>"

@@ -7,7 +7,7 @@ import sys
 import argparse
 
 # ==================== CONFIGURATION ====================
-BROKER = "10.10.43.33"
+BROKER = "192.168.1.8"
 PORT = 1883
 KEEPALIVE = 60
 
