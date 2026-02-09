@@ -7,6 +7,8 @@ import time
 from flask import session
 from database import get_session
 from models.building import Building
+from models.data import Sensor, SensorReading, SensorThreshold
+from models.alarm import AlarmEvent
 
 # Setup logging
 logging.basicConfig(
