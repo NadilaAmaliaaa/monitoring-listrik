@@ -138,6 +138,9 @@ def create_app():
         from views.common import common_bp
         app.register_blueprint(common_bp)
         
+        from views.alarms import alarms_bp
+        app.register_blueprint(alarms_bp, url_prefix='/alarms')
+        
     except Exception as e:
         logger.error(f"✗ Failed to register blueprints: {e}")
         import traceback
