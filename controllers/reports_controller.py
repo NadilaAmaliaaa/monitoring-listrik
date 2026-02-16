@@ -4,6 +4,12 @@ from sqlalchemy import func, text
 from models.views import HourlyEnergyView, DailyEnergyView
 from models.data import Sensor
 from models.building import Building
+import csv
+import io
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from flask import send_file
+
 
 class ReportsController:
     def __init__(self, session, building_id=None):
@@ -133,63 +139,174 @@ class ReportsController:
             'pages': pages
         }
 
-    def get_data_for_report(self, start_date, end_date, parameters='all', period='daily'):
+    def get_data_for_report(self, start_date, end_date, parameters='all'):
         # Parse dates
         if isinstance(start_date, str):
             start_date = datetime.fromisoformat(start_date).date()
         if isinstance(end_date, str):
             end_date = datetime.fromisoformat(end_date).date()
 
-        # Query based on period
-        if period == 'hourly':
-            query = (
-                self.session.query(
-                    HourlyEnergyView.date,
-                    Sensor.phase,
-                    HourlyEnergyView.avg_power,
-                    HourlyEnergyView.peak_power,
-                    HourlyEnergyView.total_kwh
-                )
-                .join(Sensor, Sensor.id == HourlyEnergyView.sensor_id)
-                .filter(HourlyEnergyView.date.between(start_date, end_date))
+        query = (
+            self.session.query(
+                DailyEnergyView.date,
+                Sensor.phase,
+                DailyEnergyView.avg_power,
+                DailyEnergyView.peak_power,
+                DailyEnergyView.total_energy_kwh
             )
-        else:  # daily
-            query = (
-                self.session.query(
-                    DailyEnergyView.date,
-                    Sensor.phase,
-                    DailyEnergyView.avg_power,
-                    DailyEnergyView.peak_power,
-                    DailyEnergyView.total_energy_kwh
-                )
-                .join(Sensor, Sensor.id == DailyEnergyView.sensor_id)
-                .filter(DailyEnergyView.date.between(start_date, end_date))
+            .join(Sensor, Sensor.id == DailyEnergyView.sensor_id)
+            .filter(
+                DailyEnergyView.date.between(start_date, end_date)
             )
-
-        # Apply building filter
-        query = self._get_base_query_filter(query)
-        query = query.order_by(
-            DailyEnergyView.date.asc() if period == 'daily' else HourlyEnergyView.date.asc()
         )
+
+        # =============================
+        # Filter berdasarkan building terpilih
+        # (misal: Sensor.building_id == active_building_id)
+        # =============================
+        query = self._get_base_query_filter(query)
+
+        # =============================
+        # Ordering
+        # =============================
+        query = query.order_by(DailyEnergyView.date.asc())
 
         results = query.all()
 
+        # =============================
         # Serialization
+        # =============================
         data = []
         for row in results:
             record = {
-                'date': row.date.isoformat(),
-                'phase': row.phase,
+                "date": row.date.isoformat(),  # YYYY-MM-DD
+                "phase": row.phase
             }
 
-            if parameters in ['all', 'power']:
-                record['avg_power'] = float(row.avg_power or 0)
-                record['peak_power'] = float(row.peak_power or 0)
+            if parameters in ["all", "power"]:
+                record["avg_power"] = float(row.avg_power or 0)
+                record["peak_power"] = float(row.peak_power or 0)
 
-            if parameters in ['all', 'energy']:
-                total_kwh = row.total_kwh if period == 'hourly' else row.total_energy_kwh
-                record['total_kwh'] = float(total_kwh or 0)
+            if parameters in ["all", "energy"]:
+                record["total_kwh"] = float(row.total_energy_kwh or 0)
 
             data.append(record)
 
         return data
+    
+    def generate_csv_report(self, data, start_date, end_date, building_name, parameters):
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        # Header
+        headers = ["Date", "Phase"]
+
+        if parameters in ["all", "power"]:
+            headers += ["Avg Power", "Peak Power"]
+
+        if parameters in ["all", "energy"]:
+            headers += ["Total kWh"]
+
+        writer.writerow(headers)
+
+        # Rows
+        for row in data:
+            record = [row["date"], row["phase"]]
+
+            if parameters in ["all", "power"]:
+                record += [
+                    row.get("avg_power", 0),
+                    row.get("peak_power", 0)
+                ]
+
+            if parameters in ["all", "energy"]:
+                record.append(row.get("total_kwh", 0))
+
+            writer.writerow(record)
+
+        output.seek(0)
+
+        filename = (
+            f"energy-report-"
+            f"{building_name.replace(' ', '-')}-"
+            f"{start_date}-to-{end_date}.csv"
+        )
+
+        return send_file(
+            io.BytesIO(output.getvalue().encode("utf-8")),
+            mimetype="text/csv",
+            as_attachment=True,
+            download_name=filename
+        )
+
+    def generate_pdf_report(self, data, start_date, end_date, building_name, parameters):
+        buffer = io.BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+
+        y = height - 50
+
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(50, y, f"Energy Report - {building_name}")
+        y -= 20
+
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(50, y, f"Period: {start_date} to {end_date}")
+        y -= 30
+
+        headers = ["Date", "Phase"]
+
+        if parameters in ["all", "power"]:
+            headers += ["Avg Power", "Peak Power"]
+
+        if parameters in ["all", "energy"]:
+            headers += ["Total kWh"]
+
+        x_positions = [50, 130, 210, 300, 380]
+
+        pdf.setFont("Helvetica-Bold", 9)
+        for i, h in enumerate(headers):
+            pdf.drawString(x_positions[i], y, h)
+
+        y -= 15
+        pdf.setFont("Helvetica", 9)
+
+        for row in data:
+            if y < 50:
+                pdf.showPage()
+                y = height - 50
+
+            values = [
+                row["date"],
+                row["phase"]
+            ]
+
+            if parameters in ["all", "power"]:
+                values += [
+                    f"{row.get('avg_power', 0):.2f}",
+                    f"{row.get('peak_power', 0):.2f}"
+                ]
+
+            if parameters in ["all", "energy"]:
+                values.append(f"{row.get('total_kwh', 0):.2f}")
+
+            for i, val in enumerate(values):
+                pdf.drawString(x_positions[i], y, str(val))
+
+            y -= 15
+
+        pdf.save()
+        buffer.seek(0)
+
+        filename = (
+            f"energy-report-"
+            f"{building_name.replace(' ', '-')}-"
+            f"{start_date}-to-{end_date}.pdf"
+        )
+
+        return send_file(
+            buffer,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename
+        )

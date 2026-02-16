@@ -94,73 +94,78 @@ def get_history():
 def generate_report():
     """Generate report for current building"""
     db_session = get_session()
+
     try:
         payload = request.get_json()
 
         start_date = payload.get('start_date')
         end_date = payload.get('end_date')
         parameters = payload.get('parameters', 'all')
-        period = payload.get('period', 'daily')
         format_type = payload.get('format', 'csv')
 
-        if period not in ['hourly', 'daily', 'monthly']:
-            return jsonify({'error': 'Invalid period'}), 400
+        # =============================
+        # Validasi input
+        # =============================
+        if not start_date or not end_date:
+            return jsonify({'error': 'start_date and end_date are required'}), 400
 
-        # Get current building
+        if parameters not in ['all', 'power', 'energy']:
+            return jsonify({'error': 'Invalid parameters'}), 400
+
+        # =============================
+        # Ambil building aktif
+        # =============================
         building_id = get_current_building_id()
         if not building_id:
             return jsonify({'error': 'No building selected'}), 400
 
-        controller = ReportsController(db_session, building_id=building_id)
-        
-        # Get data for report
+        controller = ReportsController(
+            session=db_session,
+            building_id=building_id
+        )
+
+        # =============================
+        # Ambil data harian
+        # =============================
         data = controller.get_data_for_report(
             start_date=start_date,
             end_date=end_date,
-            parameters=parameters,
-            period=period
+            parameters=parameters
         )
 
         if not data:
             return jsonify({'error': 'No data available'}), 404
 
+        building = db_session.query(Building).get(building_id)
+
+        # =============================
+        # Generate file
+        # =============================
         if format_type == 'csv':
-            building = db_session.query(Building).get(building_id)
-            return generate_csv_report(
-                data,
-                start_date,
-                end_date,
-                period,
-                building.name
+            return controller.generate_csv_report(
+                data=data,
+                start_date=start_date,
+                end_date=end_date,
+                building_name=building.name,
+                parameters=parameters
+            )
+
+        elif format_type == 'pdf':
+            return controller.generate_pdf_report(
+                data=data,
+                start_date=start_date,
+                end_date=end_date,
+                building_name=building.name,
+                parameters=parameters
             )
 
         return jsonify({'error': 'Invalid format'}), 400
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
     finally:
         db_session.close()
-
-
-def generate_csv_report(data, start_date, end_date, period, building_name):
-    """Generate CSV report with building info"""
-    output = io.StringIO()
-    
-    if data:
-        writer = csv.DictWriter(output, fieldnames=data[0].keys())
-        writer.writeheader()
-        writer.writerows(data)
-
-    output.seek(0)
-
-    filename = f'energy-report-{building_name.replace(" ", "-")}-{period}-{start_date}-to-{end_date}.csv'
-
-    return send_file(
-        io.BytesIO(output.getvalue().encode()),
-        mimetype='text/csv',
-        as_attachment=True,
-        download_name=filename
-    )
 
 
 # API endpoint to get all buildings

@@ -1,11 +1,6 @@
-{% extends "base.html" %}
-
-{% block title %}Laporan{% endblock %}
-
-{% block page_title %}Laporan Berkala{% endblock %}
-{% block page_subtitle %}Real-time 3-Phase Monitoring System{% endblock %}
-
-{% block extra_css %}
+{% extends "base.html" %} {% block title %}Laporan{% endblock %} {% block
+page_title %}Laporan Berkala{% endblock %} {% block page_subtitle %}Real-time
+3-Phase Monitoring System{% endblock %} {% block extra_css %}
 <style>
   .custom-select {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -18,25 +13,29 @@
     appearance: none;
   }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="max-w-[1400px] mx-auto flex flex-col gap-8">
-  
   <!-- Building/Department Selector -->
-  <div hidden class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+  <div
+    hidden
+    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4"
+  >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="material-symbols-outlined text-primary">apartment</span>
-        <span class="text-sm font-medium text-slate-600">Department/Building:</span>
+        <span class="text-sm font-medium text-slate-600"
+          >Department/Building:</span
+        >
       </div>
-      <select 
-        id="buildingSelector" 
+      <select
+        id="buildingSelector"
         class="custom-select bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-sm font-bold min-w-[300px]"
       >
         {% for building in buildings %}
-        <option value="{{ building.id }}" 
-                {% if current_building and building.id == current_building.id %}selected{% endif %}>
+        <option
+          value="{{ building.id }}"
+          {% if current_building and building.id == current_building.id %}selected{% endif %}
+        >
           {{ building.code }} - {{ building.name }}
         </option>
         {% endfor %}
@@ -45,20 +44,31 @@
   </div>
 
   <!-- Report Generation Section -->
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 relative overflow-hidden">
+  <section
+    class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 relative overflow-hidden"
+  >
     <div class="absolute right-0 top-0 p-8 opacity-[0.03]">
-      <span class="material-symbols-outlined text-[140px] text-slate-900">summarize</span>
+      <span class="material-symbols-outlined text-[140px] text-slate-900"
+        >summarize</span
+      >
     </div>
 
     <div class="relative z-10">
       <h3 class="text-slate-900 text-lg font-bold mb-8 flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary">settings_applications</span>
+        <span class="material-symbols-outlined text-primary"
+          >settings_applications</span
+        >
         Report Generation
       </h3>
 
-      <form id="reportForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+      <form
+        id="reportForm"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end"
+      >
         <div class="flex flex-col gap-2">
-          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+          <label
+            class="text-slate-500 text-[11px] font-bold uppercase tracking-wider"
+          >
             Start Date
           </label>
           <input
@@ -70,7 +80,9 @@
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+          <label
+            class="text-slate-500 text-[11px] font-bold uppercase tracking-wider"
+          >
             End Date
           </label>
           <input
@@ -82,7 +94,9 @@
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+          <label
+            class="text-slate-500 text-[11px] font-bold uppercase tracking-wider"
+          >
             Parameters
           </label>
           <select
@@ -96,15 +110,29 @@
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+          <label
+            class="text-slate-500 text-[11px] font-bold uppercase tracking-wider"
+          >
             Format
           </label>
-          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
-            <label class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all bg-white text-primary shadow-sm">
-              <input checked class="hidden" name="format" type="radio" value="pdf" />
+          <div
+            class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200"
+          >
+            <label
+              class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all bg-white text-primary shadow-sm"
+            >
+              <input
+                checked
+                class="hidden"
+                name="format"
+                type="radio"
+                value="pdf"
+              />
               PDF
             </label>
-            <label class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all text-slate-500 hover:text-slate-700">
+            <label
+              class="flex-1 text-center py-1.5 px-3 rounded-md text-xs font-bold cursor-pointer transition-all text-slate-500 hover:text-slate-700"
+            >
               <input class="hidden" name="format" type="radio" value="csv" />
               CSV
             </label>
@@ -125,8 +153,12 @@
   </section>
 
   <!-- History Monitoring Section -->
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+  <section
+    class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+  >
+    <div
+      class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50"
+    >
       <div class="flex items-center gap-3">
         <span class="material-symbols-outlined text-primary">history</span>
         <h3 class="text-slate-900 text-base font-bold">History Monitoring</h3>
@@ -156,23 +188,44 @@
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
-          <tr class="text-slate-500 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200 bg-slate-50">
+          <tr
+            class="text-slate-500 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200 bg-slate-50"
+          >
             <th class="px-6 py-4" rowspan="2">Timestamp</th>
-            <th class="px-6 py-2 text-center border-l border-slate-200" colspan="3">
+            <th
+              class="px-6 py-2 text-center border-l border-slate-200"
+              colspan="3"
+            >
               Average Power (W)
             </th>
-            <th class="px-6 py-2 text-center border-l border-slate-200" colspan="3">
+            <th
+              class="px-6 py-2 text-center border-l border-slate-200"
+              colspan="3"
+            >
               Peak Power (W)
             </th>
-            <th class="px-4 py-4 border-l border-slate-200 text-center" rowspan="2">
+            <th
+              class="px-4 py-4 border-l border-slate-200 text-center"
+              rowspan="2"
+            >
               Energy (KWh)
             </th>
           </tr>
-          <tr class="text-slate-500 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200 bg-slate-50">
-            <th class="px-4 py-2 border-l border-slate-200 text-red-500 text-center">R</th>
+          <tr
+            class="text-slate-500 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200 bg-slate-50"
+          >
+            <th
+              class="px-4 py-2 border-l border-slate-200 text-red-500 text-center"
+            >
+              R
+            </th>
             <th class="px-4 py-2 text-yellow-600 text-center">S</th>
             <th class="px-4 py-2 text-blue-600 text-center">T</th>
-            <th class="px-4 py-2 border-l border-slate-200 text-red-500 text-center">R</th>
+            <th
+              class="px-4 py-2 border-l border-slate-200 text-red-500 text-center"
+            >
+              R
+            </th>
             <th class="px-4 py-2 text-yellow-600 text-center">S</th>
             <th class="px-4 py-2 text-blue-600 text-center">T</th>
           </tr>
@@ -181,7 +234,9 @@
           <tr>
             <td colspan="8" class="px-6 py-8 text-center text-slate-400">
               <div class="flex flex-col items-center gap-2">
-                <span class="material-symbols-outlined text-4xl">hourglass_empty</span>
+                <span class="material-symbols-outlined text-4xl"
+                  >hourglass_empty</span
+                >
                 <p>Loading data...</p>
               </div>
             </td>
@@ -191,10 +246,16 @@
     </div>
 
     <!-- Pagination -->
-    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+    <div
+      class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between"
+    >
       <p class="text-slate-500 text-xs font-medium">
         Showing
-        <span id="showingStart" class="text-slate-900 font-bold">1</span>-<span id="showingEnd" class="text-slate-900 font-bold">10</span>
+        <span id="showingStart" class="text-slate-900 font-bold">1</span>-<span
+          id="showingEnd"
+          class="text-slate-900 font-bold"
+          >10</span
+        >
         of
         <span id="totalEntries" class="text-slate-900 font-bold">0</span>
         entries
@@ -220,44 +281,57 @@
     </div>
   </section>
 </div>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
   let currentPage = 1;
   let currentPeriod = "hourly";
   const perPage = 10;
+
+  // Tab Format
+  document.querySelectorAll('input[name="format"]').forEach((input) => {
+    input.addEventListener("change", function () {
+      document.querySelectorAll("label").forEach((label) => {
+        label.classList.remove("bg-white", "text-primary", "shadow-sm");
+        label.classList.add("text-slate-500");
+      });
+
+      this.parentElement.classList.add("bg-white", "text-primary", "shadow-sm");
+      this.parentElement.classList.remove("text-slate-500");
+    });
+  });
 
   // Load history data on page load
   document.addEventListener("DOMContentLoaded", function () {
     loadHistoryData();
 
     // Building selector
-    document.getElementById('buildingSelector').addEventListener('change', function(e) {
-      const buildingId = e.target.value;
-      
-      fetch(`/reports/switch-building/${buildingId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Reload data untuk building baru
-          currentPage = 1;
-          loadHistoryData();
-          
-          // Optional: show notification
-          console.log(`Switched to building: ${data.building.name}`);
-        }
-      })
-      .catch(error => {
-        console.error('Error switching building:', error);
-        alert('Failed to switch building');
+    document
+      .getElementById("buildingSelector")
+      .addEventListener("change", function (e) {
+        const buildingId = e.target.value;
+
+        fetch(`/reports/switch-building/${buildingId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Reload data untuk building baru
+              currentPage = 1;
+              loadHistoryData();
+
+              // Optional: show notification
+              console.log(`Switched to building: ${data.building.name}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error switching building:", error);
+            alert("Failed to switch building");
+          });
       });
-    });
 
     // Period buttons
     document.querySelectorAll(".period-btn").forEach((btn) => {
@@ -278,10 +352,12 @@
     });
 
     // Report form submit
-    document.getElementById("reportForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      generateReport();
-    });
+    document
+      .getElementById("reportForm")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        generateReport();
+      });
   });
 
   // Load history data
@@ -448,12 +524,19 @@
       },
       body: JSON.stringify(data),
     })
-      .then((response) => response.blob())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to generate report");
+        }
+        return response.blob();
+      })
       .then((blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
+
         a.href = url;
         a.download = `energy-report-${startDate}-to-${endDate}.${format}`;
+
         document.body.appendChild(a);
         a.click();
         a.remove();
