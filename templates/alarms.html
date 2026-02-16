@@ -1,13 +1,17 @@
 <!-- templates/alarms.html -->
-{% extends "base.html" %} {% block title %}Riwayat Alarm{% endblock %} {% block
-page_title %}Riwayat Alarm{% endblock %} {% block page_subtitle %}Log dan
-History Notifikasi Sistem{% endblock %} {% block extra_css %}
+{% extends "base.html" %} 
+{% block title %}Riwayat Alarm{% endblock %} 
+{% block page_title %}Riwayat Alarm{% endblock %} 
+{% block page_subtitle %}Log dan History Notifikasi Sistem{% endblock %} 
+{% block extra_css %}
 <style>
   .status-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border;
   }
 </style>
-{% endblock %} {% block content %}
+{% endblock %} 
+
+{% block content %}
 <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
   <!-- Summary Card -->
   <div class="flex">
@@ -26,11 +30,20 @@ History Notifikasi Sistem{% endblock %} {% block extra_css %}
         </div>
       </div>
       <div class="flex items-baseline gap-3">
-        <h3 class="text-4xl font-bold text-slate-900 tracking-tight">24</h3>
+        <h3 id="totalToday" class="text-4xl font-bold text-slate-900 tracking-tight">
+          {{ summary.total_today }}
+        </h3>
         <span
-          class="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full"
-          >+12% vs kemarin</span
-        >
+          id="percentageChange"
+          class="text-xs font-bold px-2 py-0.5 rounded-full
+          {% if summary.percentage_change >= 0 %}
+            text-red-500 bg-red-50
+          {% else %}
+            text-green-500 bg-green-50
+          {% endif %}"
+          >
+          {% if summary.percentage_change >= 0 %}+{% endif %}{{ summary.percentage_change }}% vs kemarin
+        </span>
       </div>
     </div>
   </div>
@@ -52,29 +65,29 @@ History Notifikasi Sistem{% endblock %} {% block extra_css %}
       <div class="h-6 w-[1px] bg-slate-200 mx-2"></div>
 
       <div class="flex flex-wrap gap-2">
-        <button
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors"
-        >
-          Parameter: Semua
-          <span class="material-symbols-outlined text-xs">expand_more</span>
-        </button>
-        <button
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors"
-        >
-          Fasa: Semua
-          <span class="material-symbols-outlined text-xs">expand_more</span>
-        </button>
-        <button
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors"
-        >
-          Status: Semua
-          <span class="material-symbols-outlined text-xs">expand_more</span>
-        </button>
+        <select id="parameterFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
+          <option value="all">Parameter: Semua</option>
+          <option value="voltage">Voltage</option>
+          <option value="current">Current</option>
+          <option value="power_factor">Power Factor</option>
+          <option value="frequency">Frequency</option>
+        </select>
+        
+        <select id="phaseFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
+          <option value="all">Fasa: Semua</option>
+          <option value="R">Fasa R</option>
+          <option value="S">Fasa S</option>
+          <option value="T">Fasa T</option>
+        </select>
+        
+        <!-- <select id="statusFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
+          <option value="all">Status: Semua</option>
+          <option value="critical">Critical</option>
+          <option value="warning">Warning</option>
+          <option value="normal">Normal</option>
+        </select> -->
       </div>
 
-      <!-- <button class="ml-auto text-primary text-sm font-bold hover:text-blue-700 transition-colors">
-        Reset Filter
-      </button> -->
       <div class="ml-auto flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
         <span class="material-symbols-outlined text-slate-500 text-sm">search</span>
         <input
@@ -132,286 +145,15 @@ History Notifikasi Sistem{% endblock %} {% block extra_css %}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
-          <!-- Row 1: Over Voltage -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 14:20:05
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Voltage
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-red-50 text-red-600 text-xs font-bold border border-red-200"
-              >
-                R
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-red-500 font-bold">
-              250.4 V
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              200.0 V
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              240.0 V
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="status-badge bg-red-50 text-red-500 border-red-100">
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >warning</span
+        <tbody id="alarmTableBody" class="divide-y divide-slate-100">
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-center text-slate-400">
+              <div class="flex flex-col items-center gap-2">
+                <span class="material-symbols-outlined text-4xl"
+                  >hourglass_empty</span
                 >
-                Over Voltage
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 2: Under Current -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 13:45:12
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Current
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-600 text-xs font-bold border border-blue-200"
-              >
-                T
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-yellow-600 font-bold">
-              2.1 A
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              5.0 A
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              50.0 A
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                class="status-badge bg-amber-50 text-yellow-600 border-amber-100"
-              >
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >report</span
-                >
-                Under Current
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 3: Normal Voltage -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 12:55:40
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Voltage
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-yellow-50 text-yellow-600 text-xs font-bold border border-yellow-200"
-              >
-                S
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">
-              220.5 V
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              200.0 V
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              240.0 V
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                class="status-badge bg-emerald-50 text-emerald-600 border-emerald-100"
-              >
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >check_circle</span
-                >
-                Normal
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 4: Over Current -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 12:10:30
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Current
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-red-50 text-red-600 text-xs font-bold border border-red-200"
-              >
-                R
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-red-500 font-bold">
-              55.2 A
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              5.0 A
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              50.0 A
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="status-badge bg-red-50 text-red-500 border-red-100">
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >warning</span
-                >
-                Over Current
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 5: Normal Frequency -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 11:45:00
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Frequency
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-yellow-50 text-yellow-600 text-xs font-bold border border-yellow-200"
-              >
-                S
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">
-              50.0 Hz
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              49.5 Hz
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              50.5 Hz
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                class="status-badge bg-emerald-50 text-emerald-600 border-emerald-100"
-              >
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >check_circle</span
-                >
-                Normal
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 6: Over Voltage Phase S -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 11:20:15
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Voltage
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-yellow-50 text-yellow-600 text-xs font-bold border border-yellow-200"
-              >
-                S
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-red-500 font-bold">
-              245.8 V
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              200.0 V
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              240.0 V
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="status-badge bg-red-50 text-red-500 border-red-100">
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >warning</span
-                >
-                Over Voltage
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 7: Normal Current Phase T -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 10:55:30
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Current
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-600 text-xs font-bold border border-blue-200"
-              >
-                T
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">
-              35.4 A
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              5.0 A
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              50.0 A
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                class="status-badge bg-emerald-50 text-emerald-600 border-emerald-100"
-              >
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >check_circle</span
-                >
-                Normal
-              </span>
-            </td>
-          </tr>
-
-          <!-- Row 8: Power Factor Warning -->
-          <tr class="hover:bg-slate-50/50 transition-colors group">
-            <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-              2023-10-28 10:30:45
-            </td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-900">
-              Power Factor
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              <span
-                class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-red-50 text-red-600 text-xs font-bold border border-red-200"
-              >
-                R
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-yellow-600 font-bold">
-              0.82
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              0.85
-            </td>
-            <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-              1.00
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                class="status-badge bg-amber-50 text-yellow-600 border-amber-100"
-              >
-                <span class="material-symbols-outlined text-[14px] mr-1"
-                  >report</span
-                >
-                Low PF
-              </span>
+                <p>Loading data...</p>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -423,31 +165,19 @@ History Notifikasi Sistem{% endblock %} {% block extra_css %}
       class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between"
     >
       <p class="text-xs text-slate-500 font-medium tracking-tight">
-        Menampilkan 1 - 8 dari 124 entri
+        Menampilkan <span id="showingStart">0</span> - <span id="showingEnd">0</span> dari <span id="totalEntries">0</span> entri
       </p>
       <div class="flex items-center gap-1.5">
         <button
+          id="prevBtn"
           class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 disabled:opacity-40"
           disabled
         >
           <span class="material-symbols-outlined text-sm">chevron_left</span>
         </button>
+        <div id="pageNumbers" class="flex items-center gap-1.5"></div>
         <button
-          class="w-8 h-8 rounded-lg bg-primary text-white text-xs font-bold shadow-sm shadow-primary/20"
-        >
-          1
-        </button>
-        <button
-          class="w-8 h-8 rounded-lg bg-white text-slate-600 text-xs font-bold border border-slate-200 hover:bg-slate-50 transition-colors"
-        >
-          2
-        </button>
-        <button
-          class="w-8 h-8 rounded-lg bg-white text-slate-600 text-xs font-bold border border-slate-200 hover:bg-slate-50 transition-colors"
-        >
-          3
-        </button>
-        <button
+          id="nextBtn"
           class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
         >
           <span class="material-symbols-outlined text-sm">chevron_right</span>
@@ -456,8 +186,19 @@ History Notifikasi Sistem{% endblock %} {% block extra_css %}
     </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %} 
+
+{% block extra_js %}
 <script>
+  let currentPage = 1;
+  const perPage = 10;
+  let currentFilters = {
+    parameter: 'all',
+    phase: 'all',
+    status: 'all',
+    search: ''
+  };
+
   // Update current date in filter
   function updateFilterDate() {
     const dateEl = document.getElementById("currentDateFilter");
@@ -469,6 +210,222 @@ History Notifikasi Sistem{% endblock %} {% block extra_css %}
     }
   }
 
-  updateFilterDate();
+  // Load alarm data
+  function loadAlarmData() {
+    const params = new URLSearchParams({
+      page: currentPage,
+      per_page: perPage,
+      parameter: currentFilters.parameter,
+      phase: currentFilters.phase,
+      status: currentFilters.status,
+      search: currentFilters.search
+    });
+
+    fetch(`/alarms/api/alarms?${params}`)
+      .then(response => response.json())
+      .then(data => {
+        renderTable(data.data);
+        updatePagination(data.total, data.page, data.pages);
+      })
+      .catch(error => {
+        console.error('Error loading alarms:', error);
+        showError();
+      });
+  }
+
+  // Render table
+  function renderTable(data) {
+    const tbody = document.getElementById('alarmTableBody');
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="px-6 py-8 text-center text-slate-400">
+            <div class="flex flex-col items-center gap-2">
+              <span class="material-symbols-outlined text-4xl">search_off</span>
+              <p>Tidak ada data alarm</p>
+            </div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(alarm => {
+      const phaseColors = {
+        'R': 'red',
+        'S': 'yellow',
+        'T': 'blue'
+      };
+      const phaseColor = phaseColors[alarm.phase] || 'slate';
+
+      const severityStyles = {
+        'critical': 'bg-red-50 text-red-500 border-red-100',
+        'warning': 'bg-amber-50 text-yellow-600 border-amber-100',
+        'normal': 'bg-emerald-50 text-emerald-600 border-emerald-100'
+      };
+      const severityStyle = severityStyles[alarm.severity] || 'bg-slate-50 text-slate-600 border-slate-100';
+
+      const severityIcons = {
+        'critical': 'warning',
+        'warning': 'report',
+        'normal': 'check_circle'
+      };
+      const severityIcon = severityIcons[alarm.severity] || 'info';
+
+      const valueColor = alarm.severity === 'critical' ? 'text-red-500' : 
+                        alarm.severity === 'warning' ? 'text-yellow-600' : 
+                        'text-emerald-600';
+
+      return `
+        <tr class="hover:bg-slate-50/50 transition-colors group">
+          <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+            ${alarm.timestamp}
+          </td>
+          <td class="px-6 py-4 text-sm font-semibold text-slate-900 capitalize">
+            ${alarm.parameter.replace('_', ' ')}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-${phaseColor}-50 text-${phaseColor}-600 text-xs font-bold border border-${phaseColor}-200">
+              ${alarm.phase}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-sm font-mono ${valueColor} font-bold">
+            ${alarm.actual_value_display}
+          </td>
+          <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
+            ${alarm.threshold_min_display}
+          </td>
+          <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
+            ${alarm.threshold_max_display}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="status-badge ${severityStyle}">
+              <span class="material-symbols-outlined text-[14px] mr-1">${severityIcon}</span>
+              ${alarm.status}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Update pagination
+  function updatePagination(total, page, pages) {
+    const start = (page - 1) * perPage + 1;
+    const end = Math.min(page * perPage, total);
+
+    document.getElementById('showingStart').textContent = total > 0 ? start : 0;
+    document.getElementById('showingEnd').textContent = end;
+    document.getElementById('totalEntries').textContent = total;
+
+    // Update buttons
+    document.getElementById('prevBtn').disabled = page === 1;
+    document.getElementById('nextBtn').disabled = page === pages || pages === 0;
+
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    const maxButtons = 3;
+    for (let i = 1; i <= Math.min(pages, maxButtons); i++) {
+      const btn = document.createElement('button');
+      btn.className = `w-8 h-8 rounded-lg text-xs font-bold ${
+        i === page
+          ? 'bg-primary text-white shadow-sm shadow-primary/20'
+          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors'
+      }`;
+      btn.textContent = i;
+      btn.onclick = () => {
+        currentPage = i;
+        loadAlarmData();
+      };
+      pageNumbers.appendChild(btn);
+    }
+  }
+
+  // Show error
+  function showError() {
+    const tbody = document.getElementById('alarmTableBody');
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="px-6 py-8 text-center text-red-500">
+          <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl">error</span>
+            <p>Failed to load data. Please try again.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    updateFilterDate();
+    loadAlarmData();
+
+    // Filter listeners
+    document.getElementById('parameterFilter').addEventListener('change', (e) => {
+      currentFilters.parameter = e.target.value;
+      currentPage = 1;
+      loadAlarmData();
+    });
+
+    document.getElementById('phaseFilter').addEventListener('change', (e) => {
+      currentFilters.phase = e.target.value;
+      currentPage = 1;
+      loadAlarmData();
+    });
+
+    document.getElementById('statusFilter').addEventListener('change', (e) => {
+      currentFilters.status = e.target.value;
+      currentPage = 1;
+      loadAlarmData();
+    });
+
+    // Search with debounce
+    let searchTimeout;
+    document.getElementById('searchParameter').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentFilters.search = e.target.value;
+        currentPage = 1;
+        loadAlarmData();
+      }, 500);
+    });
+
+    // Pagination buttons
+    document.getElementById('prevBtn').onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        loadAlarmData();
+      }
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+      currentPage++;
+      loadAlarmData();
+    };
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      loadAlarmData();
+      
+      // Refresh summary
+      fetch('/alarms/api/summary')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('totalToday').textContent = data.total_today;
+          const changeEl = document.getElementById('percentageChange');
+          const changeText = (data.percentage_change >= 0 ? '+' : '') + data.percentage_change + '% vs kemarin';
+          changeEl.textContent = changeText;
+          
+          if (data.percentage_change >= 0) {
+            changeEl.className = 'text-xs font-bold px-2 py-0.5 rounded-full text-red-500 bg-red-50';
+          } else {
+            changeEl.className = 'text-xs font-bold px-2 py-0.5 rounded-full text-green-500 bg-green-50';
+          }
+        });
+    }, 30000);
+  });
 </script>
 {% endblock %}
