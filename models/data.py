@@ -16,8 +16,8 @@ class Sensor(Base):
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=False)
     name = Column(String(100), nullable=False)
     phase = Column(String(1), nullable=False)  # R, S, or T
-    description = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    # description = Column(String(255))
+    # created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
     building = relationship("Building", back_populates="sensors")
