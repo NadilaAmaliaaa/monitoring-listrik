@@ -4,373 +4,300 @@ page_title %}Pengaturan Ambang Batas Energi Terpadu{% endblock %} {% block
 page_subtitle %}Kelola parameter ambang batas voltase dan arus untuk sistem
 kelistrikan 3-fasa{% endblock %} {% block content %}
 <div class="max-w-6xl w-full mx-auto flex flex-col gap-4">
+
   <!-- Info Banner -->
   <div class="mb-2">
-    <div
-      class="bg-gradient-to-br from-primary to-blue-700 rounded-3xl p-8 text-white shadow-2xl shadow-primary/20 relative overflow-hidden"
-    >
+    <div class="bg-gradient-to-br from-primary to-blue-700 rounded-3xl p-8 text-white shadow-2xl shadow-primary/20 relative overflow-hidden">
       <div class="absolute top-0 right-0 p-8 opacity-10">
         <span class="material-symbols-outlined text-9xl">psychology</span>
       </div>
-      <div
-        class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6"
-      >
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="max-w-xl">
           <div class="flex items-center gap-3 mb-2">
             <span class="bg-white/20 p-2 rounded-lg backdrop-blur-md">
-              <span
-                class="material-symbols-outlined"
-                style="font-variation-settings: &quot;FILL&quot; 1"
-                >auto_awesome</span
-              >
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">auto_awesome</span>
             </span>
-            <h2 class="text-2xl font-bold tracking-tight">
-              Ambang Batas Otomatis
-            </h2>
+            <h2 class="text-2xl font-bold tracking-tight">Ambang Batas Otomatis</h2>
           </div>
           <p class="text-blue-50/80 leading-relaxed mb-0">
             Fitur ini secara otomatis menyesuaikan batas aman berdasarkan pola beban historis.
           </p>
         </div>
-        <div
-          class="flex flex-col items-center md:items-end gap-3 min-w-[240px]"
-        >
-          <span
-            class="text-xs font-bold uppercase tracking-widest text-blue-100"
-            >Aktifkan Optimasi Otomatis</span
-          >
-          <label
-            class="relative inline-flex items-center cursor-pointer scale-125"
-          >
+        <div class="flex flex-col items-center md:items-end gap-3 min-w-[240px]">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-100">Aktifkan Optimasi Otomatis</span>
+          <label class="relative inline-flex items-center cursor-pointer scale-125">
             <input class="sr-only peer" type="checkbox" />
-            <div
-              class="w-14 h-7 bg-white/20 border border-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-primary after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:rounded-full after:h-[19px] after:w-[19px] after:transition-all peer-checked:bg-white/40"
-            ></div>
+            <div class="w-14 h-7 bg-white/20 border border-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-primary after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:rounded-full after:h-[19px] after:w-[19px] after:transition-all peer-checked:bg-white/40"></div>
           </label>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Settings Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Voltage Thresholds -->
-    <div
-      class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-4">
-          <div
-            class="size-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary"
-          >
-            <span class="material-symbols-outlined text-2xl fill-1">bolt</span>
-          </div>
-          <div>
-            <h2 class="text-lg font-bold text-slate-900">Voltage Thresholds</h2>
-            <p
-              class="text-xs text-slate-500 font-medium uppercase tracking-wider"
-            >
-              Satuan: Volt (V)
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-8">
-        <!-- Voltage Minimum -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-bold text-slate-700"
-              >Voltage Minimum (Low)</label
-            >
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                id="voltageMinEnabled"
-                type="checkbox"
-                class="sr-only peer"
-                checked
-              />
-              <div
-                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"
-              ></div>
-            </label>
-          </div>
-          <div class="relative group">
-            <input
-              id="voltageMin"
-              type="number"
-              value="180"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-display text-xl font-bold text-slate-900 outline-none"
-            />
-            <span
-              class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400"
-              >V</span
-            >
-          </div>
-        </div>
-
-        <!-- Voltage Maximum -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-bold text-slate-700"
-              >Voltage Maximum (High)</label
-            >
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                id="voltageMaxEnabled"
-                type="checkbox"
-                class="sr-only peer"
-                checked
-              />
-              <div
-                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"
-              ></div>
-            </label>
-          </div>
-          <div class="relative group">
-            <input
-              id="voltageMax"
-              type="number"
-              value="240"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-display text-xl font-bold text-slate-900 outline-none"
-            />
-            <span
-              class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400"
-              >V</span
-            >
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Current Thresholds -->
-    <div
-      class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-4">
-          <div
-            class="size-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary"
-          >
-            <span class="material-symbols-outlined text-2xl fill-1"
-              >electric_bolt</span
-            >
-          </div>
-          <div>
-            <h2 class="text-lg font-bold text-slate-900">Current Thresholds</h2>
-            <p
-              class="text-xs text-slate-500 font-medium uppercase tracking-wider"
-            >
-              Satuan: Ampere (A)
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-8">
-        <!-- Current Minimum -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-bold text-slate-700"
-              >Current Minimum</label
-            >
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                id="currentMinEnabled"
-                type="checkbox"
-                class="sr-only peer"
-              />
-              <div
-                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"
-              ></div>
-            </label>
-          </div>
-          <div class="relative group">
-            <input
-              id="currentMin"
-              type="number"
-              step="0.1"
-              value="0.5"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-display text-xl font-bold text-slate-900 outline-none"
-            />
-            <span
-              class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400"
-              >A</span
-            >
-          </div>
-        </div>
-
-        <!-- Current Maximum -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-bold text-slate-700"
-              >Current Maximum (Peak)</label
-            >
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                id="currentMaxEnabled"
-                type="checkbox"
-                class="sr-only peer"
-                checked
-              />
-              <div
-                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"
-              ></div>
-            </label>
-          </div>
-          <div class="relative group">
-            <input
-              id="currentMax"
-              type="number"
-              step="0.1"
-              value="32.0"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-display text-xl font-bold text-slate-900 outline-none"
-            />
-            <span
-              class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400"
-              >A</span
-            >
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Loading State -->
+  <div id="loadingState" class="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
+    <span class="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
+    <p class="text-sm font-medium">Memuat data threshold sensor...</p>
   </div>
 
-  <!-- Action Buttons -->
-  <div class="flex items-center justify-end gap-4 pb-12">
-    <!-- <button
-      id="resetBtn"
-      class="px-8 py-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
-    >
-      Reset ke Default
-    </button> -->
-    <button
-      id="saveBtn"
-      class="px-12 py-4 rounded-xl bg-primary text-white font-bold text-sm shadow-xl shadow-primary/25 hover:brightness-110 active:scale-[0.98] transition-all flex items-center gap-2"
-    >
-      <span class="material-symbols-outlined text-lg">save</span>
-      Simpan Perubahan
-    </button>
+  <!-- Error State -->
+  <div id="errorState" class="hidden flex-col items-center justify-center py-16 gap-3 text-red-400">
+    <span class="material-symbols-outlined text-5xl">error</span>
+    <p class="text-sm font-medium">Gagal memuat data. Silakan refresh halaman.</p>
   </div>
+
+  <!-- Sensor Settings Container — diisi dinamis via JS -->
+  <div id="sensorContainer" class="hidden flex flex-col gap-8"></div>
+
 </div>
 
-<!-- Success Notification (Hidden by default) -->
-<div
-  id="successNotification"
-  class="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-2xl z-50 hidden"
->
+<!-- Success Notification -->
+<div id="successNotification" class="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-2xl z-50 hidden">
   <div class="flex items-center gap-4">
-    <div
-      class="size-8 rounded-lg bg-green-500/20 flex items-center justify-center"
-    >
-      <span class="material-symbols-outlined text-green-400 text-xl"
-        >verified</span
-      >
+    <div class="size-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+      <span class="material-symbols-outlined text-green-400 text-xl">verified</span>
     </div>
     <div class="flex flex-col">
       <p class="text-sm font-bold">Pengaturan Disimpan</p>
-      <p class="text-[11px] text-slate-400">Parameter berhasil diperbarui</p>
+      <p class="text-[11px] text-slate-400" id="notifSubtext">Parameter berhasil diperbarui</p>
     </div>
-    <button
-      onclick="this.parentElement.parentElement.classList.add('hidden')"
-      class="ml-4 text-slate-500 hover:text-white transition-colors"
-    >
+    <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="ml-4 text-slate-500 hover:text-white transition-colors">
       <span class="material-symbols-outlined text-lg">close</span>
     </button>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
-<script>
-  // Load current settings on page load
-  document.addEventListener("DOMContentLoaded", function () {
-    loadSettings();
-  });
 
-  // Load settings from API
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── State ─────────────────────────────────────────────────────────────────
+  // sensorsData: { [sensor_id]: { phase, voltage_min, voltage_max, ... } }
+  let sensorsData = {};
+
+  const phaseColors = { R: 'red', S: 'yellow', T: 'blue' };
+  const phaseLabels = { R: 'Fasa R', S: 'Fasa S', T: 'Fasa T' };
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', loadSettings);
+
+  // ── Fetch all sensors threshold ───────────────────────────────────────────
   function loadSettings() {
-    fetch("/api/settings/get")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data) {
-          document.getElementById("voltageMin").value = data.voltage_min || 180;
-          document.getElementById("voltageMax").value = data.voltage_max || 240;
-          document.getElementById("currentMin").value = data.current_min || 0.5;
-          document.getElementById("currentMax").value = data.current_max || 32;
-          document.getElementById("frequencyMin").value =
-            data.frequency_min || 49.5;
-          document.getElementById("frequencyMax").value =
-            data.frequency_max || 50.5;
-          document.getElementById("powerFactorMin").value =
-            data.power_factor_min || 0.85;
-        }
+    showLoading(true);
+
+    fetch('/settings/api/settings/get')
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
       })
-      .catch((error) => console.error("Error loading settings:", error));
+      .then(data => {
+        showLoading(false);
+
+        if (!data || data.length === 0) {
+          showError(true);
+          return;
+        }
+
+        // Store state
+        data.forEach(sensor => {
+          sensorsData[sensor.sensor_id] = sensor;
+        });
+
+        renderAllSensors(data);
+        document.getElementById('sensorContainer').classList.remove('hidden');
+      })
+      .catch(err => {
+        console.error('Error loading settings:', err);
+        showLoading(false);
+        showError(true);
+      });
   }
 
-  // Save settings
-  document.getElementById("saveBtn").addEventListener("click", function () {
-    const settings = {
-      voltage_min: parseFloat(document.getElementById("voltageMin").value),
-      voltage_max: parseFloat(document.getElementById("voltageMax").value),
-      current_min: parseFloat(document.getElementById("currentMin").value),
-      current_max: parseFloat(document.getElementById("currentMax").value),
-      frequency_min: parseFloat(document.getElementById("frequencyMin").value),
-      frequency_max: parseFloat(document.getElementById("frequencyMax").value),
-      power_factor_min: parseFloat(
-        document.getElementById("powerFactorMin").value,
-      ),
-      voltage_min_enabled: document.getElementById("voltageMinEnabled").checked,
-      voltage_max_enabled: document.getElementById("voltageMaxEnabled").checked,
-      current_min_enabled: document.getElementById("currentMinEnabled").checked,
-      current_max_enabled: document.getElementById("currentMaxEnabled").checked,
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderAllSensors(sensors) {
+    const container = document.getElementById('sensorContainer');
+    container.innerHTML = '';
+
+    sensors.forEach(sensor => {
+      const card = buildSensorCard(sensor);
+      container.appendChild(card);
+    });
+  }
+
+  function buildSensorCard(sensor) {
+    const sensorId = sensor.sensor_id;
+    const phase = sensor.phase || '?';
+    const color = phaseColors[phase] || 'slate';
+    const phaseLabel = phaseLabels[phase] || `Fasa ${phase}`;
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <!-- Sensor Header -->
+      <div class="flex items-center gap-3 mb-4">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-${color}-100 text-${color}-600 text-sm font-black border border-${color}-200">
+          ${phase}
+        </span>
+        <h3 class="text-base font-bold text-slate-700">${phaseLabel}</h3>
+        <span class="text-xs text-slate-400 font-medium">Sensor #${sensorId}</span>
+      </div>
+
+      <!-- Settings Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Voltage Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="size-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">bolt</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Voltage Thresholds</h2>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Satuan: Volt (V)</p>
+            </div>
+          </div>
+          <div class="space-y-8">
+            ${buildInputRow(sensorId, 'voltage_min', 'Voltage Minimum (Low)', 'V', sensor.voltage_min, sensor.voltage_min_enabled)}
+            ${buildInputRow(sensorId, 'voltage_max', 'Voltage Maximum (High)', 'V', sensor.voltage_max, sensor.voltage_max_enabled)}
+          </div>
+        </div>
+
+        <!-- Current Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="size-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">electric_bolt</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Current Thresholds</h2>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Satuan: Ampere (A)</p>
+            </div>
+          </div>
+          <div class="space-y-8">
+            ${buildInputRow(sensorId, 'current_min', 'Current Minimum', 'A', sensor.current_min, sensor.current_min_enabled, '0.1')}
+            ${buildInputRow(sensorId, 'current_max', 'Current Maximum (Peak)', 'A', sensor.current_max, sensor.current_max_enabled, '0.1')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <div class="flex items-center justify-end gap-4 mt-4 pb-2">
+        <button
+          onclick="saveSettings(${sensorId})"
+          class="px-10 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-xl shadow-primary/25 hover:brightness-110 active:scale-[0.98] transition-all flex items-center gap-2"
+        >
+          <span class="material-symbols-outlined text-lg">save</span>
+          Simpan ${phaseLabel}
+        </button>
+      </div>
+
+      <!-- Divider (kecuali card terakhir) -->
+      <div class="border-t border-slate-100 mt-6"></div>
+    `;
+
+    return wrapper;
+  }
+
+  function buildInputRow(sensorId, field, label, unit, value, enabled, step = '1') {
+    const checkId = `${field}_enabled_${sensorId}`;
+    const inputId = `${field}_${sensorId}`;
+    const checkedAttr = enabled ? 'checked' : '';
+    const displayValue = value !== null && value !== undefined ? value : '';
+
+    return `
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold text-slate-700">${label}</label>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="${checkId}" type="checkbox" class="sr-only peer" ${checkedAttr} />
+            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+        <div class="relative">
+          <input
+            id="${inputId}"
+            type="number"
+            step="${step}"
+            value="${displayValue}"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-display text-xl font-bold text-slate-900 outline-none"
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">${unit}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Save ──────────────────────────────────────────────────────────────────
+  function saveSettings(sensorId) {
+    const getValue = (field) => {
+      const el = document.getElementById(`${field}_${sensorId}`);
+      return el ? parseFloat(el.value) : null;
+    };
+    const getChecked = (field) => {
+      const el = document.getElementById(`${field}_enabled_${sensorId}`);
+      return el ? el.checked : false;
     };
 
-    // Validate
-    if (settings.voltage_min >= settings.voltage_max) {
-      alert("Voltage minimum harus lebih kecil dari maximum!");
-      return;
+    const payload = {
+      voltage_min:         getValue('voltage_min'),
+      voltage_max:         getValue('voltage_max'),
+      voltage_min_enabled: getChecked('voltage_min'),
+      voltage_max_enabled: getChecked('voltage_max'),
+      current_min:         getValue('current_min'),
+      current_max:         getValue('current_max'),
+      current_min_enabled: getChecked('current_min'),
+      current_max_enabled: getChecked('current_max'),
+    };
+
+    // Client-side validation
+    if (payload.voltage_min !== null && payload.voltage_max !== null) {
+      if (payload.voltage_min >= payload.voltage_max) {
+        alert('Voltage minimum harus lebih kecil dari maximum!');
+        return;
+      }
     }
-    if (settings.current_min >= settings.current_max) {
-      alert("Current minimum harus lebih kecil dari maximum!");
-      return;
+    if (payload.current_min !== null && payload.current_max !== null) {
+      if (payload.current_min >= payload.current_max) {
+        alert('Current minimum harus lebih kecil dari maximum!');
+        return;
+      }
     }
 
-    // Save to API
-    fetch("/api/settings/update", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(settings),
+    fetch(`/settings/api/settings/sensor/${sensorId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         if (data.success) {
-          // Show success notification
-          const notification = document.getElementById("successNotification");
-          notification.classList.remove("hidden");
-          setTimeout(() => {
-            notification.classList.add("hidden");
-          }, 3000);
+          // Update local state
+          sensorsData[sensorId] = { ...sensorsData[sensorId], ...data.data };
+          showNotification(`Fasa ${sensorsData[sensorId]?.phase || ''} berhasil diperbarui`);
+        } else {
+          alert(`Gagal menyimpan: ${data.error}`);
         }
       })
-      .catch((error) => {
-        console.error("Error saving settings:", error);
-        alert("Gagal menyimpan pengaturan. Silakan coba lagi.");
+      .catch(err => {
+        console.error('Error saving settings:', err);
+        alert('Gagal menyimpan pengaturan. Silakan coba lagi.');
       });
-  });
+  }
 
-  // Reset to default
-  document.getElementById("resetBtn").addEventListener("click", function () {
-    if (confirm("Reset ke pengaturan default?")) {
-      document.getElementById("voltageMin").value = 200;
-      document.getElementById("voltageMax").value = 240;
-      document.getElementById("currentMin").value = 5;
-      document.getElementById("currentMax").value = 50;
-      document.getElementById("frequencyMin").value = 49.5;
-      document.getElementById("frequencyMax").value = 50.5;
-      document.getElementById("powerFactorMin").value = 0.85;
-    }
-  });
+  // ── UI Helpers ────────────────────────────────────────────────────────────
+  function showLoading(show) {
+    document.getElementById('loadingState').classList.toggle('hidden', !show);
+  }
+
+  function showError(show) {
+    document.getElementById('errorState').classList.toggle('hidden', !show);
+    document.getElementById('errorState').classList.toggle('flex', show);
+  }
+
+  function showNotification(message) {
+    document.getElementById('notifSubtext').textContent = message;
+    const notif = document.getElementById('successNotification');
+    notif.classList.remove('hidden');
+    setTimeout(() => notif.classList.add('hidden'), 3000);
+  }
 </script>
 {% endblock %}
