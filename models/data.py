@@ -62,28 +62,3 @@ class SensorReading(Base):
     
     def __repr__(self):
         return f"<SensorReading(sensor_id={self.sensor_id}, timestamp={self.timestamp})>"
-
-
-class SensorThreshold(Base):
-    """Model untuk threshold/batas nilai sensor"""
-    __tablename__ = "sensor_thresholds"
-
-    id = Column(Integer, primary_key=True)
-    sensor_id = Column(Integer, ForeignKey("sensors.id"), nullable=False)
-
-    # Threshold values
-    voltage_min = Column(Float)
-    voltage_max = Column(Float)
-    current_min = Column(Float)
-    current_max = Column(Float)
-    power_min = Column(Float)
-    power_max = Column(Float)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
-    sensor = relationship("Sensor", back_populates="thresholds")
-    
-    def __repr__(self):
-        return f"<SensorThreshold(id={self.id}, sensor_id={self.sensor_id})>"
