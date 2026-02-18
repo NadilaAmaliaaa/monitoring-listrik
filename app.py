@@ -7,8 +7,9 @@ import time
 from flask import session
 from database import get_session
 from models.building import Building
-from models.data import Sensor, SensorReading, SensorThreshold
+from models.data import Sensor, SensorReading
 from models.alarm import AlarmEvent
+from models.threshold import SensorThreshold
 
 # Setup logging
 logging.basicConfig(
@@ -140,6 +141,9 @@ def create_app():
         
         from views.alarms import alarms_bp
         app.register_blueprint(alarms_bp, url_prefix='/alarms')
+        
+        from views.settings import settings_bp
+        app.register_blueprint(settings_bp, url_prefix='/settings')
         
     except Exception as e:
         logger.error(f"✗ Failed to register blueprints: {e}")
