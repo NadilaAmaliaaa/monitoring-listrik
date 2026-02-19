@@ -1,0 +1,141 @@
+<!--
+  templates/_alarm_notifications.html
+-->
+
+<!-- Toast Container -->
+<div id="alarmToastContainer"
+     class="fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+</div>
+
+<script>
+(function () {
+  const TOAST_DURATION = 6000;
+  const MAX_TOASTS     = 4;
+  const RECONNECT_MS   = 3000;
+
+  const cfg = {
+    critical: {
+      icon: 'warning', bar: 'bg-red-500',
+      wrap: 'bg-red-50 border-red-200',
+      iconWrap: 'bg-red-100', iconColor: 'text-red-500', title: 'text-red-800',
+    },
+    warning: {
+      icon: 'report', bar: 'bg-amber-400',
+      wrap: 'bg-amber-50 border-amber-200',
+      iconWrap: 'bg-amber-100', iconColor: 'text-amber-500', title: 'text-amber-800',
+    },
+    normal: {
+      icon: 'check_circle', bar: 'bg-emerald-400',
+      wrap: 'bg-emerald-50 border-emerald-200',
+      iconWrap: 'bg-emerald-100', iconColor: 'text-emerald-500', title: 'text-emerald-800',
+    },
+  };
+
+  // ── SSE ────────────────────────────────────────────────────────────────────
+  let evtSource = null;
+
+  function connect() {
+    if (evtSource) evtSource.close();
+    evtSource = new EventSource('/notifications/stream');
+
+    evtSource.onmessage = function (e) {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === 'alarm') {
+          showToast(data);
+          refreshAlarmBadge();
+        }
+      } catch (_) {}
+    };
+
+    evtSource.onerror = function () {
+      evtSource.close();
+      setTimeout(connect, RECONNECT_MS);
+    };
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────────────────
+  function showToast(alarm) {
+    const container = document.getElementById('alarmToastContainer');
+    if (!container) return;
+
+    // Hapus toast tertua jika sudah penuh
+    const existing = container.querySelectorAll('.alarm-toast');
+    if (existing.length >= MAX_TOASTS) existing[0].remove();
+
+    const c      = cfg[alarm.severity] || cfg.warning;
+    const unit   = { voltage: 'V', current: 'A', frequency: 'Hz', power_factor: '' }[alarm.parameter] || '';
+    const phase  = alarm.phase ? `Fasa ${alarm.phase}` : '';
+    const tid    = `toast-${Date.now()}`;
+
+    const toast = document.createElement('div');
+    toast.id        = tid;
+    toast.className = `alarm-toast pointer-events-auto w-full rounded-2xl border ${c.wrap} shadow-lg overflow-hidden`;
+    toast.style.cssText = 'animation: slideIn .3s cubic-bezier(.34,1.56,.64,1) forwards';
+
+    toast.innerHTML = `
+      <div class="h-1 ${c.bar} origin-left" id="bar-${tid}"
+           style="transition:transform ${TOAST_DURATION}ms linear"></div>
+      <div class="flex items-start gap-3 p-4">
+        <div class="shrink-0 size-9 rounded-xl ${c.iconWrap} flex items-center justify-center">
+          <span class="material-symbols-outlined ${c.iconColor} text-xl"
+                style="font-variation-settings:'FILL' 1">${c.icon}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-sm font-bold ${c.title} truncate">${alarm.status} — ${phase}</p>
+            <button onclick="document.getElementById('${tid}').remove()"
+                    class="shrink-0 text-slate-400 hover:text-slate-600 transition-colors">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-600 mt-0.5 capitalize">
+            ${alarm.parameter.replace('_',' ')}:
+            <strong>${alarm.actual_value} ${unit}</strong>
+            ${alarm.threshold_min != null ? `· min ${alarm.threshold_min} ${unit}` : ''}
+            ${alarm.threshold_max != null ? `· max ${alarm.threshold_max} ${unit}` : ''}
+          </p>
+          <p class="text-[10px] text-slate-400 mt-1">${alarm.timestamp}</p>
+        </div>
+      </div>`;
+
+    container.appendChild(toast);
+
+    // Animasi progress bar mengecil
+    requestAnimationFrame(() => {
+      const bar = document.getElementById(`bar-${tid}`);
+      if (bar) bar.style.transform = 'scaleX(0)';
+    });
+
+    // Auto-dismiss
+    setTimeout(() => {
+      toast.style.cssText = 'opacity:0;transition:opacity .3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, TOAST_DURATION);
+  }
+
+  // ── Badge alarm di navbar ──────────────────────────────────────────────────
+  function refreshAlarmBadge() {
+    fetch('/alarms/api/summary')
+      .then(r => r.json())
+      .then(data => {
+        const badge = document.getElementById('alarmNavBadge');
+        if (!badge) return;
+        const count = data.total_today || 0;
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.classList.toggle('hidden', count === 0);
+      })
+      .catch(() => {});
+  }
+
+  // ── CSS ────────────────────────────────────────────────────────────────────
+  document.head.insertAdjacentHTML('beforeend', `<style>
+    @keyframes slideIn {
+      from { transform: translateX(110%); opacity: 0; }
+      to   { transform: translateX(0);   opacity: 1; }
+    }
+  </style>`);
+
+  connect();
+})();
+</script>
