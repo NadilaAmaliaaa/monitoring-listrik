@@ -9,7 +9,8 @@ from database import get_session
 from models.building import Building
 from models.data import Sensor, SensorReading
 from models.alarm import AlarmEvent
-from models.threshold import SensorThreshold
+# from models.threshold import SensorThreshold
+from models.threshold2 import SensorThreshold
 
 # Setup logging
 logging.basicConfig(
@@ -142,8 +143,12 @@ def create_app():
         from views.alarms import alarms_bp
         app.register_blueprint(alarms_bp, url_prefix='/alarms')
         
-        from views.settings import settings_bp
-        app.register_blueprint(settings_bp, url_prefix='/settings')
+        from views.settings2 import settings_bp2
+        app.register_blueprint(settings_bp2, url_prefix='/settings')
+        
+        from views.notifications import notifications_bp
+        app.register_blueprint(notifications_bp, url_prefix='/notifications')
+        logger.info("✓ Notifications blueprint registered")
         
     except Exception as e:
         logger.error(f"✗ Failed to register blueprints: {e}")

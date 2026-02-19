@@ -1,0 +1,493 @@
+<!-- templates/settings.html -->
+{% extends "base.html" %} {% block title %}Pengaturan{% endblock %} {% block
+page_title %}Pengaturan Ambang Batas Energi Terpadu{% endblock %} {% block
+page_subtitle %}Kelola parameter ambang batas voltase dan arus untuk sistem
+kelistrikan 3-fasa{% endblock %} {% block content %}
+<div class="max-w-6xl w-full mx-auto flex flex-col gap-4">
+
+  <!-- Info Banner -->
+  <div class="mb-2">
+    <div class="bg-gradient-to-br from-primary to-blue-700 rounded-3xl p-8 text-white shadow-2xl shadow-primary/20 relative overflow-hidden">
+      <div class="absolute top-0 right-0 p-8 opacity-10">
+        <span class="material-symbols-outlined text-9xl">psychology</span>
+      </div>
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="max-w-xl">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="bg-white/20 p-2 rounded-lg backdrop-blur-md">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">auto_awesome</span>
+            </span>
+            <h2 class="text-2xl font-bold tracking-tight">Ambang Batas Otomatis</h2>
+          </div>
+          <p class="text-blue-50/80 leading-relaxed mb-0">
+            Kalkulasi otomatis menggunakan metode <strong>IQR (Interquartile Range)</strong> dari data historis.
+            Lebih akurat dari deviasi standar karena tahan terhadap lonjakan sesaat.
+          </p>
+          <!-- Periode selector — muncul saat auto aktif -->
+          <div id="daysSelector" class="hidden mt-4 flex items-center gap-3">
+            <span class="text-xs font-bold text-blue-100 uppercase tracking-wider">Periode data:</span>
+            <div class="flex gap-2">
+              <button onclick="setDays(7)"  data-days="7"  class="days-btn px-3 py-1 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/20 transition-all">7 hari</button>
+              <button onclick="setDays(30)" data-days="30" class="days-btn px-3 py-1 rounded-lg text-xs font-bold bg-white/30 border border-white/40 transition-all">30 hari</button>
+              <button onclick="setDays(90)" data-days="90" class="days-btn px-3 py-1 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/20 transition-all">90 hari</button>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-center md:items-end gap-3 min-w-[220px]">
+          <span class="text-xs font-bold uppercase tracking-widest text-blue-100">Aktifkan Optimasi Otomatis</span>
+          <label class="relative inline-flex items-center cursor-pointer scale-125">
+            <input id="autoToggle" class="sr-only peer" type="checkbox" />
+            <div class="w-14 h-7 bg-white/20 border border-white/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-primary after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:rounded-full after:h-[19px] after:w-[19px] after:transition-all peer-checked:bg-white/40"></div>
+          </label>
+          <p id="autoToggleLabel" class="text-xs text-blue-200 text-center hidden">
+            Berlaku untuk semua sensor<br>di gedung ini
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loadingState" class="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
+    <span class="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
+    <p class="text-sm font-medium">Memuat data threshold sensor...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="errorState" class="hidden flex-col items-center justify-center py-16 gap-3 text-red-400">
+    <span class="material-symbols-outlined text-5xl">error</span>
+    <p class="text-sm font-medium">Gagal memuat data. Silakan refresh halaman.</p>
+  </div>
+
+  <!-- Sensor Cards -->
+  <div id="sensorContainer" class="hidden flex flex-col gap-8"></div>
+
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined">auto_fix_high</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900">Preview Threshold Otomatis</h3>
+        <p class="text-xs text-slate-500" id="previewModalSubtitle">—</p>
+      </div>
+    </div>
+    <div id="previewModalContent" class="space-y-3 mb-6"></div>
+    <div class="flex gap-3">
+      <button onclick="closePreviewModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all">
+        Batal
+      </button>
+      <button id="previewConfirmBtn" class="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-base">check</span>
+        Terapkan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Notification -->
+<div id="successNotification" class="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-2xl z-50 hidden">
+  <div class="flex items-center gap-4">
+    <div class="size-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+      <span class="material-symbols-outlined text-green-400 text-xl">verified</span>
+    </div>
+    <div class="flex flex-col">
+      <p class="text-sm font-bold">Pengaturan Disimpan</p>
+      <p class="text-[11px] text-slate-400" id="notifSubtext">Parameter berhasil diperbarui</p>
+    </div>
+    <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="ml-4 text-slate-500 hover:text-white transition-colors">
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let sensorsData  = {};   // { sensor_id: threshold_dict }
+  let selectedDays = 30;
+  let pendingAutoSensorId = null;
+  let isTogglingAuto = false; // debounce toggle
+
+  const phaseColors = { R: 'red', S: 'yellow', T: 'blue' };
+  const phaseLabels = { R: 'Fasa R', S: 'Fasa S', T: 'Fasa T' };
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+
+    document.getElementById('autoToggle').addEventListener('change', onAutoToggleChange);
+  });
+
+  // ── Load ───────────────────────────────────────────────────────────────────
+  function loadSettings() {
+    showLoading(true);
+
+    fetch('/settings/api/settings/get')
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(resp => {
+        showLoading(false);
+        if (!resp.thresholds || resp.thresholds.length === 0) { showError(true); return; }
+
+        resp.thresholds.forEach(s => { sensorsData[s.sensor_id] = s; });
+        renderAllSensors(resp.thresholds);
+
+        // Sinkronisasi state toggle dari DB
+        const toggle = document.getElementById('autoToggle');
+        toggle.checked = resp.auto_enabled;
+        applyGlobalAutoUI(resp.auto_enabled, /* animate= */ false);
+
+        document.getElementById('sensorContainer').classList.remove('hidden');
+      })
+      .catch(() => { showLoading(false); showError(true); });
+  }
+
+  // ── Global Auto Toggle ────────────────────────────────────────────────────
+  function onAutoToggleChange() {
+    if (isTogglingAuto) return;
+    const enabled = document.getElementById('autoToggle').checked;
+
+    if (enabled) {
+      // Tunjukkan konfirmasi sebelum aktifkan
+      if (!confirm(
+        `Aktifkan Ambang Batas Otomatis?\n\n` +
+        `Threshold semua sensor di gedung ini akan dihitung ulang dari data ${selectedDays} hari terakhir.\n` +
+        `Nilai manual yang ada akan ditimpa.`
+      )) {
+        // Batalkan toggle
+        document.getElementById('autoToggle').checked = false;
+        return;
+      }
+    }
+
+    sendAutoToggleAll(enabled);
+  }
+
+  function sendAutoToggleAll(enabled) {
+    isTogglingAuto = true;
+    const toggle = document.getElementById('autoToggle');
+    toggle.disabled = true;
+
+    fetch('/settings/api/settings/auto-toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled, days: selectedDays }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        toggle.disabled = false;
+        isTogglingAuto = false;
+
+        if (!data.success) {
+          toggle.checked = !enabled; // rollback
+          alert(`Gagal: ${data.error}`);
+          return;
+        }
+
+        // Update semua input fields dari hasil server
+        data.results.forEach(r => {
+          if (r.error || !r.threshold) return;
+          updateInputFields(r.sensor_id, r.threshold);
+          sensorsData[r.sensor_id] = { ...sensorsData[r.sensor_id], ...r.threshold };
+        });
+
+        applyGlobalAutoUI(enabled);
+
+        const { success, failed } = data.summary;
+        if (enabled) {
+          const msg = failed > 0
+            ? `${success} sensor berhasil, ${failed} gagal (data historis tidak cukup)`
+            : `Semua ${success} sensor — threshold otomatis aktif`;
+          showNotification(msg);
+        } else {
+          showNotification('Mode manual diaktifkan — threshold dapat diedit kembali');
+        }
+      })
+      .catch(() => {
+        toggle.disabled = false;
+        toggle.checked = !enabled;
+        isTogglingAuto = false;
+        alert('Gagal mengubah mode threshold.');
+      });
+  }
+
+  // Terapkan efek UI global saat auto ON/OFF
+  function applyGlobalAutoUI(enabled, animate = true) {
+    document.getElementById('daysSelector').classList.toggle('hidden', !enabled);
+    document.getElementById('autoToggleLabel').classList.toggle('hidden', !enabled);
+
+    // Lock/unlock semua input manual
+    lockAllManualInputs(enabled);
+  }
+
+  function lockAllManualInputs(lock) {
+    // Input angka
+    document.querySelectorAll('.threshold-input').forEach(el => {
+      el.disabled = lock;
+      el.classList.toggle('opacity-50', lock);
+      el.classList.toggle('cursor-not-allowed', lock);
+    });
+    // Toggle min/max enabled
+    document.querySelectorAll('.threshold-toggle').forEach(el => {
+      el.disabled = lock;
+      el.closest('label')?.classList.toggle('opacity-50', lock);
+      el.closest('label')?.classList.toggle('cursor-not-allowed', lock);
+    });
+    // Tombol simpan manual
+    document.querySelectorAll('.save-btn').forEach(btn => {
+      btn.disabled = lock;
+      btn.classList.toggle('opacity-50', lock);
+      btn.classList.toggle('cursor-not-allowed', lock);
+    });
+    // Badge mode per sensor
+    document.querySelectorAll('.sensor-mode-badge').forEach(badge => {
+      badge.textContent = lock ? 'Otomatis' : 'Manual';
+      badge.className = `sensor-mode-badge text-[10px] font-bold px-2 py-0.5 rounded-full ${
+        lock ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'
+      }`;
+    });
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function renderAllSensors(sensors) {
+    const container = document.getElementById('sensorContainer');
+    container.innerHTML = '';
+    sensors.forEach(s => container.appendChild(buildSensorCard(s)));
+  }
+
+  function buildSensorCard(sensor) {
+    const sid   = sensor.sensor_id;
+    const phase = sensor.phase || '?';
+    const color = phaseColors[phase] || 'slate';
+    const label = phaseLabels[phase] || `Fasa ${phase}`;
+    const isAuto = sensor.auto_threshold_enabled;
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <!-- Header sensor -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg
+            bg-${color}-100 text-${color}-600 text-sm font-black border border-${color}-200">
+            ${phase}
+          </span>
+          <h3 class="text-base font-bold text-slate-700">${label}</h3>
+          <span class="text-xs text-slate-400 font-medium">Sensor #${sid}</span>
+          <span class="sensor-mode-badge text-[10px] font-bold px-2 py-0.5 rounded-full
+            ${isAuto ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'}">
+            ${isAuto ? 'Otomatis' : 'Manual'}
+          </span>
+        </div>
+      </div>
+
+      <!-- Threshold cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Voltage -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="size-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">bolt</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Voltage Thresholds</h2>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Satuan: Volt (V)</p>
+            </div>
+          </div>
+          <div class="space-y-8">
+            ${buildInputRow(sid, 'voltage_min', 'Voltage Minimum (Low)', 'V', sensor.voltage_min, sensor.voltage_min_enabled)}
+            ${buildInputRow(sid, 'voltage_max', 'Voltage Maximum (High)', 'V', sensor.voltage_max, sensor.voltage_max_enabled)}
+          </div>
+        </div>
+
+        <!-- Current -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="size-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">electric_bolt</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Current Thresholds</h2>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Satuan: Ampere (A)</p>
+            </div>
+          </div>
+          <div class="space-y-8">
+            ${buildInputRow(sid, 'current_min', 'Current Minimum', 'A', sensor.current_min, sensor.current_min_enabled, '0.1')}
+            ${buildInputRow(sid, 'current_max', 'Current Maximum (Peak)', 'A', sensor.current_max, sensor.current_max_enabled, '0.1')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-3 mt-4 pb-2">
+        <button
+          onclick="saveSettings(${sid})"
+          class="save-btn px-10 py-3.5 rounded-xl bg-primary text-white font-bold text-sm
+            shadow-xl shadow-primary/25 hover:brightness-110 active:scale-[0.98] transition-all
+            flex items-center gap-2 ${isAuto ? 'opacity-50 cursor-not-allowed' : ''}"
+          ${isAuto ? 'disabled' : ''}
+        >
+          <span class="material-symbols-outlined text-lg">save</span>
+          Simpan ${label}
+        </button>
+      </div>
+
+      <div class="border-t border-slate-100 mt-6"></div>
+    `;
+    return wrapper;
+  }
+
+  function buildInputRow(sensorId, field, label, unit, value, enabled, step = '1') {
+    const checkId = `${field}_enabled_${sensorId}`;
+    const inputId = `${field}_${sensorId}`;
+    const isAuto  = sensorsData[sensorId]?.auto_threshold_enabled;
+    const disabledAttr = isAuto ? 'disabled' : '';
+    const opacityClass = isAuto ? 'opacity-50' : '';
+
+    return `
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold text-slate-700">${label}</label>
+          <label class="relative inline-flex items-center cursor-pointer ${isAuto ? 'opacity-50 cursor-not-allowed' : ''}">
+            <input id="${checkId}" type="checkbox" class="sr-only peer threshold-toggle"
+              ${enabled ? 'checked' : ''} ${disabledAttr} />
+            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer
+              peer-checked:after:translate-x-full peer-checked:after:border-white
+              after:content-[''] after:absolute after:top-[2px] after:start-[2px]
+              after:bg-white after:border-gray-300 after:border after:rounded-full
+              after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+        <div class="relative">
+          <input
+            id="${inputId}"
+            type="number"
+            step="${step}"
+            value="${value !== null && value !== undefined ? value : ''}"
+            class="threshold-input w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4
+              focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all
+              font-display text-xl font-bold text-slate-900 outline-none
+              ${isAuto ? 'opacity-50 cursor-not-allowed' : ''}"
+            ${disabledAttr}
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">${unit}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Save Manual ────────────────────────────────────────────────────────────
+  function saveSettings(sensorId) {
+    // Guard: jangan izinkan save jika auto aktif
+    if (sensorsData[sensorId]?.auto_threshold_enabled) return;
+
+    const getValue   = f => parseFloat(document.getElementById(`${f}_${sensorId}`).value);
+    const getChecked = f => document.getElementById(`${f}_enabled_${sensorId}`).checked;
+
+    const payload = {
+      voltage_min:         getValue('voltage_min'),
+      voltage_max:         getValue('voltage_max'),
+      voltage_min_enabled: getChecked('voltage_min'),
+      voltage_max_enabled: getChecked('voltage_max'),
+      current_min:         getValue('current_min'),
+      current_max:         getValue('current_max'),
+      current_min_enabled: getChecked('current_min'),
+      current_max_enabled: getChecked('current_max'),
+    };
+
+    if (payload.voltage_min >= payload.voltage_max) {
+      alert('Voltage minimum harus lebih kecil dari maximum!'); return;
+    }
+    if (payload.current_min >= payload.current_max) {
+      alert('Current minimum harus lebih kecil dari maximum!'); return;
+    }
+
+    fetch(`/settings/api/settings/sensor/${sensorId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) { alert(`Gagal: ${data.error}`); return; }
+
+        // Server mengembalikan auto_threshold_enabled=False — update local state
+        sensorsData[sensorId] = { ...sensorsData[sensorId], ...data.data };
+
+        // Pastikan toggle global ikut OFF jika sebelumnya ON
+        syncGlobalToggle();
+
+        showNotification(`Fasa ${sensorsData[sensorId]?.phase || ''} — pengaturan manual disimpan`);
+      })
+      .catch(() => alert('Gagal menyimpan pengaturan.'));
+  }
+
+  // Sinkronisasi toggle global: ON hanya jika SEMUA sensor auto=true
+  function syncGlobalToggle() {
+    const allAuto = Object.values(sensorsData).every(s => s.auto_threshold_enabled);
+    const toggle = document.getElementById('autoToggle');
+    if (toggle.checked !== allAuto) {
+      toggle.checked = allAuto;
+      applyGlobalAutoUI(allAuto);
+    }
+  }
+
+  // ── Days Selector ──────────────────────────────────────────────────────────
+  function setDays(days) {
+    selectedDays = days;
+    document.querySelectorAll('.days-btn').forEach(btn => {
+      const active = parseInt(btn.dataset.days) === days;
+      btn.className = `days-btn px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+        active ? 'bg-white/30 border-white/40' : 'bg-white/10 hover:bg-white/20 border-white/20'
+      }`;
+    });
+  }
+
+  // ── Preview Modal (dipakai internal jika perlu preview per sensor) ──────────
+  function closePreviewModal() {
+    document.getElementById('previewModal').classList.add('hidden');
+    document.getElementById('previewModal').classList.remove('flex');
+    pendingAutoSensorId = null;
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function updateInputFields(sensorId, threshold) {
+    const set = (field, val) => {
+      const el = document.getElementById(`${field}_${sensorId}`);
+      if (el && val !== null && val !== undefined) el.value = val;
+    };
+    const setCheck = (field, val) => {
+      const el = document.getElementById(`${field}_enabled_${sensorId}`);
+      if (el && val !== null && val !== undefined) el.checked = val;
+    };
+    set('voltage_min', threshold.voltage_min);
+    set('voltage_max', threshold.voltage_max);
+    set('current_min', threshold.current_min);
+    set('current_max', threshold.current_max);
+    setCheck('voltage_min', threshold.voltage_min_enabled);
+    setCheck('voltage_max', threshold.voltage_max_enabled);
+    setCheck('current_min', threshold.current_min_enabled);
+    setCheck('current_max', threshold.current_max_enabled);
+  }
+
+  function showLoading(show) {
+    document.getElementById('loadingState').classList.toggle('hidden', !show);
+  }
+  function showError(show) {
+    const el = document.getElementById('errorState');
+    el.classList.toggle('hidden', !show);
+    el.classList.toggle('flex', show);
+  }
+  function showNotification(message) {
+    document.getElementById('notifSubtext').textContent = message;
+    const notif = document.getElementById('successNotification');
+    notif.classList.remove('hidden');
+    setTimeout(() => notif.classList.add('hidden'), 3500);
+  }
+</script>
+{% endblock %}
