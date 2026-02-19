@@ -6,7 +6,7 @@ from datetime import datetime
 import sys
 
 # ==================== CONFIGURATION ====================
-BROKER = "192.168.1.8" 
+BROKER = "192.168.1.11" 
 PORT = 1883
 KEEPALIVE = 60
 
