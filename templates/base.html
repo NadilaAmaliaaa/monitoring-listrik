@@ -160,24 +160,6 @@
               {% endif %}
             </select>
           </div>
-          <!-- System Status -->
-          <div
-            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100"
-          >
-            <span class="relative flex h-2 w-2">
-              <span
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-              ></span>
-              <span
-                class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
-              ></span>
-            </span>
-            <span
-              class="text-emerald-600 text-[10px] font-bold uppercase tracking-wide"
-              >System Online</span
-            >
-          </div>
-
           <!-- Time Display -->
           <div class="hidden md:block text-right">
             <p
@@ -188,21 +170,6 @@
             </p>
             <p id="currentDate" class="text-slate-500 text-xs">---</p>
           </div>
-
-          <!-- Notifications -->
-          <div class="flex gap-2">
-            <button
-              class="flex items-center justify-center rounded-lg size-9 hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors relative"
-            >
-              <span class="material-symbols-outlined text-[20px]"
-                >notifications</span
-              >
-              <span
-                class="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white"
-              ></span>
-            </button>
-          </div>
-        </div>
       </header>
 
       <!-- Main Content -->
