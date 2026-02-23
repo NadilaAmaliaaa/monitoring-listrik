@@ -36,7 +36,7 @@ def index():
         
         # Get today's summary
         controller = AlarmsController(db_session, building_id=current_building_id)
-        summary = controller.get_today_summary()
+        summary = controller.get_summary()
         
         return render_template(
             'alarms.html',
@@ -89,7 +89,7 @@ def get_summary():
         building_id = get_current_building_id()
         
         controller = AlarmsController(db_session, building_id=building_id)
-        summary = controller.get_today_summary()
+        summary = controller.get_summary()
         
         return jsonify(summary)
     except Exception as e:
