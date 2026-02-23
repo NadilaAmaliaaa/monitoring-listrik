@@ -1,48 +1,103 @@
 <!-- templates/alarms.html -->
-{% extends "base.html" %} 
-{% block title %}Riwayat Alarm{% endblock %} 
-{% block page_title %}Riwayat Alarm{% endblock %} 
-{% block page_subtitle %}Log dan Riwayat Notifikasi Sistem{% endblock %} 
-{% block extra_css %}
+{% extends "base.html" %} {% block title %}Riwayat Alarm{% endblock %} {% block
+page_title %}Riwayat Alarm{% endblock %} {% block page_subtitle %}Log dan
+Riwayat Notifikasi Sistem{% endblock %} {% block extra_css %}
 <style>
   .status-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border;
   }
 </style>
-{% endblock %} 
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
-  <!-- Summary Card -->
-  <div class="flex">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- DAILY -->
     <div
-      class="w-full max-w-xs bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden group"
+      class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden"
     >
       <div class="absolute right-0 top-0 h-full w-1 bg-red-500"></div>
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-500"
-          >Total Alarm Hari Ini</span
-        >
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Total Alarm Hari Ini
+        </span>
         <div class="bg-red-50 p-1.5 rounded-lg text-red-500">
-          <span class="material-symbols-outlined text-xl"
-            >notifications_active</span
-          >
+          <span class="material-symbols-outlined text-xl">
+            notifications_active
+          </span>
         </div>
       </div>
+
       <div class="flex items-baseline gap-3">
-        <h3 id="totalToday" class="text-4xl font-bold text-slate-900 tracking-tight">
-          {{ summary.total_today }}
+        <h3 class="text-4xl font-bold text-slate-900 tracking-tight">
+          {{ summary.daily.total }}
         </h3>
+
         <span
-          id="percentageChange"
-          class="text-xs font-bold px-2 py-0.5 rounded-full
-          {% if summary.percentage_change >= 0 %}
-            text-red-500 bg-red-50
-          {% else %}
-            text-green-500 bg-green-50
-          {% endif %}"
-          >
-          {% if summary.percentage_change >= 0 %}+{% endif %}{{ summary.percentage_change }}% vs kemarin
+          class="text-xs font-bold px-2 py-0.5 rounded-full {% if summary.daily.percentage_change >= 0 %} text-red-500 bg-red-50 {% else %} text-green-500 bg-green-50 {% endif %}"
+        >
+          {% if summary.daily.percentage_change >= 0 %}+{% endif %} {{
+          summary.daily.percentage_change }}%
+          <span class="text-slate-400 font-medium">vs kemarin</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- WEEKLY -->
+    <div
+      class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden"
+    >
+      <div class="absolute right-0 top-0 h-full w-1 bg-amber-500"></div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Total Alarm Minggu Ini
+        </span>
+        <div class="bg-amber-50 p-1.5 rounded-lg text-amber-500">
+          <span class="material-symbols-outlined text-xl"> notifications_active </span>
+        </div>
+      </div>
+
+      <div class="flex items-baseline gap-3">
+        <h3 class="text-4xl font-bold text-slate-900 tracking-tight">
+          {{ summary.weekly.total }}
+        </h3>
+
+        <span
+          class="text-xs font-bold px-2 py-0.5 rounded-full {% if summary.weekly.percentage_change >= 0 %} text-red-500 bg-red-50 {% else %} text-green-500 bg-green-50 {% endif %}"
+        >
+          {% if summary.weekly.percentage_change >= 0 %}+{% endif %} {{
+          summary.weekly.percentage_change }}%
+          <span class="text-slate-400 font-medium">vs minggu lalu</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- MONTHLY -->
+    <div
+      class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden"
+    >
+      <div class="absolute right-0 top-0 h-full w-1 bg-blue-500"></div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Total Alarm Bulan Ini
+        </span>
+        <div class="bg-blue-50 p-1.5 rounded-lg text-blue-500">
+          <span class="material-symbols-outlined text-xl">
+            notifications_active
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-baseline gap-3">
+        <h3 class="text-4xl font-bold text-slate-900 tracking-tight">
+          {{ summary.monthly.total }}
+        </h3>
+
+        <span
+          class="text-xs font-bold px-2 py-0.5 rounded-full {% if summary.monthly.percentage_change >= 0 %} text-red-500 bg-red-50 {% else %} text-green-500 bg-green-50 {% endif %}"
+        >
+          {% if summary.monthly.percentage_change >= 0 %}+{% endif %} {{
+          summary.monthly.percentage_change }}%
+          <span class="text-slate-400 font-medium">vs bulan lalu</span>
         </span>
       </div>
     </div>
@@ -65,21 +120,27 @@
       <div class="h-6 w-[1px] bg-slate-200 mx-2"></div>
 
       <div class="flex flex-wrap gap-2">
-        <select id="parameterFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
+        <select
+          id="parameterFilter"
+          class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors"
+        >
           <option value="all">Parameter: Semua</option>
           <option value="voltage">Voltage</option>
           <option value="current">Current</option>
           <option value="power_factor">Power Factor</option>
           <option value="frequency">Frequency</option>
         </select>
-        
-        <select id="phaseFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
+
+        <select
+          id="phaseFilter"
+          class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors"
+        >
           <option value="all">Fasa: Semua</option>
           <option value="R">Fasa R</option>
           <option value="S">Fasa S</option>
           <option value="T">Fasa T</option>
         </select>
-        
+
         <!-- <select id="statusFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
           <option value="all">Status: Semua</option>
           <option value="critical">Critical</option>
@@ -88,8 +149,12 @@
         </select> -->
       </div>
 
-      <div class="ml-auto flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-        <span class="material-symbols-outlined text-slate-500 text-sm">search</span>
+      <div
+        class="ml-auto flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200"
+      >
+        <span class="material-symbols-outlined text-slate-500 text-sm"
+          >search</span
+        >
         <input
           type="text"
           placeholder="Cari parameter"
@@ -165,7 +230,9 @@
       class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between"
     >
       <p class="text-xs text-slate-500 font-medium tracking-tight">
-        Menampilkan <span id="showingStart">0</span> - <span id="showingEnd">0</span> dari <span id="totalEntries">0</span> entri
+        Menampilkan <span id="showingStart">0</span> -
+        <span id="showingEnd">0</span> dari
+        <span id="totalEntries">0</span> entri
       </p>
       <div class="flex items-center gap-1.5">
         <button
@@ -186,17 +253,15 @@
     </div>
   </div>
 </div>
-{% endblock %} 
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
   let currentPage = 1;
   const perPage = 10;
   let currentFilters = {
-    parameter: 'all',
-    phase: 'all',
-    status: 'all',
-    search: ''
+    parameter: "all",
+    phase: "all",
+    status: "all",
+    search: "",
   };
 
   // Update current date in filter
@@ -218,24 +283,24 @@
       parameter: currentFilters.parameter,
       phase: currentFilters.phase,
       status: currentFilters.status,
-      search: currentFilters.search
+      search: currentFilters.search,
     });
 
     fetch(`/alarms/api/alarms?${params}`)
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         renderTable(data.data);
         updatePagination(data.total, data.page, data.pages);
       })
-      .catch(error => {
-        console.error('Error loading alarms:', error);
+      .catch((error) => {
+        console.error("Error loading alarms:", error);
         showError();
       });
   }
 
   // Render table
   function renderTable(data) {
-    const tbody = document.getElementById('alarmTableBody');
+    const tbody = document.getElementById("alarmTableBody");
 
     if (!data || data.length === 0) {
       tbody.innerHTML = `
@@ -250,39 +315,45 @@
       return;
     }
 
-    tbody.innerHTML = data.map(alarm => {
-      const phaseColors = {
-        'R': 'red',
-        'S': 'yellow',
-        'T': 'blue'
-      };
-      const phaseColor = phaseColors[alarm.phase] || 'slate';
+    tbody.innerHTML = data
+      .map((alarm) => {
+        const phaseColors = {
+          R: "red",
+          S: "yellow",
+          T: "blue",
+        };
+        const phaseColor = phaseColors[alarm.phase] || "slate";
 
-      const severityStyles = {
-        'critical': 'bg-red-50 text-red-500 border-red-100',
-        'warning': 'bg-amber-50 text-yellow-600 border-amber-100',
-        'normal': 'bg-emerald-50 text-emerald-600 border-emerald-100'
-      };
-      const severityStyle = severityStyles[alarm.severity] || 'bg-slate-50 text-slate-600 border-slate-100';
+        const severityStyles = {
+          critical: "bg-red-50 text-red-500 border-red-100",
+          warning: "bg-amber-50 text-yellow-600 border-amber-100",
+          normal: "bg-emerald-50 text-emerald-600 border-emerald-100",
+        };
+        const severityStyle =
+          severityStyles[alarm.severity] ||
+          "bg-slate-50 text-slate-600 border-slate-100";
 
-      const severityIcons = {
-        'critical': 'warning',
-        'warning': 'report',
-        'normal': 'check_circle'
-      };
-      const severityIcon = severityIcons[alarm.severity] || 'info';
+        const severityIcons = {
+          critical: "warning",
+          warning: "report",
+          normal: "check_circle",
+        };
+        const severityIcon = severityIcons[alarm.severity] || "info";
 
-      const valueColor = alarm.severity === 'critical' ? 'text-red-500' : 
-                        alarm.severity === 'warning' ? 'text-yellow-600' : 
-                        'text-emerald-600';
+        const valueColor =
+          alarm.severity === "critical"
+            ? "text-red-500"
+            : alarm.severity === "warning"
+              ? "text-yellow-600"
+              : "text-emerald-600";
 
-      return `
+        return `
         <tr class="hover:bg-slate-50/50 transition-colors group">
           <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
             ${alarm.timestamp}
           </td>
           <td class="px-6 py-4 text-sm font-semibold text-slate-900 capitalize">
-            ${alarm.parameter.replace('_', ' ')}
+            ${alarm.parameter.replace("_", " ")}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-center">
             <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-${phaseColor}-50 text-${phaseColor}-600 text-xs font-bold border border-${phaseColor}-200">
@@ -306,7 +377,8 @@
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join("");
   }
 
   // Update pagination
@@ -314,25 +386,25 @@
     const start = (page - 1) * perPage + 1;
     const end = Math.min(page * perPage, total);
 
-    document.getElementById('showingStart').textContent = total > 0 ? start : 0;
-    document.getElementById('showingEnd').textContent = end;
-    document.getElementById('totalEntries').textContent = total;
+    document.getElementById("showingStart").textContent = total > 0 ? start : 0;
+    document.getElementById("showingEnd").textContent = end;
+    document.getElementById("totalEntries").textContent = total;
 
     // Update buttons
-    document.getElementById('prevBtn').disabled = page === 1;
-    document.getElementById('nextBtn').disabled = page === pages || pages === 0;
+    document.getElementById("prevBtn").disabled = page === 1;
+    document.getElementById("nextBtn").disabled = page === pages || pages === 0;
 
     // Generate page numbers
-    const pageNumbers = document.getElementById('pageNumbers');
-    pageNumbers.innerHTML = '';
+    const pageNumbers = document.getElementById("pageNumbers");
+    pageNumbers.innerHTML = "";
 
     const maxButtons = 3;
     for (let i = 1; i <= Math.min(pages, maxButtons); i++) {
-      const btn = document.createElement('button');
+      const btn = document.createElement("button");
       btn.className = `w-8 h-8 rounded-lg text-xs font-bold ${
         i === page
-          ? 'bg-primary text-white shadow-sm shadow-primary/20'
-          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors'
+          ? "bg-primary text-white shadow-sm shadow-primary/20"
+          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
       }`;
       btn.textContent = i;
       btn.onclick = () => {
@@ -345,7 +417,7 @@
 
   // Show error
   function showError() {
-    const tbody = document.getElementById('alarmTableBody');
+    const tbody = document.getElementById("alarmTableBody");
     tbody.innerHTML = `
       <tr>
         <td colspan="7" class="px-6 py-8 text-center text-red-500">
@@ -359,24 +431,26 @@
   }
 
   // Initialize
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     updateFilterDate();
     loadAlarmData();
 
     // Filter listeners
-    document.getElementById('parameterFilter').addEventListener('change', (e) => {
-      currentFilters.parameter = e.target.value;
-      currentPage = 1;
-      loadAlarmData();
-    });
+    document
+      .getElementById("parameterFilter")
+      .addEventListener("change", (e) => {
+        currentFilters.parameter = e.target.value;
+        currentPage = 1;
+        loadAlarmData();
+      });
 
-    document.getElementById('phaseFilter').addEventListener('change', (e) => {
+    document.getElementById("phaseFilter").addEventListener("change", (e) => {
       currentFilters.phase = e.target.value;
       currentPage = 1;
       loadAlarmData();
     });
 
-    document.getElementById('statusFilter').addEventListener('change', (e) => {
+    document.getElementById("statusFilter").addEventListener("change", (e) => {
       currentFilters.status = e.target.value;
       currentPage = 1;
       loadAlarmData();
@@ -384,24 +458,26 @@
 
     // Search with debounce
     let searchTimeout;
-    document.getElementById('searchParameter').addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        currentFilters.search = e.target.value;
-        currentPage = 1;
-        loadAlarmData();
-      }, 500);
-    });
+    document
+      .getElementById("searchParameter")
+      .addEventListener("input", (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentFilters.search = e.target.value;
+          currentPage = 1;
+          loadAlarmData();
+        }, 500);
+      });
 
     // Pagination buttons
-    document.getElementById('prevBtn').onclick = () => {
+    document.getElementById("prevBtn").onclick = () => {
       if (currentPage > 1) {
         currentPage--;
         loadAlarmData();
       }
     };
 
-    document.getElementById('nextBtn').onclick = () => {
+    document.getElementById("nextBtn").onclick = () => {
       currentPage++;
       loadAlarmData();
     };
@@ -409,20 +485,25 @@
     // Auto-refresh every 30 seconds
     setInterval(() => {
       loadAlarmData();
-      
+
       // Refresh summary
-      fetch('/alarms/api/summary')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('totalToday').textContent = data.total_today;
-          const changeEl = document.getElementById('percentageChange');
-          const changeText = (data.percentage_change >= 0 ? '+' : '') + data.percentage_change + '% vs kemarin';
+      fetch("/alarms/api/summary")
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("totalToday").textContent = data.total_today;
+          const changeEl = document.getElementById("percentageChange");
+          const changeText =
+            (data.percentage_change >= 0 ? "+" : "") +
+            data.percentage_change +
+            "% vs kemarin";
           changeEl.textContent = changeText;
-          
+
           if (data.percentage_change >= 0) {
-            changeEl.className = 'text-xs font-bold px-2 py-0.5 rounded-full text-red-500 bg-red-50';
+            changeEl.className =
+              "text-xs font-bold px-2 py-0.5 rounded-full text-red-500 bg-red-50";
           } else {
-            changeEl.className = 'text-xs font-bold px-2 py-0.5 rounded-full text-green-500 bg-green-50';
+            changeEl.className =
+              "text-xs font-bold px-2 py-0.5 rounded-full text-green-500 bg-green-50";
           }
         });
     }, 30000);
