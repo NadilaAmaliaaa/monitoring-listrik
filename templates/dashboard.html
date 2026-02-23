@@ -588,43 +588,67 @@ function updatePowerChart(newData) {
 function drawPowerChart() {
   const canvas = document.getElementById('power-chart');
   if (!canvas) return;
-  
+
   const ctx = canvas.getContext('2d');
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
-  
+
   canvas.width = width;
   canvas.height = height;
-  
+
   ctx.clearRect(0, 0, width, height);
-  
-  // Find max value for scaling
+
+  const paddingTop = 20;
+  const paddingBottom = 20;
+  const chartHeight = height - paddingTop - paddingBottom;
+
   const allValues = [...powerChartData.R, ...powerChartData.S, ...powerChartData.T];
-  const maxPower = Math.max(...allValues, 1000); // Min 1000W for scale
-  
+
+  if (allValues.length === 0) return;
+
+  const rawMax = Math.max(...allValues);
+  const rawMin = Math.min(...allValues);
+
+  // Tambahkan buffer 10% agar tidak mentok atas
+  const maxPower = rawMax * 1.1;
+  const minPower = Math.max(0, rawMin * 0.9);
+
+  const range = maxPower - minPower || 1;
+
   const drawLine = (data, color) => {
     if (data.length < 2) return;
-    
+
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
-    
-    const step = width / MAX_CHART_POINTS;
-    
+
+    const step = width / (data.length - 1);
+
     data.forEach((power, i) => {
       const x = i * step;
-      const y = height - (power / maxPower * height);
-      
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
+      const normalized = (power - minPower) / range;
+      const y = paddingTop + chartHeight - (normalized * chartHeight);
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     });
-    
+
     ctx.stroke();
   };
-  
+
+  // === DRAW GRID ===
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 1;
+
+  for (let i = 1; i <= 4; i++) {
+    const y = paddingTop + (chartHeight / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  // === DRAW LINES ===
   drawLine(powerChartData.R, '#ef4444');
   drawLine(powerChartData.S, '#ca8a04');
   drawLine(powerChartData.T, '#2563eb');
