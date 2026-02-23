@@ -256,10 +256,10 @@ class ReportsController:
         headers = ["Date", "Phase"]
 
         if parameters in ["all", "power"]:
-            headers += ["Avg Power", "Peak Power"]
+            headers += ["Avg Power (Watt)", "Peak Power (Watt)"]
 
         if parameters in ["all", "energy"]:
-            headers += ["Total kWh"]
+            headers += ["Total Energy (kWh)"]
 
         column_count = len(headers)
 
