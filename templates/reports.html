@@ -523,28 +523,33 @@ page_title %}Laporan Berkala{% endblock %} {% block page_subtitle %}Generate dan
       },
       body: JSON.stringify(data),
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to generate report");
-        }
-        return response.blob();
-      })
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
+    .then(async (response) => {
 
-        a.href = url;
-        a.download = `energy-report-${startDate}-to-${endDate}.${format}`;
+      if (!response.ok) {
+        // baca error dari backend
+        const errorData = await response.json().catch(() => null);
+        const message = errorData?.error || "Failed to generate report";
+        throw new Error(message);
+      }
 
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((error) => {
-        console.error("Error generating report:", error);
-        alert("Failed to generate report. Please try again.");
-      });
+      return response.blob();
+    })
+    .then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `energy-report-${startDate}-to-${endDate}.${format}`;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Error generating report:", error.message);
+      alert(error.message); // tampilkan pesan asli
+    });
   }
 
   // Show error
