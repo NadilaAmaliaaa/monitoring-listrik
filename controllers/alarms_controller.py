@@ -12,12 +12,6 @@ class AlarmsController:
         self.building_id = building_id
     
     def _get_base_query_filter(self, query, already_joined=False):
-        """Apply building filter to query
-        
-        Args:
-            query: SQLAlchemy query object
-            already_joined: Boolean indicating if Sensor is already joined
-        """
         if self.building_id:
             # Only join Sensor if not already joined
             if not already_joined:
@@ -40,46 +34,62 @@ class AlarmsController:
         else:
             return 'normal'
     
-    def get_today_summary(self):
-        """Get summary of alarms for today"""
-        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    def get_summary(self):
+        """Get alarm summary: daily, weekly, monthly"""
+        now = datetime.utcnow()
+
+        # ─────────────────────────────────────
+        # DAILY
+        # ─────────────────────────────────────
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         yesterday_start = today_start - timedelta(days=1)
-        
-        # Count today's alarms (excluding normal status)
-        query_today = self.session.query(func.count(AlarmEvent.id))
-        query_today = query_today.filter(
-            and_(
-                AlarmEvent.timestamp >= today_start,
-                AlarmEvent.status != 'normal'
-            )
-        )
-        # Apply building filter (will join Sensor if building_id is set)
-        query_today = self._get_base_query_filter(query_today, already_joined=False)
-        total_today = query_today.scalar() or 0
-        
-        # Count yesterday's alarms (excluding normal status)
-        query_yesterday = self.session.query(func.count(AlarmEvent.id))
-        query_yesterday = query_yesterday.filter(
-            and_(
-                AlarmEvent.timestamp >= yesterday_start,
-                AlarmEvent.timestamp < today_start,
-                AlarmEvent.status != 'normal'
-            )
-        )
-        # Apply building filter (will join Sensor if building_id is set)
-        query_yesterday = self._get_base_query_filter(query_yesterday, already_joined=False)
-        total_yesterday = query_yesterday.scalar() or 0
-        
-        # Calculate percentage change
-        if total_yesterday > 0:
-            percentage_change = ((total_today - total_yesterday) / total_yesterday) * 100
+
+        total_today = self._count_alarms(today_start, None)
+        total_yesterday = self._count_alarms(yesterday_start, today_start)
+
+        daily_percentage = self._calculate_percentage(total_today, total_yesterday)
+
+        # ─────────────────────────────────────
+        # WEEKLY
+        # ─────────────────────────────────────
+        week_start = today_start - timedelta(days=today_start.weekday())
+        last_week_start = week_start - timedelta(days=7)
+
+        total_this_week = self._count_alarms(week_start, None)
+        total_last_week = self._count_alarms(last_week_start, week_start)
+
+        weekly_percentage = self._calculate_percentage(total_this_week, total_last_week)
+
+        # ─────────────────────────────────────
+        # MONTHLY
+        # ─────────────────────────────────────
+        month_start = today_start.replace(day=1)
+        if month_start.month == 1:
+            last_month_start = month_start.replace(year=month_start.year - 1, month=12)
         else:
-            percentage_change = 100 if total_today > 0 else 0
-        
+            last_month_start = month_start.replace(month=month_start.month - 1)
+
+        total_this_month = self._count_alarms(month_start, None)
+        total_last_month = self._count_alarms(last_month_start, month_start)
+
+        monthly_percentage = self._calculate_percentage(total_this_month, total_last_month)
+
         return {
-            'total_today': total_today,
-            'total_yesterday': total_yesterday,
-            'percentage_change': round(percentage_change, 1)
+            "daily": {
+                "total": total_today,
+                "previous": total_yesterday,
+                "percentage_change": daily_percentage,
+            },
+            "weekly": {
+                "total": total_this_week,
+                "previous": total_last_week,
+                "percentage_change": weekly_percentage,
+            },
+            "monthly": {
+                "total": total_this_month,
+                "previous": total_last_month,
+                "percentage_change": monthly_percentage,
+            },
         }
     
     def get_alarms(self, page=1, per_page=10, parameter=None, phase=None, status=None, search=None):
@@ -155,6 +165,28 @@ class AlarmsController:
             'pages': pages
         }
     
+    def _count_alarms(self, start_date, end_date=None):
+        query = self.session.query(func.count(AlarmEvent.id))
+
+        filters = [
+            AlarmEvent.timestamp >= start_date,
+            AlarmEvent.status != 'normal'
+        ]
+
+        if end_date:
+            filters.append(AlarmEvent.timestamp < end_date)
+
+        query = query.filter(and_(*filters))
+        query = self._get_base_query_filter(query, already_joined=False)
+
+        return query.scalar() or 0
+    
+    @staticmethod
+    def _calculate_percentage(current, previous):
+        if previous > 0:
+            return round(((current - previous) / previous) * 100, 1)
+        return 100 if current > 0 else 0
+
     def _get_unit(self, parameter):
         """Get unit for parameter"""
         units = {
