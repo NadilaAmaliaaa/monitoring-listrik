@@ -6,7 +6,15 @@ from models.data import Sensor
 from models.building import Building
 import csv
 import io
-from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import Table
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.pdfgen import canvas
 from flask import send_file
 
@@ -241,19 +249,10 @@ class ReportsController:
 
     def generate_pdf_report(self, data, start_date, end_date, building_name, parameters):
         buffer = io.BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=A4)
-        width, height = A4
 
-        y = height - 50
-
-        pdf.setFont("Helvetica-Bold", 14)
-        pdf.drawString(50, y, f"Energy Report - {building_name}")
-        y -= 20
-
-        pdf.setFont("Helvetica", 10)
-        pdf.drawString(50, y, f"Period: {start_date} to {end_date}")
-        y -= 30
-
+        # ─────────────────────────────
+        # Determine columns
+        # ─────────────────────────────
         headers = ["Date", "Phase"]
 
         if parameters in ["all", "power"]:
@@ -262,40 +261,101 @@ class ReportsController:
         if parameters in ["all", "energy"]:
             headers += ["Total kWh"]
 
-        x_positions = [50, 130, 210, 300, 380]
+        column_count = len(headers)
 
-        pdf.setFont("Helvetica-Bold", 9)
-        for i, h in enumerate(headers):
-            pdf.drawString(x_positions[i], y, h)
+        # Auto landscape kalau kolom banyak
+        pagesize = landscape(A4) if column_count > 4 else A4
 
-        y -= 15
-        pdf.setFont("Helvetica", 9)
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=pagesize,
+            rightMargin=30,
+            leftMargin=30,
+            topMargin=40,
+            bottomMargin=30
+        )
+
+        elements = []
+
+        styles = getSampleStyleSheet()
+
+        # =============================
+        # Title Style Center
+        # =============================
+        center_title = ParagraphStyle(
+            'CenterTitle',
+            parent=styles['Heading1'],
+            alignment=1,  # CENTER
+            spaceAfter=10
+        )
+
+        center_normal = ParagraphStyle(
+            'CenterNormal',
+            parent=styles['Normal'],
+            alignment=1,
+            spaceAfter=20
+        )
+
+        elements.append(Paragraph(f"Energy Report - {building_name}", center_title))
+        elements.append(Paragraph(f"Period: {start_date} to {end_date}", center_normal))
+        elements.append(Spacer(1, 0.2 * inch))
+
+        # =============================
+        # Table Data
+        # =============================
+        table_data = [headers]
 
         for row in data:
-            if y < 50:
-                pdf.showPage()
-                y = height - 50
-
-            values = [
-                row["date"],
-                row["phase"]
+            record = [
+                str(row.get("date", "")),
+                str(row.get("phase", ""))
             ]
 
             if parameters in ["all", "power"]:
-                values += [
-                    f"{row.get('avg_power', 0):.2f}",
-                    f"{row.get('peak_power', 0):.2f}"
+                record += [
+                    f"{float(row.get('avg_power') or 0):.2f}",
+                    f"{float(row.get('peak_power') or 0):.2f}"
                 ]
 
             if parameters in ["all", "energy"]:
-                values.append(f"{row.get('total_kwh', 0):.2f}")
+                record.append(f"{float(row.get('total_kwh') or 0):.2f}")
 
-            for i, val in enumerate(values):
-                pdf.drawString(x_positions[i], y, str(val))
+            table_data.append(record)
 
-            y -= 15
+        # =============================
+        # Full Width Table
+        # =============================
+        page_width = pagesize[0] - doc.leftMargin - doc.rightMargin
+        col_width = page_width / column_count
+        col_widths = [col_width] * column_count
 
-        pdf.save()
+        table = Table(table_data, colWidths=col_widths, repeatRows=1)
+
+        table.setStyle(TableStyle([
+            # Header background
+            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+
+            # Grid lines
+            ("GRID", (0, 0), (-1, -1), 0.75, colors.black),
+
+            # Font
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+
+            # Alignment
+            ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+
+            # Padding
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+
+        elements.append(table)
+
+        doc.build(elements)
         buffer.seek(0)
 
         filename = (
