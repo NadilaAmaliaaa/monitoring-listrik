@@ -10,9 +10,10 @@
 <script>
 (function () {
   const TOAST_DURATION = 6000;
-  const MAX_TOASTS     = 4;
+  const MAX_TOASTS     = 5;
   const RECONNECT_MS   = 3000;
 
+  // Konfigurasi visual per severity
   const cfg = {
     critical: {
       icon: 'warning', bar: 'bg-red-500',
@@ -24,7 +25,8 @@
       wrap: 'bg-amber-50 border-amber-200',
       iconWrap: 'bg-amber-100', iconColor: 'text-amber-500', title: 'text-amber-800',
     },
-    normal: {
+    // is_resolved=true → severity "resolved"
+    resolved: {
       icon: 'check_circle', bar: 'bg-emerald-400',
       wrap: 'bg-emerald-50 border-emerald-200',
       iconWrap: 'bg-emerald-100', iconColor: 'text-emerald-500', title: 'text-emerald-800',
@@ -59,7 +61,6 @@
     const container = document.getElementById('alarmToastContainer');
     if (!container) return;
 
-    // Hapus toast tertua jika sudah penuh
     const existing = container.querySelectorAll('.alarm-toast');
     if (existing.length >= MAX_TOASTS) existing[0].remove();
 
@@ -68,6 +69,27 @@
     const phase  = alarm.phase ? `Fasa ${alarm.phase}` : '';
     const tid    = `toast-${Date.now()}`;
 
+    // Beda layout untuk alarm aktif vs resolved
+    const bodyHtml = alarm.is_resolved
+      ? `
+        <p class="text-sm font-bold ${c.title}">Kondisi Normal — ${phase}</p>
+        <p class="text-xs text-slate-600 mt-0.5 capitalize">
+          ${alarm.parameter.replace('_', ' ')} kembali dalam batas normal
+          ${alarm.duration_seconds ? `· Durasi: ${formatDuration(alarm.duration_seconds)}` : ''}
+        </p>
+        <p class="text-[10px] text-slate-400 mt-1">${alarm.resolved_at || alarm.timestamp}</p>
+      `
+      : `
+        <p class="text-sm font-bold ${c.title} truncate">${alarm.status} — ${phase}</p>
+        <p class="text-xs text-slate-600 mt-0.5 capitalize">
+          ${alarm.parameter.replace('_', ' ')}:
+          <strong>${alarm.actual_value} ${unit}</strong>
+          ${alarm.threshold_min != null ? `· min ${alarm.threshold_min} ${unit}` : ''}
+          ${alarm.threshold_max != null ? `· max ${alarm.threshold_max} ${unit}` : ''}
+        </p>
+        <p class="text-[10px] text-slate-400 mt-1">${alarm.timestamp}</p>
+      `;
+
     const toast = document.createElement('div');
     toast.id        = tid;
     toast.className = `alarm-toast pointer-events-auto w-full rounded-2xl border ${c.wrap} shadow-lg overflow-hidden`;
@@ -75,33 +97,26 @@
 
     toast.innerHTML = `
       <div class="h-1 ${c.bar} origin-left" id="bar-${tid}"
-           style="transition:transform ${TOAST_DURATION}ms linear"></div>
+           style="transition: transform ${TOAST_DURATION}ms linear"></div>
       <div class="flex items-start gap-3 p-4">
         <div class="shrink-0 size-9 rounded-xl ${c.iconWrap} flex items-center justify-center">
           <span class="material-symbols-outlined ${c.iconColor} text-xl"
                 style="font-variation-settings:'FILL' 1">${c.icon}</span>
         </div>
         <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between gap-2">
-            <p class="text-sm font-bold ${c.title} truncate">${alarm.status} — ${phase}</p>
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">${bodyHtml}</div>
             <button onclick="document.getElementById('${tid}').remove()"
-                    class="shrink-0 text-slate-400 hover:text-slate-600 transition-colors">
+                    class="shrink-0 text-slate-400 hover:text-slate-600 transition-colors mt-0.5">
               <span class="material-symbols-outlined text-base">close</span>
             </button>
           </div>
-          <p class="text-xs text-slate-600 mt-0.5 capitalize">
-            ${alarm.parameter.replace('_',' ')}:
-            <strong>${alarm.actual_value} ${unit}</strong>
-            ${alarm.threshold_min != null ? `· min ${alarm.threshold_min} ${unit}` : ''}
-            ${alarm.threshold_max != null ? `· max ${alarm.threshold_max} ${unit}` : ''}
-          </p>
-          <p class="text-[10px] text-slate-400 mt-1">${alarm.timestamp}</p>
         </div>
       </div>`;
 
     container.appendChild(toast);
 
-    // Animasi progress bar mengecil
+    // Progress bar
     requestAnimationFrame(() => {
       const bar = document.getElementById(`bar-${tid}`);
       if (bar) bar.style.transform = 'scaleX(0)';
@@ -114,21 +129,28 @@
     }, TOAST_DURATION);
   }
 
-  // ── Badge alarm di navbar ──────────────────────────────────────────────────
+  // ── Badge ──────────────────────────────────────────────────────────────────
   function refreshAlarmBadge() {
     fetch('/alarms/api/summary')
       .then(r => r.json())
       .then(data => {
         const badge = document.getElementById('alarmNavBadge');
         if (!badge) return;
-        const count = data.total_today || 0;
+        // Badge hanya hitung alarm yang masih aktif (is_normal=False)
+        const count = data.active_count ?? data.total_today ?? 0;
         badge.textContent = count > 99 ? '99+' : count;
         badge.classList.toggle('hidden', count === 0);
       })
       .catch(() => {});
   }
 
-  // ── CSS ────────────────────────────────────────────────────────────────────
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function formatDuration(seconds) {
+    if (seconds < 60) return `${seconds}d`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}d`;
+    return `${Math.floor(seconds / 3600)}j ${Math.floor((seconds % 3600) / 60)}m`;
+  }
+
   document.head.insertAdjacentHTML('beforeend', `<style>
     @keyframes slideIn {
       from { transform: translateX(110%); opacity: 0; }

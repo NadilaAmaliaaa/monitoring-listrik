@@ -140,13 +140,6 @@ Riwayat Notifikasi Sistem{% endblock %} {% block extra_css %}
           <option value="S">Fasa S</option>
           <option value="T">Fasa T</option>
         </select>
-
-        <!-- <select id="statusFilter" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:border-primary/50 transition-colors">
-          <option value="all">Status: Semua</option>
-          <option value="critical">Critical</option>
-          <option value="warning">Warning</option>
-          <option value="normal">Normal</option>
-        </select> -->
       </div>
 
       <div
@@ -173,50 +166,22 @@ Riwayat Notifikasi Sistem{% endblock %} {% block extra_css %}
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-slate-50/80 border-b border-slate-200">
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              Timestamp
-            </th>
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              Parameter
-            </th>
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center"
-            >
-              Fasa
-            </th>
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              Actual Value
-            </th>
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              Threshold Min
-            </th>
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              Threshold Max
-            </th>
-            <th
-              class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              Status
-            </th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Waktu Mulai</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Parameter</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">Fasa</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Nilai Aktual</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Min</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Max</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Status Alarm</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">Kondisi</th>
+            <th class="px-4 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Durasi</th>
           </tr>
         </thead>
         <tbody id="alarmTableBody" class="divide-y divide-slate-100">
           <tr>
-            <td colspan="7" class="px-6 py-8 text-center text-slate-400">
+            <td colspan="9" class="px-6 py-8 text-center text-slate-400">
               <div class="flex flex-col items-center gap-2">
-                <span class="material-symbols-outlined text-4xl"
-                  >hourglass_empty</span
-                >
+                <span class="material-symbols-outlined text-4xl">hourglass_empty</span>
                 <p>Loading data...</p>
               </div>
             </td>
@@ -265,247 +230,253 @@ Riwayat Notifikasi Sistem{% endblock %} {% block extra_css %}
   };
 
   // Update current date in filter
+function formatDuration(seconds) {
+    if (seconds === null || seconds === undefined) return '—';
+    if (seconds < 60)   return `${seconds}d`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}d`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}j ${m}m`;
+  }
+
   function updateFilterDate() {
-    const dateEl = document.getElementById("currentDateFilter");
-    if (dateEl) {
-      const now = new Date();
-      const options = { day: "numeric", month: "short", year: "numeric" };
-      dateEl.textContent =
-        "Hari Ini: " + now.toLocaleDateString("id-ID", options);
+    const el = document.getElementById('currentDateFilter');
+    if (el) {
+      el.textContent = 'Hari Ini: ' + new Date().toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
     }
   }
 
-  // Load alarm data
+  // ── Load ───────────────────────────────────────────────────────────────────
+
   function loadAlarmData() {
     const params = new URLSearchParams({
-      page: currentPage,
-      per_page: perPage,
+      page:      currentPage,
+      per_page:  perPage,
       parameter: currentFilters.parameter,
-      phase: currentFilters.phase,
-      status: currentFilters.status,
-      search: currentFilters.search,
+      phase:     currentFilters.phase,
+      status:    currentFilters.status,   // 'all' | 'active' | 'resolved'
+      search:    currentFilters.search,
     });
 
     fetch(`/alarms/api/alarms?${params}`)
-      .then((response) => response.json())
-      .then((data) => {
+      .then(r => r.json())
+      .then(data => {
         renderTable(data.data);
         updatePagination(data.total, data.page, data.pages);
       })
-      .catch((error) => {
-        console.error("Error loading alarms:", error);
-        showError();
-      });
+      .catch(() => showError());
   }
 
-  // Render table
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   function renderTable(data) {
-    const tbody = document.getElementById("alarmTableBody");
+    const tbody = document.getElementById('alarmTableBody');
 
     if (!data || data.length === 0) {
       tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="px-6 py-8 text-center text-slate-400">
-            <div class="flex flex-col items-center gap-2">
-              <span class="material-symbols-outlined text-4xl">search_off</span>
-              <p>Tidak ada data alarm</p>
-            </div>
-          </td>
-        </tr>`;
+        <tr><td colspan="9" class="px-6 py-8 text-center text-slate-400">
+          <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl">search_off</span>
+            <p>Tidak ada data alarm</p>
+          </div>
+        </td></tr>`;
       return;
     }
 
-    tbody.innerHTML = data
-      .map((alarm) => {
-        const phaseColors = {
-          R: "red",
-          S: "yellow",
-          T: "blue",
-        };
-        const phaseColor = phaseColors[alarm.phase] || "slate";
+    const phaseColors   = { R: 'red', S: 'yellow', T: 'blue' };
+    const severityStyle = {
+      critical: 'bg-red-50 text-red-500 border-red-100',
+      warning:  'bg-amber-50 text-yellow-600 border-amber-100',
+      normal:   'bg-emerald-50 text-emerald-600 border-emerald-100',
+    };
+    const severityIcon  = { critical: 'warning', warning: 'report', normal: 'check_circle' };
+    const valueColor    = { critical: 'text-red-500', warning: 'text-yellow-600', normal: 'text-emerald-600' };
 
-        const severityStyles = {
-          critical: "bg-red-50 text-red-500 border-red-100",
-          warning: "bg-amber-50 text-yellow-600 border-amber-100",
-          normal: "bg-emerald-50 text-emerald-600 border-emerald-100",
-        };
-        const severityStyle =
-          severityStyles[alarm.severity] ||
-          "bg-slate-50 text-slate-600 border-slate-100";
+    tbody.innerHTML = data.map(alarm => {
+      const pColor = phaseColors[alarm.phase] || 'slate';
+      const sStyle = severityStyle[alarm.severity] || 'bg-slate-50 text-slate-600 border-slate-100';
+      const sIcon  = severityIcon[alarm.severity]  || 'info';
+      const vColor = valueColor[alarm.severity]    || 'text-slate-600';
 
-        const severityIcons = {
-          critical: "warning",
-          warning: "report",
-          normal: "check_circle",
-        };
-        const severityIcon = severityIcons[alarm.severity] || "info";
+      // ── Kolom Kondisi (is_normal) ──────────────────────────────────────────
+      const kondisiHtml = alarm.is_normal
+        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                        bg-emerald-50 text-emerald-600 border border-emerald-100">
+             <span class="material-symbols-outlined text-[12px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+             Normal
+           </span>`
+        : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                        bg-red-50 text-red-500 border border-red-100 animate-pulse">
+             <span class="material-symbols-outlined text-[12px]" style="font-variation-settings:'FILL' 1">warning</span>
+             Aktif
+           </span>`;
 
-        const valueColor =
-          alarm.severity === "critical"
-            ? "text-red-500"
-            : alarm.severity === "warning"
-              ? "text-yellow-600"
-              : "text-emerald-600";
+      // ── Kolom Durasi ───────────────────────────────────────────────────────
+      // Jika masih aktif → tampilkan "Berlangsung..." dengan elapsed sejak mulai
+      // Jika resolved    → tampilkan total durasi dari duration_seconds
+      let durasiHtml;
+      if (alarm.is_normal) {
+        durasiHtml = alarm.duration_seconds !== null
+          ? `<span class="text-xs font-mono text-slate-500">${formatDuration(alarm.duration_seconds)}</span>`
+          : `<span class="text-xs text-slate-300">—</span>`;
+      } else {
+        // Hitung elapsed secara realtime di client
+        const startTs = new Date(alarm.timestamp.replace(' ', 'T')).getTime();
+        const elapsed = Math.floor((Date.now() - startTs) / 1000);
+        durasiHtml = `
+          <span class="inline-flex items-center gap-1 text-xs font-mono text-amber-600"
+                data-start="${alarm.timestamp}">
+            <span class="material-symbols-outlined text-[11px] animate-spin">progress_activity</span>
+            ${formatDuration(elapsed)}
+          </span>`;
+      }
 
-        return `
+      // ── Resolved at (sub-info di bawah kondisi) ────────────────────────────
+      const resolvedInfo = alarm.is_normal && alarm.resolved_at
+        ? `<div class="text-[10px] text-slate-400 mt-0.5">${alarm.resolved_at}</div>`
+        : '';
+
+      return `
         <tr class="hover:bg-slate-50/50 transition-colors group">
-          <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-            ${alarm.timestamp}
+          <td class="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">${alarm.timestamp}</td>
+          <td class="px-4 py-3.5 text-sm font-semibold text-slate-900 capitalize">
+            ${alarm.parameter.replace('_', ' ')}
           </td>
-          <td class="px-6 py-4 text-sm font-semibold text-slate-900 capitalize">
-            ${alarm.parameter.replace("_", " ")}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-center">
-            <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-${phaseColor}-50 text-${phaseColor}-600 text-xs font-bold border border-${phaseColor}-200">
+          <td class="px-4 py-3.5 text-center whitespace-nowrap">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-md
+              bg-${pColor}-50 text-${pColor}-600 text-xs font-bold border border-${pColor}-200">
               ${alarm.phase}
             </span>
           </td>
-          <td class="px-6 py-4 text-sm font-mono ${valueColor} font-bold">
-            ${alarm.actual_value_display}
-          </td>
-          <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-            ${alarm.threshold_min_display}
-          </td>
-          <td class="px-6 py-4 text-sm font-mono text-slate-400 italic">
-            ${alarm.threshold_max_display}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span class="status-badge ${severityStyle}">
-              <span class="material-symbols-outlined text-[14px] mr-1">${severityIcon}</span>
+          <td class="px-4 py-3.5 text-sm font-mono ${vColor} font-bold">${alarm.actual_value_display}</td>
+          <td class="px-4 py-3.5 text-sm font-mono text-slate-400 italic">${alarm.threshold_min_display}</td>
+          <td class="px-4 py-3.5 text-sm font-mono text-slate-400 italic">${alarm.threshold_max_display}</td>
+          <td class="px-4 py-3.5 whitespace-nowrap">
+            <span class="status-badge ${sStyle}">
+              <span class="material-symbols-outlined text-[14px] mr-1">${sIcon}</span>
               ${alarm.status}
             </span>
           </td>
-        </tr>
-      `;
-      })
-      .join("");
+          <td class="px-4 py-3.5 text-center whitespace-nowrap">
+            ${kondisiHtml}
+            ${resolvedInfo}
+          </td>
+          <td class="px-4 py-3.5 whitespace-nowrap">${durasiHtml}</td>
+        </tr>`;
+    }).join('');
+
+    // Tick durasi alarm aktif setiap detik
+    startElapsedTicker();
   }
 
-  // Update pagination
+  // ── Elapsed ticker untuk alarm yang masih aktif ────────────────────────────
+  let tickerInterval = null;
+
+  function startElapsedTicker() {
+    if (tickerInterval) clearInterval(tickerInterval);
+
+    tickerInterval = setInterval(() => {
+      document.querySelectorAll('[data-start]').forEach(el => {
+        const startTs = new Date(el.dataset.start.replace(' ', 'T')).getTime();
+        const elapsed = Math.floor((Date.now() - startTs) / 1000);
+        // Ganti teks tapi pertahankan icon spin
+        const icon = el.querySelector('.material-symbols-outlined');
+        el.textContent = formatDuration(elapsed);
+        if (icon) el.prepend(icon);
+      });
+    }, 1000);
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+
   function updatePagination(total, page, pages) {
-    const start = (page - 1) * perPage + 1;
-    const end = Math.min(page * perPage, total);
+    const start = total > 0 ? (page - 1) * perPage + 1 : 0;
+    const end   = Math.min(page * perPage, total);
+    document.getElementById('showingStart').textContent = start;
+    document.getElementById('showingEnd').textContent   = end;
+    document.getElementById('totalEntries').textContent = total;
 
-    document.getElementById("showingStart").textContent = total > 0 ? start : 0;
-    document.getElementById("showingEnd").textContent = end;
-    document.getElementById("totalEntries").textContent = total;
+    document.getElementById('prevBtn').disabled = page === 1;
+    document.getElementById('nextBtn').disabled = page === pages || pages === 0;
 
-    // Update buttons
-    document.getElementById("prevBtn").disabled = page === 1;
-    document.getElementById("nextBtn").disabled = page === pages || pages === 0;
-
-    // Generate page numbers
-    const pageNumbers = document.getElementById("pageNumbers");
-    pageNumbers.innerHTML = "";
-
-    const maxButtons = 3;
-    for (let i = 1; i <= Math.min(pages, maxButtons); i++) {
-      const btn = document.createElement("button");
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    const maxBtns = 3;
+    for (let i = 1; i <= Math.min(pages, maxBtns); i++) {
+      const btn = document.createElement('button');
       btn.className = `w-8 h-8 rounded-lg text-xs font-bold ${
         i === page
-          ? "bg-primary text-white shadow-sm shadow-primary/20"
-          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+          ? 'bg-primary text-white shadow-sm shadow-primary/20'
+          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors'
       }`;
       btn.textContent = i;
-      btn.onclick = () => {
-        currentPage = i;
-        loadAlarmData();
-      };
+      btn.onclick = () => { currentPage = i; loadAlarmData(); };
       pageNumbers.appendChild(btn);
     }
   }
 
-  // Show error
   function showError() {
-    const tbody = document.getElementById("alarmTableBody");
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-8 text-center text-red-500">
-          <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl">error</span>
-            <p>Failed to load data. Please try again.</p>
-          </div>
-        </td>
-      </tr>
-    `;
+    document.getElementById('alarmTableBody').innerHTML = `
+      <tr><td colspan="9" class="px-6 py-8 text-center text-red-500">
+        <div class="flex flex-col items-center gap-2">
+          <span class="material-symbols-outlined text-4xl">error</span>
+          <p>Gagal memuat data. Silakan coba lagi.</p>
+        </div>
+      </td></tr>`;
   }
 
-  // Initialize
-  document.addEventListener("DOMContentLoaded", function () {
+  // ── Init ───────────────────────────────────────────────────────────────────
+
+  document.addEventListener('DOMContentLoaded', () => {
     updateFilterDate();
     loadAlarmData();
 
-    // Filter listeners
-    document
-      .getElementById("parameterFilter")
-      .addEventListener("change", (e) => {
-        currentFilters.parameter = e.target.value;
-        currentPage = 1;
-        loadAlarmData();
-      });
-
-    document.getElementById("phaseFilter").addEventListener("change", (e) => {
-      currentFilters.phase = e.target.value;
-      currentPage = 1;
-      loadAlarmData();
+    document.getElementById('parameterFilter').addEventListener('change', e => {
+      currentFilters.parameter = e.target.value; currentPage = 1; loadAlarmData();
+    });
+    document.getElementById('phaseFilter').addEventListener('change', e => {
+      currentFilters.phase = e.target.value; currentPage = 1; loadAlarmData();
+    });
+    document.getElementById('statusFilter').addEventListener('change', e => {
+      currentFilters.status = e.target.value; currentPage = 1; loadAlarmData();
     });
 
-    document.getElementById("statusFilter").addEventListener("change", (e) => {
-      currentFilters.status = e.target.value;
-      currentPage = 1;
-      loadAlarmData();
-    });
-
-    // Search with debounce
     let searchTimeout;
-    document
-      .getElementById("searchParameter")
-      .addEventListener("input", (e) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          currentFilters.search = e.target.value;
-          currentPage = 1;
-          loadAlarmData();
-        }, 500);
-      });
+    document.getElementById('searchParameter').addEventListener('input', e => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentFilters.search = e.target.value; currentPage = 1; loadAlarmData();
+      }, 500);
+    });
 
-    // Pagination buttons
-    document.getElementById("prevBtn").onclick = () => {
-      if (currentPage > 1) {
-        currentPage--;
-        loadAlarmData();
-      }
+    document.getElementById('prevBtn').onclick = () => {
+      if (currentPage > 1) { currentPage--; loadAlarmData(); }
+    };
+    document.getElementById('nextBtn').onclick = () => {
+      currentPage++; loadAlarmData();
     };
 
-    document.getElementById("nextBtn").onclick = () => {
-      currentPage++;
-      loadAlarmData();
-    };
-
-    // Auto-refresh every 30 seconds
+    // Auto-refresh tabel + summary setiap 30 detik
     setInterval(() => {
       loadAlarmData();
-
-      // Refresh summary
-      fetch("/alarms/api/summary")
-        .then((response) => response.json())
-        .then((data) => {
-          document.getElementById("totalToday").textContent = data.total_today;
-          const changeEl = document.getElementById("percentageChange");
-          const changeText =
-            (data.percentage_change >= 0 ? "+" : "") +
-            data.percentage_change +
-            "% vs kemarin";
-          changeEl.textContent = changeText;
-
-          if (data.percentage_change >= 0) {
-            changeEl.className =
-              "text-xs font-bold px-2 py-0.5 rounded-full text-red-500 bg-red-50";
-          } else {
-            changeEl.className =
-              "text-xs font-bold px-2 py-0.5 rounded-full text-green-500 bg-green-50";
+      fetch('/alarms/api/summary')
+        .then(r => r.json())
+        .then(data => {
+          const totalEl  = document.getElementById('totalToday');
+          const changeEl = document.getElementById('percentageChange');
+          if (totalEl)  totalEl.textContent = data.total_today;
+          if (changeEl) {
+            changeEl.textContent = (data.percentage_change >= 0 ? '+' : '')
+              + data.percentage_change + '% vs kemarin';
+            changeEl.className = `text-xs font-bold px-2 py-0.5 rounded-full ${
+              data.percentage_change >= 0
+                ? 'text-red-500 bg-red-50' : 'text-green-500 bg-green-50'
+            }`;
           }
-        });
+        })
+        .catch(() => {});
     }, 30000);
   });
 </script>
