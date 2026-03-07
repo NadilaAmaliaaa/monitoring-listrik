@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Login — Energy Monitoring System</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#136dec",
+            "background-light": "#ffffff",
+            "background-dark": "#0f172a",
+          },
+          fontFamily: { "display": ["Space Grotesk"] },
+        },
+      },
+    }
+  </script>
+  <style type="text/tailwindcss">
+    body { font-family: "Space Grotesk", sans-serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+    }
+    .input-minimalist {
+      @apply border-0 border-b border-gray-200 bg-transparent px-0 py-3
+             focus:ring-0 focus:border-primary transition-all duration-300
+             text-gray-900 placeholder-gray-300;
+    }
+  </style>
+</head>
+<body class="bg-background-light min-h-screen">
+<div class="flex min-h-screen">
+
+  <!-- ── Panel Kiri (hero) ───────────────────────────────────────────────── -->
+  <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary">
+    <!-- Overlay texture -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none"
+         style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+                background-size: 32px 32px;"></div>
+
+    <!-- Grid dekoratif -->
+    <div class="absolute bottom-0 left-0 right-0 h-64 opacity-10"
+         style="background: linear-gradient(to top, #000 0%, transparent 100%)"></div>
+
+    <div class="relative z-10 flex flex-col justify-between p-16 w-full">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 text-white">
+        <div class="size-10">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight font-display">EMS 3-Phase</h1>
+      </div>
+
+      <!-- Tagline -->
+      <div class="max-w-md">
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20
+                    px-3 py-1 rounded-full text-white/80 text-xs font-semibold
+                    uppercase tracking-widest mb-6">
+          <span class="size-1.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+          Sistem Monitoring Aktif
+        </div>
+        <h2 class="text-4xl font-bold text-white mb-6 leading-tight">
+          Advanced Energy Intelligence<br>at your fingertips.
+        </h2>
+        <p class="text-white/70 text-lg font-light leading-relaxed">
+          Monitor distribusi daya 3-fasa dengan analitik real-time
+          dan alat pemantauan berbasis ambang batas cerdas.
+        </p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="flex gap-8">
+        <div>
+          <p class="text-white/40 text-xs uppercase tracking-widest mb-1">Interval Data</p>
+          <p class="text-white font-bold text-lg">5 Detik</p>
+        </div>
+        <div class="w-[1px] bg-white/10"></div>
+        <div>
+          <p class="text-white/40 text-xs uppercase tracking-widest mb-1">Agregasi</p>
+          <p class="text-white font-bold text-lg">Per Menit</p>
+        </div>
+        <div class="w-[1px] bg-white/10"></div>
+        <div>
+          <p class="text-white/40 text-xs uppercase tracking-widest mb-1">Deteksi Alarm</p>
+          <p class="text-white font-bold text-lg">Otomatis</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panel Kanan (form) ──────────────────────────────────────────────── -->
+  <div class="w-full lg:w-1/2 flex flex-col justify-center
+              px-8 sm:px-16 lg:px-24 xl:px-32 bg-white">
+    <div class="max-w-md w-full mx-auto">
+
+      <!-- Logo mobile -->
+      <div class="lg:hidden flex items-center gap-3 mb-12 text-primary">
+        <div class="size-8">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="text-xl font-bold font-display">EMS 3-Phase</span>
+      </div>
+
+      <!-- Heading -->
+      <div class="mb-10">
+        <h3 class="text-3xl font-bold text-gray-900 mb-2 font-display">Selamat Datang</h3>
+        <p class="text-gray-400 text-sm">Masukkan kredensial Anda untuk mengakses dashboard.</p>
+      </div>
+
+      <!-- Error alert -->
+      {% if error %}
+      <div class="mb-6 flex items-center gap-3 bg-red-50 border border-red-100
+                  text-red-600 px-4 py-3 rounded-xl text-sm font-medium">
+        <span class="material-symbols-outlined text-base shrink-0"
+              style="font-variation-settings:'FILL' 1">error</span>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <!-- Form -->
+      <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-8">
+
+        <!-- Username -->
+        <div class="group relative">
+          <label class="block text-xs font-semibold text-gray-400 uppercase
+                        tracking-widest mb-1 transition-colors group-focus-within:text-primary">
+            Username
+          </label>
+          <div class="relative">
+            <input
+              name="username"
+              type="text"
+              autocomplete="username"
+              autofocus
+              placeholder="e.g. administrator"
+              value="{{ request.form.get('username', '') }}"
+              class="input-minimalist w-full text-base outline-none"
+              required
+            />
+            <span class="absolute right-0 top-1/2 -translate-y-1/2
+                         material-symbols-outlined text-gray-300 transition-colors
+                         group-focus-within:text-primary/50">person</span>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="group relative">
+          <label class="block text-xs font-semibold text-gray-400 uppercase
+                        tracking-widest mb-1 transition-colors group-focus-within:text-primary">
+            Password
+          </label>
+          <div class="relative">
+            <input
+              id="passwordInput"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              class="input-minimalist w-full text-base outline-none pr-8"
+              required
+            />
+            <!-- Toggle show/hide -->
+            <button type="button" onclick="togglePassword()"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300
+                           hover:text-gray-500 transition-colors focus:outline-none">
+              <span id="eyeIcon" class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-2">
+          <button type="submit"
+                  class="w-full bg-primary hover:bg-primary/90 text-white font-bold
+                         py-4 px-6 rounded-xl transition-all active:scale-[0.99]
+                         shadow-lg shadow-primary/20 flex items-center justify-center
+                         gap-2 group">
+            <span>Masuk ke Dashboard</span>
+            <span class="material-symbols-outlined text-white transition-transform
+                         group-hover:translate-x-1">arrow_forward</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Footer -->
+      <div class="mt-10 pt-8 border-t border-gray-100 text-center">
+        <p class="text-xs text-gray-400">
+          © 2024 Energy Monitoring System &mdash; 3-Phase Power Distribution
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function togglePassword() {
+    const input = document.getElementById('passwordInput');
+    const icon  = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility';
+    }
+  }
+</script>
+</body>
+</html>
