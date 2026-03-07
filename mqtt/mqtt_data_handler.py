@@ -104,7 +104,9 @@ class SensorDataHandler:
     def save_sensor_reading(sensor_id: int, data: dict, max_retries: int = 3):
         """
         Menyimpan data sensor ke database dengan retry mechanism.
-        Setelah commit berhasil, menjalankan alarm check otomatis.
+        Alarm check TIDAK dijalankan di sini — hanya dipanggil dari
+        flush_matured_buckets() saat data sudah final (nilai rata-rata
+        bucket penuh, bukan intermediate update).
         """
         required_keys = ['voltage', 'current', 'power', 'energy', 
                         'frequency', 'power_factor', 'peak_voltage', 'peak_current']
@@ -162,23 +164,20 @@ class SensorDataHandler:
                         f"@ {timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
                     )
 
-                    # ── ALARM CHECK ───────────────────────────────────────────
-                    # Dijalankan setelah commit berhasil menggunakan session
-                    # yang sama. Menggunakan session terpisah via get_session()
-                    # agar tidak mengganggu transaksi utama jika alarm gagal.
-                    if ALARM_CHECK_AVAILABLE:
-                        try:
-                            run_alarm_check(session, sensor_id, saved_reading)
-                        except Exception as alarm_err:
-                            # Alarm error TIDAK boleh membatalkan data yang
-                            # sudah tersimpan — cukup log saja
-                            logger.error(
-                                f"Alarm check failed for sensor {sensor_id}: {alarm_err}",
-                                exc_info=True
-                            )
-                    # ─────────────────────────────────────────────────────────
-
-                    return True
+                    # Return plain dict — aman dipakai setelah session.close()
+                    # SQLAlchemy object akan expired/detached setelah session ditutup
+                    return {
+                        'sensor_id':    sensor_id,
+                        'timestamp':    timestamp,
+                        'voltage':      float(data['voltage']),
+                        'current':      float(data['current']),
+                        'power':        float(data['power']),
+                        'energy':       float(data['energy']),
+                        'frequency':    float(data['frequency']),
+                        'power_factor': float(data['power_factor']),
+                        'peak_voltage': float(data['peak_voltage']),
+                        'peak_current': float(data['peak_current']),
+                    }
                     
                 except Exception as e:
                     session.rollback()
@@ -262,18 +261,38 @@ class AggregationBuffer:
     
     @staticmethod
     def flush_matured_buckets(sensor_id: int):
-        """Flush bucket yang sudah matang (lebih dari BUCKET_CUTOFF_SEC)"""
+        """
+        Flush bucket yang sudah matang.
+
+        Bucket dianggap matang jika:
+          1. Sudah melewati BUCKET_CUTOFF_SEC sejak awal bucket, DAN
+          2. Bucket timestamp + 60 detik < sekarang
+             (menjamin menit bucket sudah benar-benar berlalu)
+
+        Ini mencegah alarm check terjadi sebelum data final.
+        """
         now_ts = time.time()
         cutoff_time = now_ts - BUCKET_CUTOFF_SEC
-        
+
         with agg_lock:
             if sensor_id not in agg_buffer:
                 return
-            
+
             bucket_keys = list(agg_buffer[sensor_id].keys())
-            
+
             for b_key in bucket_keys:
+                # Kondisi 1: belum melewati BUCKET_CUTOFF_SEC
                 if b_key > cutoff_time:
+                    continue
+
+                # Kondisi 2: menit bucket belum selesai
+                # b_key adalah timestamp awal menit (detik=0),
+                # jadi b_key + 60 = awal menit berikutnya
+                if b_key + 60 > now_ts:
+                    logger.debug(
+                        f"Bucket {datetime.fromtimestamp(b_key).strftime('%H:%M')} "
+                        f"sensor {sensor_id} belum matang — menit belum selesai, skip"
+                    )
                     continue
                 
                 buf   = agg_buffer[sensor_id][b_key]
@@ -294,13 +313,25 @@ class AggregationBuffer:
                     }
                     
                     try:
-                        # save_sensor_reading sudah include alarm check di dalamnya
-                        SensorDataHandler.save_sensor_reading(sensor_id, averaged_data)
+                        # Data sudah final (bucket matang) — jalankan alarm check
+                        saved = SensorDataHandler.save_sensor_reading(sensor_id, averaged_data)
                         logger.info(
                             f"Flushed bucket for sensor {sensor_id}, "
                             f"time: {buf['timestamp_obj'].strftime('%H:%M')}, "
                             f"samples: {count}"
                         )
+                        # ── ALARM CHECK — hanya di sini, setelah data final ──
+                        if saved and ALARM_CHECK_AVAILABLE:
+                            try:
+                                alarm_session = get_session()
+                                run_alarm_check(alarm_session, sensor_id, saved)
+                                alarm_session.close()
+                            except Exception as alarm_err:
+                                logger.error(
+                                    f"Alarm check failed for sensor {sensor_id}: {alarm_err}",
+                                    exc_info=True
+                                )
+                        # ─────────────────────────────────────────────────────
                     except Exception as e:
                         logger.error(
                             f"Error flushing bucket for sensor {sensor_id}: {e}"
