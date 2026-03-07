@@ -29,7 +29,7 @@ class SensorThreshold(Base):
     # False → mode manual, user bisa ubah bebas
     auto_threshold_enabled = Column(Boolean, default=False, nullable=False)
 
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     # Relationship
     sensor = relationship("Sensor", back_populates="thresholds")
@@ -47,7 +47,7 @@ class SensorThreshold(Base):
             "current_min_enabled": self.current_min_enabled,
             "current_max_enabled": self.current_max_enabled,
             "auto_threshold_enabled": self.auto_threshold_enabled,
-            "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            "updated_at": self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
         }
 
     def __repr__(self):
