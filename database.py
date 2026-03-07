@@ -6,52 +6,66 @@ from config import Config
 # Create database engine
 engine = create_engine(
     Config.SQLALCHEMY_DATABASE_URI,
-    echo=False,  # Set True untuk debug SQL queries
-    pool_pre_ping=True,  # Verify connections before using
-    pool_size=Config.DB_POOL_MAXCONN,
-    max_overflow=10,
-    pool_recycle=3600  # Recycle connections after 1 hour
+    echo=False,
+    pool_pre_ping=True,       # verify connection sebelum dipakai
+    pool_size=20,             # koneksi persistent di pool
+    max_overflow=10,          # koneksi tambahan saat pool penuh (total max 30)
+    pool_recycle=1800,        # recycle tiap 30 menit (lebih agresif dari 1 jam)
+    pool_timeout=10,          # timeout tunggu koneksi dari pool (detik)
 )
 
-# Create session factory
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
-
-# Create scoped session for thread safety
+# Scoped session — dipakai untuk request Flask via close_db()
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db_session = scoped_session(SessionLocal)
 
-# Create declarative base for models
 Base = declarative_base()
 
 
-# ==================== HELPER FUNCTIONS ====================
+# ── Session helpers ───────────────────────────────────────────────────────────
 
 def get_session():
+    """
+    Buat session baru yang TIDAK terikat scoped_session.
+    Caller wajib menutup sendiri via session.close() atau pakai context manager.
+
+    Contoh pakai (wajib):
+        session = get_session()
+        try:
+            ...
+        finally:
+            session.close()   # kembalikan koneksi ke pool
+
+    Atau pakai context manager:
+        with get_session() as session:
+            ...
+    """
     return SessionLocal()
 
 
+def get_request_session():
+    """
+    Session yang terikat ke Flask request context (scoped).
+    Otomatis di-remove oleh close_db() di teardown_appcontext.
+    Gunakan ini di dalam route/controller Flask.
+    """
+    return db_session()
+
+
 def close_db(exception=None):
+    """
+    Dipanggil oleh @app.teardown_appcontext.
+    Remove scoped session — kembalikan koneksi ke pool.
+    """
     db_session.remove()
 
 
 def init_db():
-    # Import all models to ensure they are registered
     from models.data import Sensor, SensorReading, SensorThreshold, AlarmEvent
     from models.building import Building
     from models.views import HourlyEnergyView, DailyEnergyView
-    
-    # Create all tables
+
     Base.metadata.create_all(bind=engine)
     print("✓ Database tables created successfully")
 
 
-# def drop_db():
-#     Base.metadata.drop_all(bind=engine)
-#     print("✓ All tables dropped")
-
-
-# Alias for compatibility
 db = Base
