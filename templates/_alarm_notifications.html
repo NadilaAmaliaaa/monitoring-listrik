@@ -1,5 +1,6 @@
 <!--
   templates/_alarm_notifications.html
+  Include SEKALI di base template — SSE connection dibagi semua halaman.
 -->
 
 <!-- Toast Container -->
@@ -11,7 +12,11 @@
 (function () {
   const TOAST_DURATION = 6000;
   const MAX_TOASTS     = 5;
-  const RECONNECT_MS   = 3000;
+  const RECONNECT_MS   = 5000;
+
+  // ── Cegah duplikasi jika script ter-load lebih dari sekali ────────────────
+  if (window.__alarmNotifInit) return;
+  window.__alarmNotifInit = true;
 
   // Konfigurasi visual per severity
   const cfg = {
@@ -25,7 +30,6 @@
       wrap: 'bg-amber-50 border-amber-200',
       iconWrap: 'bg-amber-100', iconColor: 'text-amber-500', title: 'text-amber-800',
     },
-    // is_resolved=true → severity "resolved"
     resolved: {
       icon: 'check_circle', bar: 'bg-emerald-400',
       wrap: 'bg-emerald-50 border-emerald-200',
@@ -34,27 +38,68 @@
   };
 
   // ── SSE ────────────────────────────────────────────────────────────────────
-  let evtSource = null;
+  // Simpan di window agar tidak dibuat ulang jika halaman di-render ulang
+  // tapi script ter-load lagi (misal Turbo/HTMX partial reload)
+  let reconnectTimer = null;
 
   function connect() {
-    if (evtSource) evtSource.close();
-    evtSource = new EventSource('/notifications/stream');
+    // Jika sudah ada koneksi aktif — jangan buat baru
+    if (window.__sseSource &&
+        window.__sseSource.readyState !== EventSource.CLOSED) {
+      return;
+    }
 
-    evtSource.onmessage = function (e) {
+    // Tutup koneksi lama jika masih ada (readyState CLOSED tapi object masih ada)
+    if (window.__sseSource) {
+      window.__sseSource.close();
+      window.__sseSource = null;
+    }
+
+    const src = new EventSource('/notifications/stream');
+    window.__sseSource = src;
+
+    src.onopen = function () {
+      // Koneksi berhasil — batalkan timer reconnect jika ada
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+    };
+
+    src.onmessage = function (e) {
       try {
         const data = JSON.parse(e.data);
         if (data.type === 'alarm') {
           showToast(data);
           refreshAlarmBadge();
         }
+        // heartbeat & connected diabaikan — tidak perlu aksi
       } catch (_) {}
     };
 
-    evtSource.onerror = function () {
-      evtSource.close();
-      setTimeout(connect, RECONNECT_MS);
+    src.onerror = function () {
+      // Jangan langsung close + reconnect — beri waktu server cleanup
+      // EventSource browser sudah punya auto-reconnect bawaan,
+      // tapi kita override agar intervalnya lebih terkontrol
+      src.close();
+      window.__sseSource = null;
+
+      if (!reconnectTimer) {
+        reconnectTimer = setTimeout(function () {
+          reconnectTimer = null;
+          connect();
+        }, RECONNECT_MS);
+      }
     };
   }
+
+  // Tutup SSE saat tab/halaman di-unload agar server dapat GeneratorExit segera
+  window.addEventListener('beforeunload', function () {
+    if (window.__sseSource) {
+      window.__sseSource.close();
+      window.__sseSource = null;
+    }
+  });
 
   // ── Toast ──────────────────────────────────────────────────────────────────
   function showToast(alarm) {
@@ -64,12 +109,11 @@
     const existing = container.querySelectorAll('.alarm-toast');
     if (existing.length >= MAX_TOASTS) existing[0].remove();
 
-    const c      = cfg[alarm.severity] || cfg.warning;
-    const unit   = { voltage: 'V', current: 'A', frequency: 'Hz', power_factor: '' }[alarm.parameter] || '';
-    const phase  = alarm.phase ? `Fasa ${alarm.phase}` : '';
-    const tid    = `toast-${Date.now()}`;
+    const c     = cfg[alarm.severity] || cfg.warning;
+    const unit  = { voltage: 'V', current: 'A', frequency: 'Hz', power_factor: '' }[alarm.parameter] || '';
+    const phase = alarm.phase ? `Fasa ${alarm.phase}` : '';
+    const tid   = `toast-${Date.now()}`;
 
-    // Beda layout untuk alarm aktif vs resolved
     const bodyHtml = alarm.is_resolved
       ? `
         <p class="text-sm font-bold ${c.title}">Kondisi Normal — ${phase}</p>
@@ -116,13 +160,11 @@
 
     container.appendChild(toast);
 
-    // Progress bar
     requestAnimationFrame(() => {
       const bar = document.getElementById(`bar-${tid}`);
       if (bar) bar.style.transform = 'scaleX(0)';
     });
 
-    // Auto-dismiss
     setTimeout(() => {
       toast.style.cssText = 'opacity:0;transition:opacity .3s ease';
       setTimeout(() => toast.remove(), 300);
@@ -136,7 +178,6 @@
       .then(data => {
         const badge = document.getElementById('alarmNavBadge');
         if (!badge) return;
-        // Badge hanya hitung alarm yang masih aktif (is_normal=False)
         const count = data.active_count ?? data.total_today ?? 0;
         badge.textContent = count > 99 ? '99+' : count;
         badge.classList.toggle('hidden', count === 0);
@@ -158,6 +199,7 @@
     }
   </style>`);
 
+  // Mulai koneksi SSE
   connect();
 })();
 </script>
