@@ -170,6 +170,10 @@ def create_app():
         # SSE stream butuh koneksi panjang — jangan redirect
         if flask_request.path == '/notifications/stream':
             return
+        
+        if flask_request.path.startswith('/api'):
+            if 'user_id' not in session:
+                return jsonify({'error': 'Unauthorized'}), 401
 
         if 'user_id' not in session:
             # API request → kembalikan 401 JSON bukan redirect HTML
