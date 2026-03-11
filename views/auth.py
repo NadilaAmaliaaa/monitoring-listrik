@@ -68,6 +68,8 @@ def login():
                 user = db.query(User).filter(User.username == username).first()
 
                 if user and user.check_password(password):
+                    # Hapus session lama untuk mencegah race condition
+                    session.clear()
                     # Ambil data building user untuk disimpan ke session
                     # agar context_processor tidak perlu query DB setiap request
                     building = db.query(Building).get(user.building_id)
@@ -98,14 +100,27 @@ def login():
 
     return render_template('login.html', error=error)
 
-
 @auth_bp.route('/logout')
 def logout():
-    # Hapus semua key session secara eksplisit + clear()
-    # Mencegah context_processor re-inject building_id setelah logout
-    for key in ('user_id', 'user_name', 'username', 'building_id', 'next'):
-        session.pop(key, None)
     session.clear()
-    # modified=True memastikan Flask benar-benar kirim Set-Cookie untuk invalidasi
-    session.modified = True
-    return redirect(url_for('auth.login'))
+
+    resp = redirect(url_for('auth.login'))
+    resp.delete_cookie('session')
+
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+
+    return resp
+
+
+# @auth_bp.route('/logout')
+# def logout():
+#     # Hapus semua key session secara eksplisit + clear()
+#     # Mencegah context_processor re-inject building_id setelah logout
+#     for key in ('user_id', 'user_name', 'username', 'building_id', 'next'):
+#         session.pop(key, None)
+#     session.clear()
+#     # modified=True memastikan Flask benar-benar kirim Set-Cookie untuk invalidasi
+#     session.modified = True
+#     return redirect(url_for('auth.login'))
