@@ -326,22 +326,53 @@
 // ==================== CONFIGURATION ====================
 
 const API = {
-  // REALTIME data dari MQTT (via realtime_store)
   voltage: '/api/dashboard/voltage',
   current: '/api/dashboard/current',
-  
-  // AGREGASI data dari Database
   summary: '/api/dashboard/summary',
   powerFactor: '/api/dashboard/power-factor',
   statistics: '/api/dashboard/statistics'
 };
 
 const INTERVALS = {
-  realtime: 1000,    // 1 second - untuk voltage/current dari MQTT
-  summary: 5000,     // 5 seconds - untuk summary dari DB
-  statistics: 30000  // 30 seconds - untuk statistics dari DB
+  realtime: 1000,
+  summary: 5000,
+  statistics: 30000
 };
 
+let intervalIds = [];
+
+function startIntervals() {
+
+  stopIntervals(); // pastikan tidak duplicate
+
+  intervalIds.push(setInterval(fetchRealtimeVoltage, INTERVALS.realtime));
+  intervalIds.push(setInterval(fetchRealtimeCurrent, INTERVALS.realtime));
+  intervalIds.push(setInterval(fetchSummary, INTERVALS.summary));
+  intervalIds.push(setInterval(fetchPowerFactor, INTERVALS.summary));
+  intervalIds.push(setInterval(fetchStatistics, INTERVALS.statistics));
+}
+
+function stopIntervals() {
+  intervalIds.forEach(id => clearInterval(id));
+  intervalIds = [];
+}
+
+async function safeFetch(url) {
+  const response = await fetch(url, { credentials: "same-origin" });
+
+  if (response.status === 401) {
+    console.warn("Session expired. Redirecting to login...");
+    stopIntervals();
+    window.location.replace("/auth/login");
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error("Request failed");
+  }
+
+  return response.json();
+}
 // ==================== REALTIME VOLTAGE UPDATE (dari MQTT) ====================
 
 async function fetchRealtimeVoltage() {
@@ -681,11 +712,9 @@ function updateProgressBar(elementId, percentage) {
 // ==================== INITIALIZATION ====================
 
 async function initDashboard() {
-  console.log('🚀 Initializing dashboard...');
-  console.log('📡 Realtime data: Voltage & Current from MQTT');
-  console.log('📊 Agregasi data: Summary & Statistics from Database');
-  
-  // Initial fetch
+
+  console.log("Initializing dashboard");
+
   await Promise.all([
     fetchRealtimeVoltage(),
     fetchRealtimeCurrent(),
@@ -693,22 +722,11 @@ async function initDashboard() {
     fetchPowerFactor(),
     fetchStatistics()
   ]);
-  
-  // Setup intervals
-  setInterval(fetchRealtimeVoltage, INTERVALS.realtime);
-  setInterval(fetchRealtimeCurrent, INTERVALS.realtime);
-  setInterval(fetchSummary, INTERVALS.summary);
-  setInterval(fetchPowerFactor, INTERVALS.summary);
-  setInterval(fetchStatistics, INTERVALS.statistics);
-  
-  console.log('✅ Dashboard initialized');
-  console.log(`   Realtime update: ${INTERVALS.realtime}ms`);
-  console.log(`   Summary update: ${INTERVALS.summary}ms`);
-  console.log(`   Statistics update: ${INTERVALS.statistics}ms`);
+
+  startIntervals();
 }
 
-// Start when page loads
-document.addEventListener('DOMContentLoaded', initDashboard);
+document.addEventListener("DOMContentLoaded", initDashboard);
 
 // Handle visibility change
 document.addEventListener('visibilitychange', () => {
@@ -717,5 +735,13 @@ document.addEventListener('visibilitychange', () => {
     initDashboard();
   }
 });
+
+function handleLogout() {
+
+  stopIntervals();
+
+  window.location.href = "/auth/logout";
+
+}
 </script>
 {% endblock %}
