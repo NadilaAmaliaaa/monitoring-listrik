@@ -33,7 +33,7 @@ def create_app():
 
     app = Flask(__name__)
     app.config.from_object(Config)
-
+    
     # ── Secret key & session lifetime ─────────────────────────────────────────
     if not app.config.get('SECRET_KEY'):
         app.secret_key = 'ganti-dengan-string-acak-panjang-di-env'
@@ -121,6 +121,10 @@ def create_app():
         from views.dashboard import dashboard_bp
         app.register_blueprint(dashboard_bp)
         logger.info("✓ Dashboard blueprint registered")
+        
+        from views.analytics import analytics_bp
+        app.register_blueprint(analytics_bp)
+        logger.info("✓ Analytics blueprint registered")
 
         from views.reports import reports_bp
         app.register_blueprint(reports_bp, url_prefix='/reports')
