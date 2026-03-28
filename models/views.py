@@ -29,6 +29,9 @@ class DailyEnergyView(Base):
     total_energy_kwh = Column(Float)
     avg_power = Column(Float)
     peak_power = Column(Float)
+    avg_pf = Column(Float)
+    total_current = Column(Float)
+    avg_voltage = Column(Float)
     total_cost = Column(Float)
 
     def __repr__(self):
