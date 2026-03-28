@@ -270,6 +270,17 @@ function formatDuration(seconds) {
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
+  function parseServerTimestamp(ts) {
+    if (!ts) return null;
+
+    // ubah spasi menjadi T
+    let iso = ts.replace(' ', 'T');
+
+    // ubah timezone +07 -> +07:00
+    iso = iso.replace(/([+-]\d{2})$/, '$1:00');
+
+    return new Date(iso);
+  }
 
   function renderTable(data) {
     const tbody = document.getElementById('alarmTableBody');
@@ -323,7 +334,7 @@ function formatDuration(seconds) {
           : `<span class="text-xs text-slate-300">—</span>`;
       } else {
         // Hitung elapsed secara realtime di client
-        const startTs = new Date(alarm.timestamp.replace(' ', 'T')).getTime();
+        const startTs = parseServerTimestamp(alarm.timestamp).getTime();
         const elapsed = Math.floor((Date.now() - startTs) / 1000);
         durasiHtml = `
           <span class="inline-flex items-center gap-1 text-xs font-mono text-amber-600"
@@ -379,7 +390,7 @@ function formatDuration(seconds) {
 
     tickerInterval = setInterval(() => {
       document.querySelectorAll('[data-start]').forEach(el => {
-        const startTs = new Date(el.dataset.start.replace(' ', 'T')).getTime();
+        const startTs = parseServerTimestamp(el.dataset.start).getTime();
         const elapsed = Math.floor((Date.now() - startTs) / 1000);
         // Ganti teks tapi pertahankan icon spin
         const icon = el.querySelector('.material-symbols-outlined');

@@ -18,7 +18,7 @@ Keuntungan:
     - query "alarm aktif" cukup: WHERE is_normal=False
 """
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from models.alarm import AlarmEvent
 from models.threshold2 import SensorThreshold
 
@@ -105,7 +105,7 @@ class AlarmService:
             # NORMAL → ABNORMAL : INSERT alarm baru
             event = AlarmEvent(
                 sensor_id=sensor_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 parameter=parameter,
                 actual_value=actual_value,
                 threshold_min=threshold_min,
@@ -126,7 +126,7 @@ class AlarmService:
 
         elif not is_abnormal and active_alarm is not None:
             # ABNORMAL → NORMAL : UPDATE row yang sama (resolve)
-            active_alarm.resolve(resolved_at=datetime.utcnow())
+            active_alarm.resolve(resolved_at=datetime.now(timezone.utc))
             self.session.commit()
             self.session.refresh(active_alarm)
 
