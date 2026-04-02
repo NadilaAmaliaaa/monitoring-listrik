@@ -4,7 +4,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block page_title %}Dashboard Utama{% endblock %}
-{% block page_subtitle %}Real-time 3-Phase Monitoring System{% endblock %}
+{% block page_subtitle %}Sistem Monitoring Tiga Fasa Real-time{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -46,14 +46,14 @@
       </div>
       <div class="flex items-center gap-2 mb-2">
         <span class="material-symbols-outlined text-slate-400 text-xl">speed</span>
-        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Frequency</h3>
+        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Frekuensi</h3>
       </div>
       <div>
         <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
           <span id="frequency-value" class="transition-all">--</span>
           <span class="text-lg text-slate-400 font-normal">Hz</span>
         </p>
-        <p class="text-slate-500 text-sm mt-1">Grid Standard Stability</p>
+        <p class="text-slate-500 text-sm mt-1">Nilai Normal 50Hz</p>
       </div>
     </div>
 
@@ -62,18 +62,18 @@
       <div class="absolute -right-6 -top-6 bg-white/10 rounded-full size-32 blur-2xl"></div>
       <div class="flex items-center gap-2 mb-2 relative z-10">
         <span class="material-symbols-outlined text-white/80 text-xl">offline_bolt</span>
-        <h3 class="text-white/80 text-sm font-medium uppercase tracking-wider">Total Power</h3>
+        <h3 class="text-white/80 text-sm font-medium uppercase tracking-wider">Total Daya</h3>
       </div>
       <div class="relative z-10">
         <p class="text-white text-3xl font-bold tracking-tight tabular-nums">
           <span id="power-value" class="transition-all">--</span>
-          <span class="text-lg text-white/70 font-normal">kW</span>
+          <span class="text-lg text-white/70 font-normal">W</span>
         </p>
         <div class="w-full bg-black/10 rounded-full h-1 mt-3 overflow-hidden">
           <div id="power-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 0%"></div>
         </div>
         <p class="text-white/70 text-xs mt-1 text-right">
-          <span id="power-percentage">0</span>% Load
+          <span id="power-percentage">0</span>% Beban
         </p>
       </div>
     </div>
@@ -85,7 +85,7 @@
       </div>
       <div class="flex items-center gap-2 mb-2">
         <span class="material-symbols-outlined text-slate-400 text-xl">savings</span>
-        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Energy</h3>
+        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Energi</h3>
       </div>
       <div>
         <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
@@ -93,7 +93,7 @@
           <span class="text-lg text-slate-400 font-normal">kWh</span>
         </p>
         <p class="text-slate-500 text-sm mt-1 flex items-center gap-1">
-          <span class="text-emerald-600 font-bold">+12%</span> vs last month
+          <span class="text-emerald-600 font-bold">+12%</span> vs bulan lalu
         </p>
       </div>
     </div>
@@ -106,7 +106,7 @@
       <div class="flex items-center justify-between">
         <h3 class="text-slate-900 text-lg font-bold flex items-center gap-2">
           <span class="material-symbols-outlined text-primary">bolt</span>
-          Voltage (Phase-Neutral)
+          Tegangan (Voltage)
         </h3>
         <div class="flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">
           <span class="size-1.5 rounded-full bg-emerald-500 animate-live-pulse"></span>
@@ -118,7 +118,7 @@
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-r shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase R</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Fasa R</span>
             <span class="bg-red-50 text-phase-r text-[10px] px-1.5 py-0.5 rounded font-bold border border-red-100">L1</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
@@ -129,7 +129,7 @@
         
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-s shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase S</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Fasa S</span>
             <span class="bg-yellow-50 text-phase-s text-[10px] px-1.5 py-0.5 rounded font-bold border border-yellow-100">L2</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
@@ -140,7 +140,7 @@
         
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-l-4 border-l-phase-t shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase T</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Fasa T</span>
             <span class="bg-blue-50 text-phase-t text-[10px] px-1.5 py-0.5 rounded font-bold border border-blue-100">L3</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
@@ -153,7 +153,7 @@
       <!-- Power Usage Chart (Realtime) -->
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 h-64 flex flex-col">
         <div class="flex justify-between items-center mb-4">
-          <span class="text-slate-500 text-sm font-medium">Realtime Power Usage (W)</span>
+          <span class="text-slate-500 text-sm font-medium">Realtime Penggunaan Daya (W)</span>
           <div class="flex gap-4">
             <div class="flex items-center gap-1.5">
               <span class="size-2 rounded-full bg-phase-r"></span>
@@ -185,7 +185,7 @@
       <div class="flex items-center justify-between">
         <h3 class="text-slate-900 text-lg font-bold flex items-center gap-2">
           <span class="material-symbols-outlined text-primary">electrical_services</span>
-          Current (Amperage)
+          Arus (Current)
         </h3>
         <div class="flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">
           <span class="size-1.5 rounded-full bg-emerald-500 animate-live-pulse"></span>
@@ -197,7 +197,7 @@
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-r shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase R</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Fasa R</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
             <span id="current-r" class="transition-all">--</span>
@@ -210,7 +210,7 @@
         
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-s shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase S</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Fasa S</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
             <span id="current-s" class="transition-all">--</span>
@@ -223,7 +223,7 @@
         
         <div class="bg-white p-4 rounded-xl border border-slate-200 border-t-4 border-t-phase-t shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-slate-400 text-[10px] font-bold uppercase">Phase T</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase">Fasa T</span>
           </div>
           <p class="text-slate-900 text-2xl lg:text-3xl font-bold tabular-nums">
             <span id="current-t" class="transition-all">--</span>
@@ -239,7 +239,7 @@
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex items-center justify-between h-64">
         <div class="flex flex-col gap-4">
           <div>
-            <h4 class="text-slate-500 text-[10px] uppercase font-bold mb-1">Power Factor Summary</h4>
+            <h4 class="text-slate-500 text-[10px] uppercase font-bold mb-1">Ringkasan Power Factor</h4>
             <p class="text-slate-900 text-3xl font-bold tabular-nums">
               <span id="pf-value" class="transition-all">--</span>
             </p>
@@ -249,10 +249,10 @@
             </span>
           </div>
           <div class="flex gap-4">
-            <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+            <!-- <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
               <p class="text-slate-400 text-[10px] uppercase font-bold">Type</p>
               <p class="text-slate-900 text-sm font-medium">Lagging</p>
-            </div>
+            </div> -->
             <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
               <p class="text-slate-400 text-[10px] uppercase font-bold">Target</p>
               <p class="text-slate-900 text-sm font-medium">&gt; 0.90</p>
@@ -266,7 +266,7 @@
           </svg>
           <div class="absolute flex flex-col items-center">
             <span id="pf-percentage" class="text-3xl font-bold text-slate-900 tabular-nums transition-all">--</span>
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Efficiency</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Efisien</span>
           </div>
         </div>
       </div>
@@ -278,17 +278,17 @@
     <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
       <h3 class="text-slate-900 text-base font-bold flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">analytics</span>
-        Phase Statistics Summary (24h)
+        Ringkasan Statistik Fasa (24h)
       </h3>
       <div class="flex gap-4">
         <span class="flex items-center gap-2 text-[10px] font-bold text-phase-r">
-          <span class="size-2 rounded-full bg-phase-r"></span> PHASE R
+          <span class="size-2 rounded-full bg-phase-r"></span> FASA R
         </span>
         <span class="flex items-center gap-2 text-[10px] font-bold text-phase-s">
-          <span class="size-2 rounded-full bg-phase-s"></span> PHASE S
+          <span class="size-2 rounded-full bg-phase-s"></span> FASA S
         </span>
         <span class="flex items-center gap-2 text-[10px] font-bold text-phase-t">
-          <span class="size-2 rounded-full bg-phase-t"></span> PHASE T
+          <span class="size-2 rounded-full bg-phase-t"></span> FASA T
         </span>
       </div>
     </div>
@@ -297,10 +297,10 @@
         <thead>
           <tr class="bg-slate-50">
             <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">Parameter</th>
-            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">Phase</th>
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">Fasa</th>
             <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Minimum</th>
             <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Maximum</th>
-            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Average</th>
+            <th class="px-6 py-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Rata-rata</th>
           </tr>
         </thead>
         <tbody id="statistics-tbody" class="divide-y divide-slate-100">
@@ -496,13 +496,13 @@ async function fetchPowerFactor() {
     // Update status
     let status, statusColor;
     if (avgPF >= 0.95) {
-      status = 'Excellent';
+      status = 'Sangat Baik';
       statusColor = 'text-emerald-600';
     } else if (avgPF >= 0.90) {
-      status = 'Optimized';
+      status = 'Baik';
       statusColor = 'text-blue-600';
     } else {
-      status = 'Need Improvement';
+      status = 'Perlu Peningkatan';
       statusColor = 'text-orange-600';
     }
     
@@ -531,22 +531,22 @@ async function fetchStatistics() {
         <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-sm">bolt</span>
-            Voltage (V)
+            Tegangan (V)
           </div>
         </td>
-        <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
+        <td class="px-6 py-4 text-phase-r text-[10px] font-bold">Fasa R</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.voltage?.min || '--'}</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.voltage?.max || '--'}</td>
         <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.R?.voltage?.avg || '--'}</td>
       </tr>
       <tr class="hover:bg-slate-50/50 transition-colors">
-        <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
+        <td class="px-6 py-4 text-phase-s text-[10px] font-bold">Fasa S</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.voltage?.min || '--'}</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.voltage?.max || '--'}</td>
         <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.S?.voltage?.avg || '--'}</td>
       </tr>
       <tr class="hover:bg-slate-50/50 transition-colors">
-        <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
+        <td class="px-6 py-4 text-phase-t text-[10px] font-bold">Fasa T</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.voltage?.min || '--'}</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.voltage?.max || '--'}</td>
         <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.T?.voltage?.avg || '--'}</td>
@@ -557,22 +557,22 @@ async function fetchStatistics() {
         <td class="px-6 py-4 text-slate-900 text-sm font-semibold align-top" rowspan="3">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-sm">electrical_services</span>
-            Current (A)
+            Arus (A)
           </div>
         </td>
-        <td class="px-6 py-4 text-phase-r text-[10px] font-bold">L1 - PHASE R</td>
+        <td class="px-6 py-4 text-phase-r text-[10px] font-bold">Fasa R</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.current?.min || '--'}</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.R?.current?.max || '--'}</td>
         <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.R?.current?.avg || '--'}</td>
       </tr>
       <tr class="hover:bg-slate-50/50 transition-colors">
-        <td class="px-6 py-4 text-phase-s text-[10px] font-bold">L2 - PHASE S</td>
+        <td class="px-6 py-4 text-phase-s text-[10px] font-bold">Fasa S</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.current?.min || '--'}</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.S?.current?.max || '--'}</td>
         <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.S?.current?.avg || '--'}</td>
       </tr>
       <tr class="hover:bg-slate-50/50 transition-colors">
-        <td class="px-6 py-4 text-phase-t text-[10px] font-bold">L3 - PHASE T</td>
+        <td class="px-6 py-4 text-phase-t text-[10px] font-bold">Fasa T</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.current?.min || '--'}</td>
         <td class="px-6 py-4 text-slate-700 text-sm tabular-nums text-center">${data.T?.current?.max || '--'}</td>
         <td class="px-6 py-4 text-slate-900 text-sm tabular-nums text-center font-bold">${data.T?.current?.avg || '--'}</td>
