@@ -16,7 +16,7 @@ from database import get_session
 from models.data import Sensor, SensorReading
 from models.building import Building
 from models.alarm import AlarmEvent
-from models.views import DailyEnergyView
+from models.views import HourlyEnergyView, DailyEnergyView
 
 logger = logging.getLogger(__name__)
 
@@ -93,8 +93,11 @@ class ViewModeController:
 
                 # ── Realtime per fasa ──────────────────────────────────────
                 sensor_rows = []
+                dept = realtime.get(f"department{bld.id}", {})
+
                 for s in sensors:
-                    rt = realtime.get(s.id) or realtime.get(str(s.id)) or {}
+                    rt = dept.get(s.phase) or {}
+
                     sensor_rows.append({
                         'phase':   s.phase or s.name,
                         'voltage': round(float(rt.get('voltage', 0)), 1),
@@ -105,12 +108,11 @@ class ViewModeController:
                 # ── Energi hari ini ────────────────────────────────────────
                 day_rows = (
                     db.query(
-                        func.sum(DailyEnergyView.total_energy_kwh).label('kwh'),
-                        func.sum(DailyEnergyView.total_cost).label('cost'),
+                        func.sum(HourlyEnergyView.total_kwh).label('kwh'),
                     )
                     .filter(
-                        DailyEnergyView.sensor_id.in_(sensor_ids),
-                        DailyEnergyView.date == today,
+                        HourlyEnergyView.sensor_id.in_(sensor_ids),
+                        func.date(HourlyEnergyView.date) == today,
                     )
                     .first()
                 )
@@ -212,33 +214,42 @@ class ViewModeController:
     # ── Summary: keseimbangan fasa ────────────────────────────────────────────
 
     def get_phase_balance(self) -> list:
-        """
-        Arus per fasa (realtime) per building + persentase imbalance.
-        """
         db = get_session()
         try:
-            realtime  = _realtime_all()
+            today = date.today()
+
             buildings = db.query(Building).order_by(Building.id).all()
-            results   = []
+            results = []
 
             for bld in buildings:
                 sensors = (
                     db.query(Sensor)
                     .filter(Sensor.building_id == bld.id)
-                    .order_by(Sensor.name)
                     .all()
                 )
 
                 phase_current = {'R': 0.0, 'S': 0.0, 'T': 0.0}
+
                 for s in sensors:
-                    rt = realtime.get(s.id) or realtime.get(str(s.id)) or {}
-                    ph = (s.phase or 'R').upper()
+                    ph = (s.phase or 'R').strip().upper()
+
+                    # 🔥 agregasi dari hourly
+                    avg_current = (
+                        db.query(func.avg(HourlyEnergyView.avg_current))
+                        .filter(
+                            HourlyEnergyView.sensor_id == s.id,
+                            func.date(HourlyEnergyView.date) == today
+                        )
+                        .scalar()
+                    )
+
                     if ph in phase_current:
-                        phase_current[ph] = round(float(rt.get('current', 0)), 1)
+                        phase_current[ph] = round(float(avg_current or 0), 2)
 
                 vals = list(phase_current.values())
                 max_v = max(vals) if vals else 0
                 min_v = min(vals) if vals else 0
+
                 imbalance_pct = round((max_v - min_v) / max_v * 100, 1) if max_v > 0 else 0
 
                 results.append({
@@ -247,7 +258,7 @@ class ViewModeController:
                     'phase_S':        phase_current['S'],
                     'phase_T':        phase_current['T'],
                     'imbalance_pct':  imbalance_pct,
-                    'is_ok':          imbalance_pct < 10.0,
+                    'is_ok':          imbalance_pct < 5.0,
                 })
 
             return results
@@ -261,22 +272,26 @@ class ViewModeController:
     # ── Summary: distribusi beban ─────────────────────────────────────────────
 
     def get_load_distribution(self) -> dict:
-        """
-        Energi hari ini per building untuk bar chart distribusi beban.
-        """
         db = get_session()
         try:
             today = date.today()
-            rows  = (
+
+            start = datetime.combine(today, datetime.min.time())
+            end   = datetime.combine(today, datetime.max.time())
+
+            rows = (
                 db.query(
                     Building.name.label('building_name'),
-                    func.sum(DailyEnergyView.total_energy_kwh).label('kwh'),
+                    func.sum(HourlyEnergyView.total_kwh).label('kwh'),
                 )
-                .join(Sensor,         Building.id == Sensor.building_id)
-                .join(DailyEnergyView, Sensor.id  == DailyEnergyView.sensor_id)
-                .filter(DailyEnergyView.date == today)
+                .join(Sensor, Building.id == Sensor.building_id)
+                .join(HourlyEnergyView, Sensor.id == HourlyEnergyView.sensor_id)
+                .filter(
+                    HourlyEnergyView.date >= start,
+                    HourlyEnergyView.date <= end
+                )
                 .group_by(Building.id, Building.name)
-                .order_by(func.sum(DailyEnergyView.total_energy_kwh).desc())
+                .order_by(func.sum(HourlyEnergyView.total_kwh).desc())
                 .all()
             )
 
@@ -284,9 +299,10 @@ class ViewModeController:
                 {'name': r.building_name, 'kwh': round(float(r.kwh or 0), 2)}
                 for r in rows
             ]
-            total    = sum(b['kwh'] for b in buildings)
-            max_kwh  = buildings[0]['kwh'] if buildings else 1
-            top_pct  = round(buildings[0]['kwh'] / total * 100, 1) if total > 0 else 0
+
+            total   = sum(b['kwh'] for b in buildings)
+            max_kwh = buildings[0]['kwh'] if buildings else 1
+            top_pct = round(buildings[0]['kwh'] / total * 100, 1) if total > 0 else 0
 
             return {
                 'buildings': buildings,
@@ -298,6 +314,12 @@ class ViewModeController:
 
         except Exception as e:
             logger.error(f"get_load_distribution error: {e}", exc_info=True)
-            return {'buildings': [], 'total_kwh': 0, 'max_kwh': 1, 'top_name': '-', 'top_pct': 0}
+            return {
+                'buildings': [],
+                'total_kwh': 0,
+                'max_kwh': 1,
+                'top_name': '-',
+                'top_pct': 0
+            }
         finally:
             db.close()
