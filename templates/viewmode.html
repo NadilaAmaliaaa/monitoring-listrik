@@ -76,12 +76,12 @@
     }
 
     /* alarm panel */
-    .alarm-card{background:#fff;border:1px solid #fca5a5;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .alarm-card{background:#fff;border:1px solid #fca5a5;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,.06);max-height: 100%;}
     .alarm-card-header{padding:7px 12px;background:#fef2f2;border-bottom:1px solid #fecaca;display:flex;align-items:center;gap:7px;flex-shrink:0}
     .alarm-pulse-dot{width:7px;height:7px;border-radius:50%;background:#dc2626;animation:blink 1s ease-in-out infinite;flex-shrink:0}
     .alarm-card-title{font-size:10px;font-weight:800;color:#b91c1c;letter-spacing:.04em;flex:1}
     .alarm-count-badge{font-size:9px;font-weight:800;background:#dc2626;color:#fff;padding:1px 6px;border-radius:9999px}
-    .alarm-list{flex:1;overflow-y:auto}
+    .alarm-list{flex:1;overflow-y:auto;max-height: 100%;}
     .alarm-item{display:flex;flex-direction:column;gap:2px;padding:6px 12px;border-bottom:1px solid #fff5f5}
     .alarm-item:last-child{border-bottom:none}
     .alarm-item-row{display:flex;align-items:center;gap:6px}
@@ -354,7 +354,7 @@
         const grid = document.getElementById('building-grid');
 
         // Sesuaikan jumlah kolom dengan jumlah building (max 4)
-        const cols = Math.min(list.length, 4);
+        const cols = Math.min(list.length+1, 4);
         grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
 
         // Jika > 4 building, tambah baris kedua
@@ -362,16 +362,87 @@
           grid.style.gridTemplateRows = 'repeat(2,1fr)';
         }
 
-        grid.innerHTML = list.map(buildingCard).join('');
+        // grid.innerHTML = list.map(buildingCard).join('');
+        let html = list.map(buildingCard).join('');
+
+        // tambahkan alarm card di akhir
+        html += alarmCard(); 
+
+        grid.innerHTML = html;
+
+        setTimeout(loadAlarms, 100);
       }).catch(()=>{});
   }
 
-  // ── Alarm Panel (dalam grid kolom terakhir jika slot tersedia) ────────────
-  // Alarm ditampilkan sebagai overlay kecil di pojok kanan atas jika ada
-  function loadAlarms() {
-    // Alarm sudah ter-reflect di card state (warna merah/kuning)
-    // Panel terpisah tidak ada di layout ini — info sudah di card
+  // ── Alarm Panel 
+
+    function formatAlarmMessage(a) {
+    const paramMap = {
+      voltage: 'Tegangan',
+      current: 'Arus',
+      power: 'Daya'
+    };
+
+    const param = paramMap[a.parameter] || a.parameter;
+
+    // contoh hasil:
+    // Arus terlalu rendah (4.9 A) di bawah batas minimum 5 A
+    if (a.actual_value < a.threshold_min) {
+      return `${param} terlalu rendah (${a.actual_value.toFixed(1)}) di bawah batas minimum ${a.threshold_min}`;
+    }
+
+    if (a.actual_value > a.threshold_max) {
+      return `${param} terlalu tinggi (${a.actual_value.toFixed(1)}) melebihi batas maksimum ${a.threshold_max}`;
+    }
+
+    // fallback
+    return `${a.status} (${param}: ${a.actual_value})`;
   }
+
+ function loadAlarms() {
+  fetch('/api/view/alarms') // endpoint kamu
+    .then(r => r.json())
+    .then(list => {
+      const container = document.getElementById('alarm-list');
+      const countEl   = document.getElementById('alarm-count');
+
+      if (!container || !countEl) return;
+
+      countEl.textContent = list.length;
+
+      if (!list.length) {
+        container.innerHTML = `<div class="alarm-empty">Tidak ada alarm</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(a => `
+        <div class="alarm-item">
+          <div class="alarm-item-row">
+            <span class="alarm-building">${a.building_name}</span>
+            <span class="alarm-time">${a.timestamp}</span>
+          </div>
+          <div class="alarm-msg">
+            ${formatAlarmMessage(a)}
+          </div>
+        </div>
+      `).join('');
+    })
+    .catch(()=>{});
+}
+
+  function alarmCard() {
+  return `
+  <div class="alarm-card h-full flex flex-col">
+    <div class="alarm-card-header">
+      <span class="alarm-pulse-dot"></span>
+      <span class="alarm-card-title">Alarm Aktif</span>
+      <span class="alarm-count-badge" id="alarm-count">0</span>
+    </div>
+    <div class="alarm-list overflow-y-auto" id="alarm-list">
+      <div class="alarm-empty">Memuat...</div>
+    </div>
+  </div>`;
+}
 
   // ── Phase Balance ─────────────────────────────────────────────────────────
   function loadPhaseBalance() {
@@ -446,6 +517,7 @@
 
   setInterval(loadRT,   REFRESH_RT_MS);
   setInterval(loadSlow, REFRESH_SLOW_MS);
+  setInterval(loadAlarms, REFRESH_RT_MS);
 
 })();
 </script>
