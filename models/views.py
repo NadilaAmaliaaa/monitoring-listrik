@@ -14,6 +14,9 @@ class HourlyEnergyView(Base):
     peak_power = Column(Float)
     total_kwh = Column(Float)
     total_cost = Column(Float)
+    total_cuurrent = Column(Float)
+    avg_current = Column(Float)
+    avg_voltage = Column(Float)
 
     def __repr__(self):
         return f"<HourlyEnergyView(date={self.date}, sensor_id={self.sensor_id})>"
