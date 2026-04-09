@@ -25,6 +25,13 @@ PUBLIC_ENDPOINTS = {
     'static',
     'health_check',           # /health
     'debug_realtime_store',   # /api/debug/realtime-store
+    # View mode — halaman publik tanpa login
+    'viewmode.index',
+    'viewmode.api_header',
+    'viewmode.api_buildings',
+    'viewmode.api_alarms',
+    'viewmode.api_phase_balance',
+    'viewmode.api_load',
 }
 
 
@@ -145,6 +152,10 @@ def create_app():
         from views.notifications import notifications_bp
         app.register_blueprint(notifications_bp, url_prefix='/notifications')
         logger.info("✓ Notifications blueprint registered")
+        
+        from views.viewmode import viewmode_bp
+        app.register_blueprint(viewmode_bp)
+        logger.info("✓ Viewmode blueprint registered")
 
     except Exception as e:
         logger.error(f"✗ Failed to register blueprints: {e}")
@@ -175,6 +186,50 @@ def create_app():
         if flask_request.path == '/notifications/stream':
             return
         
+        # Cek flag invalidasi — session sudah di-logout tapi request masih jalan
+        # (race condition: JS polling API saat logout diproses)
+        # if session.get('_invalidated'):
+        #     session.clear()
+        #     if (flask_request.accept_mimetypes.accept_json and
+        #             not flask_request.accept_mimetypes.accept_html):
+        #         return jsonify({'error': 'Session invalidated'}), 401
+        #     return redirect(url_for('auth.login'))
+ 
+        # if 'user_id' not in session:
+        #     logger.info(
+        #         f"[AUTH BLOCK] user_id not in session — "
+        #         f"endpoint={flask_request.endpoint} "
+        #         f"path={flask_request.path} "
+        #         f"session_keys={list(session.keys())}"
+        #     )
+        #     # API request → kembalikan 401 JSON bukan redirect HTML
+        #     if (flask_request.accept_mimetypes.accept_json and
+        #             not flask_request.accept_mimetypes.accept_html):
+        #         return jsonify({'error': 'Unauthorized', 'login': url_for('auth.login')}), 401
+ 
+        #     # Simpan URL tujuan, tapi HANYA untuk halaman non-root yang navigable
+        #     _path = flask_request.path
+        #     _last_segment = _path.split('/')[-1]
+        #     _is_navigable = (
+        #         flask_request.method == 'GET'
+        #         and _path not in ('/', '', '/view')  # jangan simpan root/view
+        #         and not _path.startswith('/static')
+        #         and not _path.startswith('/api')
+        #         and not _path.startswith('/favicon')
+        #         and '.' not in _last_segment
+        #     )
+        #     if _is_navigable:
+        #         session['next'] = flask_request.url
+        #     else:
+        #         session.pop('next', None)
+ 
+        #     # Untuk root path '/', arahkan ke view mode dulu (bukan login)
+        #     if flask_request.path in ('/', ''):
+        #         return redirect(url_for('viewmode.index'))
+ 
+        #     return redirect(url_for('auth.login'))
+        
+        # LAMA
         if flask_request.path.startswith('/api'):
             if 'user_id' not in session:
                 return jsonify({'error': 'Unauthorized'}), 401
