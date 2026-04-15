@@ -330,6 +330,7 @@
           categoryPercentage: 0.8,
         }));
         chartEnergy.update();
+        handleEmptyChart(chartEnergy);
       })
       .catch(() => {});
   }
@@ -346,6 +347,7 @@
           borderRadius:    2,
         }));
         chartBalance.update();
+        handleEmptyChart(chartBalance);
 
         // Status badge
         const el      = document.getElementById('balanceStatus');
@@ -378,6 +380,7 @@
           borderRadius:  3,
         }];
         chartPeak.update();
+        handleEmptyChart(chartPeak);
 
         document.getElementById('valAvgPeak').textContent = d.avg_peak_kw || '—';
         const growthEl = document.getElementById('valGrowth');
@@ -415,6 +418,7 @@
           },
         ];
         chartPf.update();
+        handleEmptyChart(chartPf);
       })
       .catch(() => {});
   }
@@ -430,6 +434,32 @@
     if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
     if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
     return Math.round(n).toLocaleString('id-ID');
+  }
+  function handleEmptyChart(chart, message = 'Belum ada data') {
+    if (!chart) return;
+
+    const hasData = chart.data.datasets?.some(ds =>
+      Array.isArray(ds.data) && ds.data.some(v => v !== null && v !== 0)
+    );
+
+    const canvas = chart.canvas;
+    const parent = canvas.parentElement;
+
+    // Hapus placeholder lama kalau ada
+    const oldMsg = parent.querySelector('.empty-chart-msg');
+    if (oldMsg) oldMsg.remove();
+
+    if (!hasData) {
+      canvas.style.display = 'none';
+
+      const msg = document.createElement('div');
+      msg.className = 'empty-chart-msg flex items-center justify-center h-full text-slate-400 text-sm font-medium';
+      msg.innerText = message;
+
+      parent.appendChild(msg);
+    } else {
+      canvas.style.display = 'block';
+    }
   }
 
   // ── Event Listeners ────────────────────────────────────────────────────────
