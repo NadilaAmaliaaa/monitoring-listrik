@@ -104,6 +104,22 @@ page_subtitle %}Kelola parameter ambang batas voltase dan arus{% endblock %} {% 
   </div>
 </div>
 
+<!-- Error Notification -->
+<div id="errorNotification" class="fixed bottom-8 right-8 bg-red-600 text-white px-5 py-4 rounded-2xl shadow-2xl z-50 hidden">
+  <div class="flex items-center gap-4">
+    <div class="size-8 rounded-lg bg-white/20 flex items-center justify-center">
+      <span class="material-symbols-outlined text-white text-xl">error</span>
+    </div>
+    <div class="flex flex-col">
+      <p class="text-sm font-bold">Validasi Gagal</p>
+      <p class="text-[11px] text-red-100" id="errorNotifText">Input tidak valid</p>
+    </div>
+    <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="ml-4 text-red-200 hover:text-white transition-colors">
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -366,6 +382,7 @@ page_subtitle %}Kelola parameter ambang batas voltase dan arus{% endblock %} {% 
           <input
             id="${inputId}"
             type="number"
+            min="0"
             step="${step}"
             value="${value !== null && value !== undefined ? value : ''}"
             class="threshold-input w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4
@@ -381,12 +398,45 @@ page_subtitle %}Kelola parameter ambang batas voltase dan arus{% endblock %} {% 
   }
 
   // ── Save Manual ────────────────────────────────────────────────────────────
+  function validateNumber(val, name) {
+    if (val === null || val === '' || isNaN(val)) {
+      showErrorNotification(`${name} tidak boleh kosong`);
+      return false;
+    }
+    if (val < 0) {
+      showErrorNotification(`${name} tidak boleh kurang dari 0`);
+      return false;
+    }
+    return true;
+  }
   function saveSettings(sensorId) {
     // Guard: jangan izinkan save jika auto aktif
     if (sensorsData[sensorId]?.auto_threshold_enabled) return;
 
     const getValue   = f => parseFloat(document.getElementById(`${f}_${sensorId}`).value);
     const getChecked = f => document.getElementById(`${f}_enabled_${sensorId}`).checked;
+
+    const voltage_min = getValue('voltage_min');
+    const voltage_max = getValue('voltage_max');
+    const current_min = getValue('current_min');
+    const current_max = getValue('current_max');
+
+    // ✅ Validasi kosong & negatif
+    if (!validateNumber(voltage_min, 'Voltage Minimum')) return;
+    if (!validateNumber(voltage_max, 'Voltage Maximum')) return;
+    if (!validateNumber(current_min, 'Current Minimum')) return;
+    if (!validateNumber(current_max, 'Current Maximum')) return;
+
+    // ✅ Validasi logika
+    if (voltage_min >= voltage_max) {
+      showErrorNotification('Voltage minimum harus lebih kecil dari maximum!');
+      return;
+    }
+
+    if (current_min >= current_max) {
+      showErrorNotification('Current minimum harus lebih kecil dari maximum!');
+      return;
+    }
 
     const payload = {
       voltage_min:         getValue('voltage_min'),
@@ -413,7 +463,10 @@ page_subtitle %}Kelola parameter ambang batas voltase dan arus{% endblock %} {% 
     })
       .then(r => r.json())
       .then(data => {
-        if (!data.success) { alert(`Gagal: ${data.error}`); return; }
+        if (!data.success) {
+          showErrorNotification(data.error || 'Gagal menyimpan');
+          return;
+        }
 
         // Server mengembalikan auto_threshold_enabled=False — update local state
         sensorsData[sensorId] = { ...sensorsData[sensorId], ...data.data };
@@ -487,6 +540,16 @@ page_subtitle %}Kelola parameter ambang batas voltase dan arus{% endblock %} {% 
     const notif = document.getElementById('successNotification');
     notif.classList.remove('hidden');
     setTimeout(() => notif.classList.add('hidden'), 3500);
+  }
+  function showErrorNotification(message) {
+    const notif = document.getElementById('errorNotification');
+    document.getElementById('errorNotifText').textContent = message;
+
+    notif.classList.remove('hidden');
+
+    setTimeout(() => {
+      notif.classList.add('hidden');
+    }, 3500);
   }
 </script>
 {% endblock %}
