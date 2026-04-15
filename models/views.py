@@ -14,7 +14,7 @@ class HourlyEnergyView(Base):
     peak_power = Column(Float)
     total_kwh = Column(Float)
     total_cost = Column(Float)
-    total_cuurrent = Column(Float)
+    total_current = Column(Float)
     avg_current = Column(Float)
     avg_voltage = Column(Float)
 
