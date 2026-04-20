@@ -19,31 +19,50 @@ class DashboardController:
         
     def get_voltage(self):
         if not self.building_code:
-            return {"R": 0, "S": 0, "T": 0}
-
+            return {"R": None, "S": None, "T": None, "no_data": True}
+ 
         data = get_by_building(self.building_code)
-
+ 
+        # Cek apakah ada data sama sekali
+        has_data = any(
+            data.get(ph, {}).get("voltage") not in (None, 0)
+            for ph in ("R", "S", "T")
+        )
+ 
+        if not has_data:
+            return {"R": None, "S": None, "T": None, "no_data": True}
+ 
         return {
-            "R": round(data.get("R", {}).get("voltage", 0), 2),
-            "S": round(data.get("S", {}).get("voltage", 0), 2),
-            "T": round(data.get("T", {}).get("voltage", 0), 2),
+            "R": round(data.get("R", {}).get("voltage", 0), 2) or None,
+            "S": round(data.get("S", {}).get("voltage", 0), 2) or None,
+            "T": round(data.get("T", {}).get("voltage", 0), 2) or None,
+            "no_data": False,
             "timestamp": (
                 data.get("R", {}).get("timestamp")
                 or data.get("S", {}).get("timestamp")
                 or data.get("T", {}).get("timestamp")
             )
         }
-
+ 
     def get_current(self):
         if not self.building_code:
-            return {"R": 0, "S": 0, "T": 0}
-
+            return {"R": None, "S": None, "T": None, "no_data": True}
+ 
         data = get_by_building(self.building_code)
-        
+ 
+        has_data = any(
+            data.get(ph, {}).get("current") not in (None, 0)
+            for ph in ("R", "S", "T")
+        )
+ 
+        if not has_data:
+            return {"R": None, "S": None, "T": None, "no_data": True}
+ 
         return {
-            "R": round(data.get("R", {}).get("current", 0), 2),
-            "S": round(data.get("S", {}).get("current", 0), 2),
-            "T": round(data.get("T", {}).get("current", 0), 2),
+            "R": round(data.get("R", {}).get("current", 0), 2) or None,
+            "S": round(data.get("S", {}).get("current", 0), 2) or None,
+            "T": round(data.get("T", {}).get("current", 0), 2) or None,
+            "no_data": False,
             "timestamp": (
                 data.get("R", {}).get("timestamp")
                 or data.get("S", {}).get("timestamp")

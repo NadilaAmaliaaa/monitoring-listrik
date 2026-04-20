@@ -340,6 +340,13 @@ const INTERVALS = {
 };
 
 let intervalIds = [];
+const NO_DATA = null;
+
+function displayVal(v, decimals = 2) {
+  // Jika null/undefined → tampilkan "—", bukan 0
+  if (v === null || v === undefined) return '—';
+  return Number(v).toFixed(decimals);
+}
 
 function startIntervals() {
 
@@ -377,22 +384,19 @@ async function safeFetch(url) {
 
 async function fetchRealtimeVoltage() {
   try {
-    const response = await fetch(API.voltage);
-    if (!response.ok) throw new Error('Failed to fetch voltage');
-    
-    const data = await response.json();
-    
-    // Update voltage displays dengan animasi
-    updateValueWithAnimation('voltage-r', data.R);
-    updateValueWithAnimation('voltage-s', data.S);
-    updateValueWithAnimation('voltage-t', data.T);
-    
-    // Calculate power (V × I × PF) untuk masing-masing phase
-    // Ini akan di-update dari data current
-    
+    const data = await safeFetch(API.voltage);
+ 
+    updateValueWithAnimation('voltage-r', displayVal(data.R));
+    updateValueWithAnimation('voltage-s', displayVal(data.S));
+    updateValueWithAnimation('voltage-t', displayVal(data.T));
+ 
+    // Simpan ke window agar fetchRealtimeCurrent bisa pakai
+    window._lastVoltage = data.no_data ? null : data;
+ 
   } catch (error) {
-    console.error('Error fetching realtime voltage:', error);
-    // Keep showing last value, don't reset to --
+    if (error.message !== 'Unauthorized') {
+      console.error('Error fetching realtime voltage:', error);
+    }
   }
 }
 
@@ -400,41 +404,52 @@ async function fetchRealtimeVoltage() {
 
 async function fetchRealtimeCurrent() {
   try {
-    const response = await fetch(API.current);
-    if (!response.ok) throw new Error('Failed to fetch current');
-    
-    const data = await response.json();
-    
-    // Update current displays dengan animasi
-    updateValueWithAnimation('current-r', data.R);
-    updateValueWithAnimation('current-s', data.S);
-    updateValueWithAnimation('current-t', data.T);
-    
-    // Update current bars (max 100A for scale)
+    const data = await safeFetch(API.current);
+ 
+    updateValueWithAnimation('current-r', displayVal(data.R));
+    updateValueWithAnimation('current-s', displayVal(data.S));
+    updateValueWithAnimation('current-t', displayVal(data.T));
+ 
     const maxCurrent = 100;
-    updateProgressBar('current-bar-r', (data.R / maxCurrent) * 100);
-    updateProgressBar('current-bar-s', (data.S / maxCurrent) * 100);
-    updateProgressBar('current-bar-t', (data.T / maxCurrent) * 100);
-    
-    // Calculate and display power per phase
-    // P = V × I × PF (simplified, assume PF ≈ 0.95)
-    const voltageR = parseFloat(document.getElementById('voltage-r').textContent) || 220;
-    const voltageS = parseFloat(document.getElementById('voltage-s').textContent) || 220;
-    const voltageT = parseFloat(document.getElementById('voltage-t').textContent) || 220;
-    
-    const powerR = (voltageR * data.R * 0.95).toFixed(0);
-    const powerS = (voltageS * data.S * 0.95).toFixed(0);
-    const powerT = (voltageT * data.T * 0.95).toFixed(0);
-    
-    document.getElementById('power-r-display').textContent = powerR;
-    document.getElementById('power-s-display').textContent = powerS;
-    document.getElementById('power-t-display').textContent = powerT;
-    
-    // Update power chart
-    updatePowerChart([parseFloat(powerR), parseFloat(powerS), parseFloat(powerT)]);
-    
+    updateProgressBar('current-bar-r', data.R != null ? (data.R / maxCurrent) * 100 : 0);
+    updateProgressBar('current-bar-s', data.S != null ? (data.S / maxCurrent) * 100 : 0);
+    updateProgressBar('current-bar-t', data.T != null ? (data.T / maxCurrent) * 100 : 0);
+ 
+    if (data.no_data) {
+      // Tidak ada data — tampilkan "—" di display daya
+      document.getElementById('power-r-display').textContent = '—';
+      document.getElementById('power-s-display').textContent = '—';
+      document.getElementById('power-t-display').textContent = '—';
+ 
+      // Push null ke chart agar chart tahu tidak ada data
+      updatePowerChart([null, null, null]);
+      return;
+    }
+ 
+    // Hitung daya dari tegangan × arus × PF ≈ 0.95
+    const v = window._lastVoltage;
+    const vR = v?.R ?? 220;
+    const vS = v?.S ?? 220;
+    const vT = v?.T ?? 220;
+ 
+    const powerR = data.R != null ? (vR * data.R * 0.95).toFixed(0) : null;
+    const powerS = data.S != null ? (vS * data.S * 0.95).toFixed(0) : null;
+    const powerT = data.T != null ? (vT * data.T * 0.95).toFixed(0) : null;
+ 
+    document.getElementById('power-r-display').textContent = powerR ?? '—';
+    document.getElementById('power-s-display').textContent = powerS ?? '—';
+    document.getElementById('power-t-display').textContent = powerT ?? '—';
+ 
+    updatePowerChart([
+      powerR != null ? parseFloat(powerR) : null,
+      powerS != null ? parseFloat(powerS) : null,
+      powerT != null ? parseFloat(powerT) : null,
+    ]);
+ 
   } catch (error) {
-    console.error('Error fetching realtime current:', error);
+    if (error.message !== 'Unauthorized') {
+      console.error('Error fetching realtime current:', error);
+    }
   }
 }
 
@@ -601,76 +616,67 @@ let powerChartData = {
 const MAX_CHART_POINTS = 60; // 60 points = 1 minute of data
 
 function updatePowerChart(newData) {
-  // Add new data
+  // newData: [R, S, T] — nilai bisa null jika tidak ada data
   powerChartData.R.push(newData[0]);
   powerChartData.S.push(newData[1]);
   powerChartData.T.push(newData[2]);
-  
-  // Keep only last N points
+ 
   if (powerChartData.R.length > MAX_CHART_POINTS) {
     powerChartData.R.shift();
     powerChartData.S.shift();
     powerChartData.T.shift();
   }
-  
+ 
   drawPowerChart();
 }
-
+ 
 function drawPowerChart() {
   const canvas = document.getElementById('power-chart');
   if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-  const width = canvas.clientWidth;
+ 
+  const ctx    = canvas.getContext('2d');
+  const width  = canvas.clientWidth;
   const height = canvas.clientHeight;
-
-  canvas.width = width;
+  canvas.width  = width;
   canvas.height = height;
-
   ctx.clearRect(0, 0, width, height);
-
-  const paddingTop = 20;
+ 
+  const paddingTop    = 20;
   const paddingBottom = 20;
-  const chartHeight = height - paddingTop - paddingBottom;
-
-  const allValues = [...powerChartData.R, ...powerChartData.S, ...powerChartData.T];
-
-  if (allValues.length === 0) return;
-
-  const rawMax = Math.max(...allValues);
-  const rawMin = Math.min(...allValues);
-
-  // Tambahkan buffer 10% agar tidak mentok atas
-  const maxPower = rawMax * 1.1;
-  const minPower = Math.max(0, rawMin * 0.9);
-
-  const range = maxPower - minPower || 1;
-
-  const drawLine = (data, color) => {
-    if (data.length < 2) return;
-
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-
-    const step = width / (data.length - 1);
-
-    data.forEach((power, i) => {
-      const x = i * step;
-      const normalized = (power - minPower) / range;
-      const y = paddingTop + chartHeight - (normalized * chartHeight);
-
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-
-    ctx.stroke();
-  };
-
-  // === DRAW GRID ===
+  const chartHeight   = height - paddingTop - paddingBottom;
+ 
+  // Cek apakah semua data adalah null (tidak ada data sama sekali)
+  const allNull = [...powerChartData.R, ...powerChartData.S, ...powerChartData.T]
+    .every(v => v === null || v === undefined);
+ 
+  if (allNull) {
+    // Tampilkan pesan "Tidak ada data realtime"
+    ctx.fillStyle = '#94a3b8';
+    ctx.font      = '11px Space Grotesk, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tidak ada data realtime', width / 2, height / 2 - 8);
+    ctx.font      = '9px Space Grotesk, sans-serif';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('Data akan muncul saat sensor aktif', width / 2, height / 2 + 8);
+    return;
+  }
+ 
+  // Hitung range hanya dari nilai non-null
+  const allValues = [
+    ...powerChartData.R,
+    ...powerChartData.S,
+    ...powerChartData.T,
+  ].filter(v => v != null);
+ 
+  const rawMax  = Math.max(...allValues);
+  const rawMin  = Math.min(...allValues);
+  const maxPow  = rawMax * 1.1 || 1;
+  const minPow  = Math.max(0, rawMin * 0.9);
+  const range   = maxPow - minPow || 1;
+ 
+  // Grid
   ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = 1;
-
+  ctx.lineWidth   = 1;
   for (let i = 1; i <= 4; i++) {
     const y = paddingTop + (chartHeight / 4) * i;
     ctx.beginPath();
@@ -678,8 +684,38 @@ function drawPowerChart() {
     ctx.lineTo(width, y);
     ctx.stroke();
   }
-
-  // === DRAW LINES ===
+ 
+  // Gambar garis per fasa — skip segment null
+  const drawLine = (data, color) => {
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 2;
+    let started = false;
+ 
+    data.forEach((power, i) => {
+      const x = (i / (data.length - 1 || 1)) * width;
+ 
+      if (power === null || power === undefined) {
+        // Putus garis di sini
+        if (started) ctx.stroke();
+        started = false;
+        return;
+      }
+ 
+      const normalized = (power - minPow) / range;
+      const y = paddingTop + chartHeight - normalized * chartHeight;
+ 
+      if (!started) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+ 
+    if (started) ctx.stroke();
+  };
+ 
   drawLine(powerChartData.R, '#ef4444');
   drawLine(powerChartData.S, '#ca8a04');
   drawLine(powerChartData.T, '#2563eb');
