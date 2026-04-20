@@ -279,9 +279,10 @@
     return Math.round(n).toLocaleString('id-ID');
   }
   function fmtNum(n, dec=1) {
-    return Number(n || 0).toFixed(dec);
+    return n == null ? '—' : Number(n).toFixed(dec);
   }
   function fmtW(w) {
+    if (w === null || w === undefined) return '—';
     if (w >= 1000) return (w/1000).toFixed(1)+'k';
     return Math.round(w)+'';
   }

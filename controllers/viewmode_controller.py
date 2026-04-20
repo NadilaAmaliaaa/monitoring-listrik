@@ -62,6 +62,18 @@ class ViewModeController:
             db.close()
 
     # ── Main Grid: kartu per building ─────────────────────────────────────────
+    @staticmethod
+    def _val(v):
+        try:
+            if v is None:
+                return None
+            v = float(v)
+            # anggap 0 = tidak ada data
+            if v == 0:
+                return None
+            return round(v, 1)
+        except:
+            return None
 
     def get_building_cards(self) -> list:
         """
@@ -98,11 +110,16 @@ class ViewModeController:
                 for s in sensors:
                     rt = dept.get(s.phase) or {}
 
+                    voltage = self._val(rt.get('voltage'))
+                    current = self._val(rt.get('current'))
+                    power   = self._val(rt.get('power'))
+
                     sensor_rows.append({
                         'phase':   s.phase or s.name,
-                        'voltage': round(float(rt.get('voltage', 0)), 1),
-                        'current': round(float(rt.get('current', 0)), 1),
-                        'power':   round(float(rt.get('power',   0)), 1),
+                        'voltage': voltage,
+                        'current': current,
+                        'power':   power,
+                        'no_data': not bool(rt) or (voltage is None and current is None and power is None)
                     })
 
                 # ── Energi hari ini ────────────────────────────────────────
