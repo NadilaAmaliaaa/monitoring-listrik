@@ -20,7 +20,7 @@ def index():
 @analytics_bp.route('/api/analytics/summary', strict_slashes=False)
 def get_summary():
     days = int(request.args.get('days', 7))
-    return jsonify(_get_controller().get_summary_cards(days=days))
+    return jsonify(_get_controller().get_summary_cards())
 
 
 @analytics_bp.route('/api/analytics/energy-trend', strict_slashes=False)
