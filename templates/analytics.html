@@ -161,8 +161,8 @@
       </div>
       <div class="mt-4 grid grid-cols-2 gap-3">
         <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
-          <p class="text-[8px] text-slate-400 font-bold uppercase mb-1">Avg Weekly Peak</p>
-          <p class="text-sm font-black text-slate-800"><span id="valAvgPeak">—</span> kW</p>
+          <p class="text-[8px] text-slate-400 font-bold uppercase mb-1">Avg Load This Month</p>
+          <p class="text-sm font-black text-slate-800"><span id="valAvgPwr">—</span> kW</p>
         </div>
         <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
           <p class="text-[8px] text-slate-400 font-bold uppercase mb-1">Growth Trend</p>
@@ -382,7 +382,7 @@
         chartPeak.update();
         handleEmptyChart(chartPeak);
 
-        document.getElementById('valAvgPeak').textContent = d.avg_peak_kw || '—';
+        document.getElementById('valAvgPwr').textContent = d.avg_power_kw || '—';
         const growthEl = document.getElementById('valGrowth');
         const g        = d.growth_pct || 0;
         growthEl.textContent = `${g > 0 ? '+' : ''}${g}%`;
