@@ -49,6 +49,11 @@ class AnalyticsController:
             # ✅ Bulan ini (FIXED)
             start_date = date(today.year, today.month, 1)
             end_date = (start_date + timedelta(days=32)).replace(day=1)
+            
+            # Bulan sebelumnya (day-aligned)
+            prev_start_date = (start_date - timedelta(days=1)).replace(day=1)
+            days_elapsed = (today - start_date).days + 1
+            prev_end_date = prev_start_date + timedelta(days=days_elapsed)
 
             sensor_ids = self._sensor_ids(db)
             if not sensor_ids:
@@ -65,16 +70,32 @@ class AnalyticsController:
                 .scalar()
             ) or 0
 
-            # total_cost = (
-            #     db.query(func.sum(DailyEnergyView.total_cost))
-            #     .filter(
-            #         DailyEnergyView.sensor_id.in_(sensor_ids),
-            #         DailyEnergyView.date >= start_date,
-            #         DailyEnergyView.date < end_date,
-            #     )
-            #     .scalar()
-            # ) or 0
-            total_cost = total_kwh*1440
+            total_cost = (
+                db.query(func.sum(DailyEnergyView.total_cost))
+                .filter(
+                    DailyEnergyView.sensor_id.in_(sensor_ids),
+                    DailyEnergyView.date >= start_date,
+                    DailyEnergyView.date < end_date,
+                )
+                .scalar()
+            ) or 0
+            
+            # ✅ TOTAL bulan sebelumnya
+            prev_total_kwh = (
+                db.query(func.sum(DailyEnergyView.total_energy_kwh))
+                .filter(
+                    DailyEnergyView.sensor_id.in_(sensor_ids),
+                    DailyEnergyView.date >= prev_start_date,
+                    DailyEnergyView.date < prev_end_date,
+                )
+                .scalar()
+            ) or 0
+
+            # ✅ HITUNG DELTA (%)
+            if prev_total_kwh > 0:
+                kwh_delta_pct = ((total_kwh - prev_total_kwh) / prev_total_kwh) * 100
+            else:
+                kwh_delta_pct = 0
 
             # ✅ Ambil data untuk peak & PF
             rows = (
@@ -116,6 +137,10 @@ class AnalyticsController:
                 'peak_datetime': str(peak_row.date),
                 'avg_pf': round(avg_pf, 3),
                 'total_cost': round(total_cost, 0),
+                'kwh_delta_pct': round(kwh_delta_pct, 1),
+                'last_month_kwh': round(prev_total_kwh, 2),
+                'last_month_start': str(prev_start_date),
+                'last_month_end': str(prev_end_date - timedelta(days=1)),
             }
 
         except Exception as e:
@@ -332,81 +357,94 @@ class AnalyticsController:
         db = get_session()
         try:
             sensor_ids = self._sensor_ids(db)
+            if not sensor_ids:
+                return self._empty_peak_response()
 
             today = _today_utc()
-            start_date = today.replace(day=1)
-            since = start_date
 
             # ===============================
-            # CURRENT PERIOD
+            # CURRENT PERIOD (month-to-date)
+            # ===============================
+            start_date = today.replace(day=1)
+            end_date = today + timedelta(days=1)  # EXCLUSIVE
+
+            # ===============================
+            # PREVIOUS PERIOD (day-aligned)
+            # ===============================
+            prev_start_date = (start_date - timedelta(days=1)).replace(day=1)
+            days_elapsed = (today - start_date).days + 1
+            prev_end_date = prev_start_date + timedelta(days=days_elapsed)
+
+            # ===============================
+            # CURRENT DATA
             # ===============================
             rows = (
                 db.query(
                     DailyEnergyView.date,
-                    func.sum(DailyEnergyView.peak_power).label('peak'),
-                    func.sum(DailyEnergyView.avg_power).label('total_avg_power')
+                    func.sum(DailyEnergyView.peak_power).label('peak_w'),
+                    func.sum(DailyEnergyView.avg_power).label('avg_w'),
                 )
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= since,
-                    DailyEnergyView.date <= today,
+                    DailyEnergyView.date >= start_date,
+                    DailyEnergyView.date < end_date,
                 )
                 .group_by(DailyEnergyView.date)
                 .order_by(DailyEnergyView.date)
                 .all()
             )
 
+            # chart
             labels = [r.date.strftime('%d %b') for r in rows]
-            values = [(r.peak or 0) / 1000 for r in rows]  # kW
-              
+            values = [(r.peak_w or 0) / 1000 for r in rows]  # kW
+
+            # avg power (3-phase sudah dijumlahkan)
+            daily_avg_kw = [(r.avg_w or 0) / 1000 for r in rows]
+            curr_avg = sum(daily_avg_kw) / len(daily_avg_kw) if daily_avg_kw else 0
 
             # ===============================
-            # METRICS CURRENT
+            # PREVIOUS DATA (ALIGNED)
             # ===============================
-            daily_avg_power = [(r.total_avg_power or 0) / 1000 for r in rows]
-            curr_avg = sum(daily_avg_power) / len(daily_avg_power) if daily_avg_power else 0
-
-            # ===============================
-            # PREVIOUS PERIOD
-            # ===============================
-            prev_end = start_date - timedelta(days=1)
-            prev_start = prev_end.replace(day=1)
-
             prev_rows = (
                 db.query(
                     DailyEnergyView.date,
-                    func.sum(DailyEnergyView.avg_power).label('total_avg_power')
+                    func.sum(DailyEnergyView.avg_power).label('avg_w'),
                 )
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= prev_start,
-                    DailyEnergyView.date <= prev_end,
+                    DailyEnergyView.date >= prev_start_date,
+                    DailyEnergyView.date < prev_end_date,
                 )
                 .group_by(DailyEnergyView.date)
+                .order_by(DailyEnergyView.date)
                 .all()
             )
 
-            prev_daily_avg = [(r.total_avg_power or 0) / 1000 for r in prev_rows]
-            prev_avg = sum(prev_daily_avg) / len(prev_daily_avg) if prev_daily_avg else 0
+            prev_daily_avg_kw = [(r.avg_w or 0) / 1000 for r in prev_rows]
+            prev_avg = (
+                sum(prev_daily_avg_kw) / len(prev_daily_avg_kw)
+                if prev_daily_avg_kw else 0
+            )
 
             # ===============================
-            # GROWTH (BEST PRACTICE)
+            # GROWTH (%)
             # ===============================
-            growth = ((curr_avg - prev_avg) / prev_avg * 100
-                
-                if prev_avg else 0
-            )
+            if prev_avg > 0:
+                growth = ((curr_avg - prev_avg) / prev_avg) * 100
+            else:
+                growth = 0
 
             return {
                 'labels': labels,
                 'values': [round(v, 2) for v in values],
 
-                # ✅ utama
+                # metrics
                 'avg_power_kw': round(curr_avg, 2),
                 'prev_avg_power_kw': round(prev_avg, 2),
                 'growth_pct': round(growth, 1),
+
                 'current_month': start_date.strftime('%b %Y'),
-                'previous_month': prev_start.strftime('%b %Y'),
+                'previous_month': prev_start_date.strftime('%b %Y'),
             }
 
         except Exception as e:
@@ -414,11 +452,11 @@ class AnalyticsController:
             return {
                 'labels': [],
                 'values': [],
-                'avg_peak_kw': 0,
+                'avg_power_kw': 0,
+                'prev_avg_power_kw': 0,
                 'growth_pct': 0,
-                'max_peak_kw': 0,
-                'prev_avg_peak_kw': 0,
-                'prev_max_peak_kw': 0,
+                'current_month': '',
+                'previous_month': '',
             }
         finally:
             db.close()
