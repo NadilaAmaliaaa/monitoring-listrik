@@ -385,8 +385,18 @@
         document.getElementById('valAvgPwr').textContent = d.avg_power_kw || '—';
         const growthEl = document.getElementById('valGrowth');
         const g        = d.growth_pct || 0;
-        growthEl.textContent = `${g > 0 ? '+' : ''}${g}%`;
-        growthEl.className   = `text-sm font-black ${g > 0 ? 'text-red-500' : 'text-green-600'}`;
+        const isDown   = g < 0;
+
+        growthEl.className = `mt-2 flex items-center gap-1 text-sm font-black ${
+          isDown ? 'text-green-600' : 'text-red-500'
+        }`;
+
+        growthEl.innerHTML = `
+          <span class="material-symbols-outlined text-[14px]">
+            ${isDown ? 'arrow_downward' : 'arrow_upward'}
+          </span>
+          <span>${Math.abs(g)}% vs periode sebelumnya</span>
+        `;
       })
       .catch(() => {});
   }
