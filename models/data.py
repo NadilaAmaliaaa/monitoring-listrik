@@ -46,6 +46,7 @@ class SensorReading(Base):
     frequency = Column(Float, nullable=False)
     power_factor = Column(Float, nullable=False)
     energy = Column(Float, nullable=False)
+    cost = Column(Float)
 
     # Peak values (untuk monitoring)
     peak_voltage = Column(Float)

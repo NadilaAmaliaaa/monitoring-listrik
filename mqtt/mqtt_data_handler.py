@@ -141,6 +141,7 @@ class SensorDataHandler:
                         existing.power_factor = float(data['power_factor'])
                         existing.peak_voltage = float(data['peak_voltage'])
                         existing.peak_current = float(data['peak_current'])
+                        existing.cost = float(data.get('cost', 0.0))
                         saved_reading = existing
                         logger.debug(f"Updated existing reading for sensor {sensor_id}")
                     else:
@@ -154,7 +155,8 @@ class SensorDataHandler:
                             frequency=float(data['frequency']),
                             power_factor=float(data['power_factor']),
                             peak_voltage=float(data['peak_voltage']),
-                            peak_current=float(data['peak_current'])
+                            peak_current=float(data['peak_current']),
+                            cost=float(data.get('cost', 0.0))
                         )
                         session.add(saved_reading)
                     
@@ -223,7 +225,7 @@ class AggregationBuffer:
                 agg_buffer[sensor_id][bucket_ts] = {
                     "sums": {
                         'voltage': 0.0, 'current': 0.0, 'power': 0.0,
-                        'energy': 0.0, 'frequency': 0.0, 'power_factor': 0.0
+                        'energy': 0.0, 'frequency': 0.0, 'power_factor': 0.0, 'cost': 0.0
                     },
                     "count": 0,
                     "timestamp_obj": bucket_time,
@@ -241,6 +243,7 @@ class AggregationBuffer:
                 buf['sums']['current']      += float(data.get('arus', 0.0))
                 buf['sums']['power']        += power
                 buf['sums']['energy']       += energy_kwh
+                buf['sums']['cost']         += cost
                 buf['sums']['frequency']    += float(data.get('frekuensi', 0.0))
                 buf['sums']['power_factor'] += float(data.get('pf', 0.0))
                 buf['count'] += 1
@@ -305,6 +308,7 @@ class AggregationBuffer:
                         "current":         sums['current'] / count,
                         "power":           sums['power'],
                         "energy":          sums['energy'],
+                        "cost":            sums['cost'],
                         "frequency":       sums['frequency'] / count,
                         "power_factor":    sums['power_factor'] / count,
                         "force_timestamp": buf['timestamp_obj'],
