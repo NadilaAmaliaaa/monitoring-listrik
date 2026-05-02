@@ -6,12 +6,12 @@ from datetime import datetime
 import sys
 
 # ==================== CONFIGURATION ====================
-BROKER = "192.168.1.20" 
+BROKER = "192.168.110.175" 
 PORT = 1883
 KEEPALIVE = 60
 
 # Departments yang akan menerima data
-DEPARTMENTS = [1, 3, 6]
+DEPARTMENTS = [1, 4, 6]
 
 # Base configuration untuk sensors (akan digunakan untuk semua department)
 SENSOR_CONFIGS = {
