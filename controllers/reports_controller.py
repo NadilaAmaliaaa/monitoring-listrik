@@ -464,13 +464,13 @@ class ReportsController:
         story.append(Spacer(1, 10))
 
         # Trend insight
-        trend_sentence = (
-            f"Tren konsumsi energi {'meningkat' if (trend_pct or 0) > 0 else 'menurun'} "
-            f"{abs(trend_pct or 0):.1f}% pada paruh kedua periode dibanding paruh pertama. "
-            f"Rata-rata konsumsi harian: {avg_kwh_day:,.2f} kWh/hari."
-        )
-        story.append(Paragraph(f"📊  {trend_sentence}", S['insight']))
-        story.append(Spacer(1, 6))
+        # trend_sentence = (
+        #     f"Tren konsumsi energi {'meningkat' if (trend_pct or 0) > 0 else 'menurun'} "
+        #     f"{abs(trend_pct or 0):.1f}% pada paruh kedua periode dibanding paruh pertama. "
+        #     f"Rata-rata konsumsi harian: {avg_kwh_day:,.2f} kWh/hari."
+        # )
+        # story.append(Paragraph(f"📊  {trend_sentence}", S['insight']))
+        # story.append(Spacer(1, 6))
 
         pf_insight = (
             'Baik (≥0.90)' if avg_pf >= 0.90
@@ -497,7 +497,8 @@ class ReportsController:
         kwh_t = [float(by_date[d].get('T', None) and
                        by_date[d]['T'].total_energy_kwh or 0) for d in dates_sorted]
 
-        spark = _mini_line_chart(kwh_r, kwh_s, kwh_t, w=int(W*2.83), h=80)
+        spark = _mini_line_chart(kwh_r, kwh_s, kwh_t, w=W-20, h=80)
+        spark.hAlign = 'CENTER'
         story.append(spark)
 
         # Legend
@@ -677,7 +678,7 @@ class ReportsController:
         # ══════════════════════════════════════════════════════════════════════
         # HALAMAN 4 — RINGKASAN & REKOMENDASI
         # ══════════════════════════════════════════════════════════════════════
-        story.append(Paragraph('Ringkasan & Rekomendasi', S['section']))
+        story.append(Paragraph('Ringkasan', S['section']))
         story.append(HRFlowable(width=W, thickness=0.5, color=C_BORDER, spaceAfter=8))
 
         # Summary table
@@ -695,9 +696,9 @@ class ReportsController:
             ['Avg Power Factor',
              f"{avg_pf:.3f}",
              'Baik (≥0.90)' if avg_pf >= 0.90 else 'Perlu perbaikan'],
-            ['Tren Konsumsi',
-             f"{trend_txt}",
-             'vs paruh pertama periode'],
+            # ['Tren Konsumsi',
+            #  f"{trend_txt}",
+            #  'vs paruh pertama periode'],
         ]
         sum_tbl = Table(sum_data, colWidths=[4.5*cm, 4*cm, W-8.5*cm], repeatRows=1)
         sum_style = [
@@ -724,63 +725,63 @@ class ReportsController:
         story.append(Spacer(1, 16))
 
         # Rekomendasi
-        story.append(Paragraph('Rekomendasi Manajemen Energi', S['section']))
-        story.append(HRFlowable(width=W, thickness=0.5, color=C_BORDER, spaceAfter=8))
+        # story.append(Paragraph('Rekomendasi Manajemen Energi', S['section']))
+        # story.append(HRFlowable(width=W, thickness=0.5, color=C_BORDER, spaceAfter=8))
 
-        recommendations = []
-        if avg_pf < 0.90:
-            recommendations.append(
-                '⚠️  Power factor di bawah 0.90. Pertimbangkan pemasangan kapasitor bank '
-                'untuk meningkatkan power factor dan mengurangi biaya daya reaktif.'
-            )
-        if trend_pct and trend_pct > 5:
-            recommendations.append(
-                f'📈  Konsumsi energi meningkat {trend_pct:.1f}% pada paruh kedua periode. '
-                'Lakukan audit penggunaan peralatan listrik dan jadwalkan pemeliharaan rutin.'
-            )
-        if trend_pct and trend_pct < -5:
-            recommendations.append(
-                f'✅  Konsumsi energi menurun {abs(trend_pct):.1f}% — program efisiensi berjalan baik. '
-                'Pertahankan praktik ini dan dokumentasikan best practice.'
-            )
+        # recommendations = []
+        # if avg_pf < 0.90:
+        #     recommendations.append(
+        #         '⚠️  Power factor di bawah 0.90. Pertimbangkan pemasangan kapasitor bank '
+        #         'untuk meningkatkan power factor dan mengurangi biaya daya reaktif.'
+        #     )
+        # if trend_pct and trend_pct > 5:
+        #     recommendations.append(
+        #         f'📈  Konsumsi energi meningkat {trend_pct:.1f}% pada paruh kedua periode. '
+        #         'Lakukan audit penggunaan peralatan listrik dan jadwalkan pemeliharaan rutin.'
+        #     )
+        # if trend_pct and trend_pct < -5:
+        #     recommendations.append(
+        #         f'✅  Konsumsi energi menurun {abs(trend_pct):.1f}% — program efisiensi berjalan baik. '
+        #         'Pertahankan praktik ini dan dokumentasikan best practice.'
+        #     )
 
         # Phase imbalance check
-        ph_kwh_vals = [phase_totals[ph]['kwh'] for ph in ('R','S','T')
-                       if ph in phase_totals]
-        if ph_kwh_vals:
-            ph_max = max(ph_kwh_vals)
-            ph_min = min(ph_kwh_vals)
-            if ph_max > 0 and (ph_max - ph_min) / ph_max > 0.10:
-                recommendations.append(
-                    '⚖️  Ketidakseimbangan beban antar fasa >10%. '
-                    'Distribusikan ulang beban antara fasa R, S, T untuk efisiensi optimal.'
-                )
+        # ph_kwh_vals = [phase_totals[ph]['kwh'] for ph in ('R','S','T')
+        #                if ph in phase_totals]
+        # if ph_kwh_vals:
+        #     ph_max = max(ph_kwh_vals)
+        #     ph_min = min(ph_kwh_vals)
+        #     if ph_max > 0 and (ph_max - ph_min) / ph_max > 0.10:
+        #         recommendations.append(
+        #             '⚖️  Ketidakseimbangan beban antar fasa >10%. '
+        #             'Distribusikan ulang beban antara fasa R, S, T untuk efisiensi optimal.'
+        #         )
 
-        if not recommendations:
-            recommendations.append(
-                '✅  Sistem berjalan dalam kondisi normal. '
-                'Lanjutkan monitoring rutin dan pertahankan efisiensi operasional.'
-            )
+        # if not recommendations:
+        #     recommendations.append(
+        #         '✅  Sistem berjalan dalam kondisi normal. '
+        #         'Lanjutkan monitoring rutin dan pertahankan efisiensi operasional.'
+        #     )
 
-        for rec in recommendations:
-            rec_tbl = Table([[Paragraph(rec, S['body'])]], colWidths=[W])
-            rec_tbl.setStyle(TableStyle([
-                ('BACKGROUND',   (0,0),(-1,-1), colors.HexColor('#eff6ff')),
-                ('BOX',          (0,0),(-1,-1), 0.5, C_PRIMARY),
-                ('LEFTPADDING',  (0,0),(-1,-1), 10),
-                ('RIGHTPADDING', (0,0),(-1,-1), 10),
-                ('TOPPADDING',   (0,0),(-1,-1), 8),
-                ('BOTTOMPADDING',(0,0),(-1,-1), 8),
-            ]))
-            story.append(rec_tbl)
-            story.append(Spacer(1, 6))
+        # for rec in recommendations:
+        #     rec_tbl = Table([[Paragraph(rec, S['body'])]], colWidths=[W])
+        #     rec_tbl.setStyle(TableStyle([
+        #         ('BACKGROUND',   (0,0),(-1,-1), colors.HexColor('#eff6ff')),
+        #         ('BOX',          (0,0),(-1,-1), 0.5, C_PRIMARY),
+        #         ('LEFTPADDING',  (0,0),(-1,-1), 10),
+        #         ('RIGHTPADDING', (0,0),(-1,-1), 10),
+        #         ('TOPPADDING',   (0,0),(-1,-1), 8),
+        #         ('BOTTOMPADDING',(0,0),(-1,-1), 8),
+        #     ]))
+        #     story.append(rec_tbl)
+        #     story.append(Spacer(1, 6))
 
         # Footer note
         story.append(Spacer(1, 20))
         story.append(HRFlowable(width=W, thickness=0.3, color=C_BORDER))
         story.append(Spacer(1, 4))
         story.append(Paragraph(
-            f'Laporan ini dibuat secara otomatis oleh EnergyMon v2.0 pada '
+            f'Laporan ini dibuat secara otomatis pada '
             f'{datetime.now().strftime("%d %B %Y pukul %H:%M WIB")}. '
             f'Data bersumber dari sistem monitoring energi real-time.',
             S['caption']
