@@ -1,4 +1,4 @@
-from flask import Flask, session, redirect, url_for, request as flask_request, jsonify
+from flask import Flask, Response, session, redirect, url_for, request as flask_request, jsonify
 from config import Config
 from database import close_db
 from models.building import Building
@@ -229,6 +229,15 @@ def create_app():
  
         #     return redirect(url_for('auth.login'))
         
+        # Handle root URL '/'
+        if flask_request.path in ('/', ''):
+
+            # Belum login → view mode
+            if 'user_id' not in session:
+                return redirect(url_for('viewmode.index'))
+
+            # Sudah login → dashboard
+            return redirect(url_for('dashboard.index'))
         # LAMA
         if flask_request.path.startswith('/api'):
             if 'user_id' not in session:
@@ -255,6 +264,18 @@ def create_app():
                 session['next'] = flask_request.url
 
             return redirect(url_for('auth.login'))
+    
+    # @app.before_request
+    # def no_cache(response):
+    #      """
+    #      Tambahkan header untuk mencegah caching di browser.
+    #      Ini penting agar perubahan session (login/logout) langsung terasa tanpa harus refresh paksa.
+    #      """
+    #      if 'Cache-Control' not in response.headers:
+    #          response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    #          response.headers['Pragma'] = 'no-cache'
+    #          response.headers['Expires'] = '0'
+    #      return response
 
     # ================================
     # Context Processors
