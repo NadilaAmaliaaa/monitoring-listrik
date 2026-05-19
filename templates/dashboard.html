@@ -69,7 +69,7 @@
           <span id="power-value" class="transition-all">--</span>
           <span class="text-lg text-white/70 font-normal">W</span>
         </p>
-        <div class="w-full bg-black/10 rounded-full h-1 mt-3 overflow-hidden">
+        <div class="w-full bg-black/10 rounded-full h-1 mt-3 overflow-hidden invisible">
           <div id="power-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 0%"></div>
         </div>
         <!-- <p class="text-white/70 text-xs mt-1 text-right">
@@ -92,7 +92,7 @@
           <span id="energy-value" class="transition-all">--</span>
           <span class="text-lg text-slate-400 font-normal">kWh</span>
         </p>
-        <p class="text-slate-500 text-sm mt-1 flex items-center gap-1">
+        <p class="text-slate-500 text-sm mt-1 flex items-center gap-1 invisible">
           <span class="text-emerald-600 font-bold">+12%</span> vs bulan lalu
         </p>
       </div>
@@ -470,16 +470,17 @@ async function fetchSummary() {
     updateValueWithAnimation('power-value', powerKW);
     
     // Update power bar (max 250kW)
-    const maxPower = 250;
-    const powerPercentage = Math.min((data.power / 1000 / maxPower) * 100, 100);
-    updateProgressBar('power-bar', powerPercentage);
-    document.getElementById('power-percentage').textContent = powerPercentage.toFixed(0);
+    // const maxPower = 250;
+    // const powerPercentage = Math.min((data.power / 1000 / maxPower) * 100, 100);
+    // updateProgressBar('power-bar', powerPercentage);
+    // document.getElementById('power-percentage').textContent = powerPercentage.toFixed(0);
     
     // Update energy
     if (data.energy) {
       const energyFormatted = data.energy >= 1000 
         ? (data.energy / 1000).toFixed(1) + 'k' 
         : data.energy.toFixed(0);
+      console.log('Updating energy value to:', energyFormatted);
       updateValueWithAnimation('energy-value', energyFormatted);
     }
     
