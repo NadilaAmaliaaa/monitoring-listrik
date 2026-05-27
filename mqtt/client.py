@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 import paho.mqtt.client as mqtt
 from config import Config
-from mqtt.mqtt_data_handler import (
+from mqtt.mqtt_data_handler2 import (
     handle_mqtt_sensor_message,
     AggregationBuffer,
     logger
@@ -196,6 +196,7 @@ class HybridMQTTClient:
                 "energy": float(data.get("energi", 0)),
                 "pf": float(data.get("pf", 0)),
                 "frequency": float(data.get("frekuensi", 0)),
+                "seq": data.get("seq"),
                 "timestamp": data.get("time", datetime.now(timezone.utc).isoformat())
             }
             
@@ -205,12 +206,12 @@ class HybridMQTTClient:
             update_realtime(building_code, phase, realtime_data)
             
             # Log success with key metrics
-            logger.info(
-                f"✓ Realtime store updated: Phase {phase} → "
-                f"V={realtime_data['voltage']:.1f}V, "
-                f"I={realtime_data['current']:.2f}A, "
-                f"P={realtime_data['power']:.1f}W"
-            )
+            # logger.info(
+            #     f"✓ Realtime store updated: Phase {phase} → "
+            #     f"V={realtime_data['voltage']:.1f}V, "
+            #     f"I={realtime_data['current']:.2f}A, "
+            #     f"P={realtime_data['power']:.1f}W"
+            # )
             
             return True
             

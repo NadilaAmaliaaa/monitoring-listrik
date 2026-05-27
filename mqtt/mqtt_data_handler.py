@@ -306,7 +306,7 @@ class AggregationBuffer:
                     averaged_data = {
                         "voltage":         sums['voltage'] / count,
                         "current":         sums['current'] / count,
-                        "power":           sums['power'],
+                        "power":           sums['power'] / count,
                         "energy":          sums['energy'],
                         "cost":            sums['cost'],
                         "frequency":       sums['frequency'] / count,
