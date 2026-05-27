@@ -3,7 +3,9 @@ from sqlalchemy import func
 from database import db
 from models.data import Sensor, SensorReading
 from mqtt.realtime_store import get_all, get_by_building
+import logging
 
+logger = logging.getLogger(__name__)
 
 class DashboardController:
     def __init__(self, session, building_id=None, building_code=None):
@@ -57,11 +59,28 @@ class DashboardController:
  
         if not has_data:
             return {"R": None, "S": None, "T": None, "no_data": True}
- 
+
+        server_time = datetime.now()
+        r_current = round(data.get("R", {}).get("current", 0), 2) or 0
+        s_current = round(data.get("S", {}).get("current", 0), 2) or 0
+        t_current = round(data.get("T", {}).get("current", 0), 2) or 0
+        seq = (
+            data.get("R", {}).get("seq")
+            or data.get("S", {}).get("seq")
+            or data.get("T", {}).get("seq")
+        )
+        logger.info(
+            f"Server Timestamp : {server_time.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}"        
+            f"SEQ={seq} | "
+            f"R={r_current}A | "
+            f"S={s_current}A | "
+            f"T={t_current}A"
+        )
+        
         return {
-            "R": round(data.get("R", {}).get("current", 0), 2) or None,
-            "S": round(data.get("S", {}).get("current", 0), 2) or None,
-            "T": round(data.get("T", {}).get("current", 0), 2) or None,
+            "R": round(data.get("R", {}).get("current", 0), 2) or 0,
+            "S": round(data.get("S", {}).get("current", 0), 2) or 0,
+            "T": round(data.get("T", {}).get("current", 0), 2) or 0,
             "no_data": False,
             "timestamp": (
                 data.get("R", {}).get("timestamp")
