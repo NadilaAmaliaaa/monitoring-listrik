@@ -179,28 +179,96 @@ class ReportsController:
                 func.date_trunc('month', DailyEnergyView.date), Sensor.phase
             ).order_by(text('date DESC'))
 
-        total   = query.count()
-        results = query.offset(offset).limit(per_page).all()
+        results = query.all()
+        
+        # =========================================================
+        # PIVOT DATA
+        # =========================================================
+        grouped = {}
 
-        if period == 'hourly':
-            data = [{'date': r.date.strftime('%H:%M'), 'phase': r.phase,
-                     'avg_power': float(r.avg_power or 0),
-                     'peak_power': float(r.peak_power or 0),
-                     'total_kwh': float(r.total_kwh or 0)} for r in results]
-        elif period == 'daily':
-            data = [{'date': r.date.strftime('%Y-%m-%d'), 'phase': r.phase,
-                     'avg_power': float(r.avg_power or 0),
-                     'peak_power': float(r.peak_power or 0),
-                     'total_kwh': float(r.total_energy_kwh or 0)} for r in results]
-        else:
-            data = [{'date': r.date.strftime('%Y-%m'), 'phase': r.phase,
-                     'avg_power': float(r.avg_power or 0),
-                     'peak_power': float(r.peak_power or 0),
-                     'total_kwh': float(r.total_kwh or 0)} for r in results]
+        for r in results:
 
+            # format key waktu
+            if period == 'hourly':
+                key = r.date.strftime('%H:%M')
+
+            elif period == 'daily':
+                key = r.date.strftime('%Y-%m-%d')
+
+            else:
+                key = r.date.strftime('%Y-%m')
+
+            # init row
+            if key not in grouped:
+                grouped[key] = {
+                    'time': key,
+
+                    'avg_r': 0,
+                    'avg_s': 0,
+                    'avg_t': 0,
+
+                    'peak_r': 0,
+                    'peak_s': 0,
+                    'peak_t': 0,
+
+                    'total_kwh': 0,
+                }
+
+            avg_power = float(r.avg_power or 0)
+            peak_power = float(r.peak_power or 0)
+
+            if r.phase == 'R':
+                grouped[key]['avg_r'] = avg_power
+                grouped[key]['peak_r'] = peak_power
+
+            elif r.phase == 'S':
+                grouped[key]['avg_s'] = avg_power
+                grouped[key]['peak_s'] = peak_power
+
+            elif r.phase == 'T':
+                grouped[key]['avg_t'] = avg_power
+                grouped[key]['peak_t'] = peak_power
+
+            # total kwh
+            if period == 'daily':
+                kwh = float(r.total_energy_kwh or 0)
+            else:
+                kwh = float(r.total_kwh or 0)
+
+            grouped[key]['total_kwh'] += kwh
+
+        # =========================================================
+        # CONVERT KE LIST
+        # =========================================================
+        data = list(grouped.values())
+
+        # sorting terbaru di atas
+        data.sort(
+            key=lambda x: x['time'],
+            reverse=True
+        )
+
+        # =========================================================
+        # PAGINATION
+        # =========================================================
+        total = len(data)
+
+        start = offset
+        end = offset + per_page
+
+        paginated_data = data[start:end]
+
+        pages = math.ceil(total / per_page)
+
+        # =========================================================
+        # RESPONSE
+        # =========================================================
         return {
-            'data': data, 'total': total, 'page': page,
-            'per_page': per_page, 'pages': max(1, (total + per_page - 1) // per_page)
+            'data': paginated_data,
+            'total': total,
+            'page': page,
+            'per_page': per_page,
+            'pages': pages if pages > 0 else 1,
         }
 
     # ── Aggregate data for report ─────────────────────────────────────────────

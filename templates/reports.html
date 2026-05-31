@@ -366,13 +366,13 @@ page_title %}Laporan Berkala{% endblock %} {% block page_subtitle %}Generate dan
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        let rows = data.data;
+        // let rows = data.data;
 
-        if (currentPeriod) {
-          rows = pivotDataByDate(rows);
-        }
+        // if (currentPeriod) {
+        //   rows = pivotDataByDate(rows);
+        // }
 
-        renderTable(rows);
+        renderTable(data.data);
         updatePagination(data.total, data.page, data.pages);
       })
       .catch((error) => {
