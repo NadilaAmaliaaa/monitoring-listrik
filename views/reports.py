@@ -42,27 +42,27 @@ def index():
         db_session.close()
 
 
-@reports_bp.route('/switch-building/<int:building_id>', methods=['POST'])
-def switch_building(building_id):
-    """Switch active building/department"""
-    db_session = get_session()
-    try:
-        building = db_session.query(Building).get(building_id)
-        if not building:
-            return jsonify({'error': 'Building not found'}), 404
+# @reports_bp.route('/switch-building/<int:building_id>', methods=['POST'])
+# def switch_building(building_id):
+#     """Switch active building/department"""
+#     db_session = get_session()
+#     try:
+#         building = db_session.query(Building).get(building_id)
+#         if not building:
+#             return jsonify({'error': 'Building not found'}), 404
         
-        set_current_building(building_id)
+#         set_current_building(building_id)
         
-        return jsonify({
-            'success': True,
-            'building': {
-                'id': building.id,
-                'name': building.name,
-                'code': building.code
-            }
-        })
-    finally:
-        db_session.close()
+#         return jsonify({
+#             'success': True,
+#             'building': {
+#                 'id': building.id,
+#                 'name': building.name,
+#                 'code': building.code
+#             }
+#         })
+#     finally:
+#         db_session.close()
 
 
 @reports_bp.route('/history')
