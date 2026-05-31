@@ -46,7 +46,7 @@
       </div>
       <div class="flex items-center gap-2 mb-2">
         <span class="material-symbols-outlined text-slate-400 text-xl">speed</span>
-        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Frekuensi</h3>
+        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Frekuensi Bulan Ini</h3>
       </div>
       <div>
         <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
@@ -62,12 +62,12 @@
       <div class="absolute -right-6 -top-6 bg-white/10 rounded-full size-32 blur-2xl"></div>
       <div class="flex items-center gap-2 mb-2 relative z-10">
         <span class="material-symbols-outlined text-white/80 text-xl">offline_bolt</span>
-        <h3 class="text-white/80 text-sm font-medium uppercase tracking-wider">Total Daya</h3>
+        <h3 class="text-white/80 text-sm font-medium uppercase tracking-wider">Total Daya Bulan Ini</h3>
       </div>
       <div class="relative z-10">
         <p class="text-white text-3xl font-bold tracking-tight tabular-nums">
           <span id="power-value" class="transition-all">--</span>
-          <span class="text-lg text-white/70 font-normal">W</span>
+          <span class="text-lg text-white/70 font-normal">kW</span>
         </p>
         <div class="w-full bg-black/10 rounded-full h-1 mt-3 overflow-hidden invisible">
           <div id="power-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 0%"></div>
@@ -85,7 +85,7 @@
       </div>
       <div class="flex items-center gap-2 mb-2">
         <span class="material-symbols-outlined text-slate-400 text-xl">savings</span>
-        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Energi</h3>
+        <h3 class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Energi Bulan Ini</h3>
       </div>
       <div>
         <p class="text-slate-900 text-3xl font-bold tracking-tight tabular-nums">
@@ -466,8 +466,13 @@ async function fetchSummary() {
     updateValueWithAnimation('frequency-value', data.frequency ? data.frequency.toFixed(2) : '--');
     
     // Update power (convert W to kW)
-    const powerKW = data.power ? (data.power / 1000).toFixed(1) : '0.0';
-    updateValueWithAnimation('power-value', powerKW);
+    updateValueWithAnimation(
+      'power-value',
+      ((data.power || 0) / 1000).toLocaleString('id-ID', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      })
+    );
     
     // Update power bar (max 250kW)
     // const maxPower = 250;
@@ -477,11 +482,13 @@ async function fetchSummary() {
     
     // Update energy
     if (data.energy) {
-      const energyFormatted = data.energy >= 1000 
-        ? (data.energy / 1000).toFixed(1) + 'k' 
-        : data.energy.toFixed(0);
-      console.log('Updating energy value to:', energyFormatted);
-      updateValueWithAnimation('energy-value', energyFormatted);
+      updateValueWithAnimation(
+        'energy-value',
+        Number(data.energy).toLocaleString('id-ID', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        })
+      );
     }
     
   } catch (error) {
