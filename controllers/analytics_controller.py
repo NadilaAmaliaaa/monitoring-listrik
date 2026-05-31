@@ -8,16 +8,32 @@ from models.views import DailyEnergyView, HourlyEnergyView
 
 logger = logging.getLogger(__name__)
 
-
-def _today_utc() -> date:
-    """Tanggal hari ini dalam UTC — konsisten dengan datetime.utcnow()."""
-    return datetime.now(timezone.utc).date()
+# ── Timezone WIB (UTC+7) — dipakai konsisten di seluruh controller ────────────
+_WIB = timezone(timedelta(hours=7))
 
 
-def _month_start_utc() -> date:
-    """Tanggal awal bulan ini dalam UTC — sama persis dengan DashboardController."""
-    today = _today_utc()
-    return today.replace(day=1)
+def _today_wib() -> date:
+    """Tanggal hari ini dalam WIB — konsisten dengan data lokal."""
+    return datetime.now(_WIB).date()
+
+
+def _month_start_wib() -> date:
+    """Tanggal awal bulan ini dalam WIB."""
+    return _today_wib().replace(day=1)
+
+
+def _tomorrow_wib() -> date:
+    """Besok dalam WIB — dipakai sebagai exclusive upper bound filter."""
+    return _today_wib() + timedelta(days=1)
+
+
+# ── Shorthand filter helpers ──────────────────────────────────────────────────
+# Karena kolom date di view bertipe timestamptz, cast eksplisit ke date
+# diperlukan agar perbandingan tidak bergantung pada session timezone PostgreSQL.
+
+def _date_col(col):
+    """Cast kolom timestamptz ke date (pakai timezone Asia/Jakarta)."""
+    return func.date(func.timezone('Asia/Jakarta', col))
 
 
 class AnalyticsController:
@@ -44,28 +60,28 @@ class AnalyticsController:
     def get_summary_cards(self) -> dict:
         db = get_session()
         try:
-            today = date.today()
+            today    = _today_wib()
+            tomorrow = _tomorrow_wib()
 
-            # ✅ Bulan ini (FIXED)
-            start_date = date(today.year, today.month, 1)
-            end_date = (start_date + timedelta(days=32)).replace(day=1)
-            
-            # Bulan sebelumnya (day-aligned)
+            # Bulan ini: [start_date, end_date)
+            start_date = today.replace(day=1)
+            end_date   = (start_date + timedelta(days=32)).replace(day=1)
+
+            # Bulan sebelumnya
             prev_start_date = (start_date - timedelta(days=1)).replace(day=1)
-            days_elapsed = (today - start_date).days + 1
-            prev_end_date = prev_start_date + timedelta(days=days_elapsed)
+            prev_end_date   = start_date
 
             sensor_ids = self._sensor_ids(db)
             if not sensor_ids:
                 return self._empty_cards()
 
-            # ✅ TOTAL (SQL, aman)
+            # Total energi bulan ini
             total_kwh = (
                 db.query(func.sum(DailyEnergyView.total_energy_kwh))
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= start_date,
-                    DailyEnergyView.date < end_date,
+                    _date_col(DailyEnergyView.date) >= start_date,
+                    _date_col(DailyEnergyView.date) <  end_date,
                 )
                 .scalar()
             ) or 0
@@ -74,36 +90,36 @@ class AnalyticsController:
                 db.query(func.sum(DailyEnergyView.total_cost))
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= start_date,
-                    DailyEnergyView.date < end_date,
-                )
-                .scalar()
-            ) or 0
-            
-            # ✅ TOTAL bulan sebelumnya
-            prev_total_kwh = (
-                db.query(func.sum(DailyEnergyView.total_energy_kwh))
-                .filter(
-                    DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= prev_start_date,
-                    DailyEnergyView.date < prev_end_date,
+                    _date_col(DailyEnergyView.date) >= start_date,
+                    _date_col(DailyEnergyView.date) <  end_date,
                 )
                 .scalar()
             ) or 0
 
-            # ✅ HITUNG DELTA (%)
+            # Total energi bulan sebelumnya
+            prev_total_kwh = (
+                db.query(func.sum(DailyEnergyView.total_energy_kwh))
+                .filter(
+                    DailyEnergyView.sensor_id.in_(sensor_ids),
+                    _date_col(DailyEnergyView.date) >= prev_start_date,
+                    _date_col(DailyEnergyView.date) <  prev_end_date,
+                )
+                .scalar()
+            ) or 0
+
+            # Delta (%)
             if prev_total_kwh > 0:
                 kwh_delta_pct = ((total_kwh - prev_total_kwh) / prev_total_kwh) * 100
             else:
                 kwh_delta_pct = 0
 
-            # ✅ Ambil data untuk peak & PF
+            # Data untuk peak & PF
             rows = (
                 db.query(DailyEnergyView)
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= start_date,
-                    DailyEnergyView.date < end_date,
+                    _date_col(DailyEnergyView.date) >= start_date,
+                    _date_col(DailyEnergyView.date) <  end_date,
                 )
                 .all()
             )
@@ -111,7 +127,6 @@ class AnalyticsController:
             if not rows:
                 return self._empty_cards()
 
-            # peak_row = max(rows, key=lambda r: r.peak_power or 0)
             peak_row = (
                 db.query(
                     DailyEnergyView.date,
@@ -119,8 +134,8 @@ class AnalyticsController:
                 )
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= start_date,
-                    DailyEnergyView.date < end_date,
+                    _date_col(DailyEnergyView.date) >= start_date,
+                    _date_col(DailyEnergyView.date) <  end_date,
                 )
                 .group_by(DailyEnergyView.date)
                 .order_by(func.sum(DailyEnergyView.peak_power).desc())
@@ -129,18 +144,18 @@ class AnalyticsController:
             peak_power = peak_row.total_peak or 0
 
             pf_values = [r.avg_pf for r in rows if r.avg_pf is not None]
-            avg_pf = sum(pf_values) / len(pf_values) if pf_values else 0
+            avg_pf    = sum(pf_values) / len(pf_values) if pf_values else 0
 
             return {
-                'total_kwh': round(total_kwh, 2),
-                'peak_power_kw': round(peak_power / 1000, 2),
-                'peak_datetime': str(peak_row.date),
-                'avg_pf': round(avg_pf, 3),
-                'total_cost': round(total_cost, 0),
-                'kwh_delta_pct': round(kwh_delta_pct, 1),
-                'last_month_kwh': round(prev_total_kwh, 2),
+                'total_kwh':        round(total_kwh, 2),
+                'peak_power_kw':    round(peak_power / 1000, 2),
+                'peak_datetime':    str(peak_row.date),
+                'avg_pf':           round(avg_pf, 3),
+                'total_cost':       round(total_cost, 0),
+                'kwh_delta_pct':    round(kwh_delta_pct, 1),
+                'last_month_kwh':   round(prev_total_kwh, 2),
                 'last_month_start': str(prev_start_date),
-                'last_month_end': str(prev_end_date - timedelta(days=1)),
+                'last_month_end':   str(prev_end_date - timedelta(days=1)),
             }
 
         except Exception as e:
@@ -155,14 +170,15 @@ class AnalyticsController:
             'avg_pf': 0, 'total_cost': 0, 'kwh_delta_pct': 0,
         }
 
-    # ── Monthly Energy (sama persis dengan Dashboard) ─────────────────────────
+    # ── Monthly Energy ────────────────────────────────────────────────────────
 
     def get_monthly_energy(self) -> dict:
         db = get_session()
         try:
-            sensor_ids  = self._sensor_ids(db)
-            since       = _month_start_utc()
-            today       = _today_utc()
+            sensor_ids = self._sensor_ids(db)
+            today      = _today_wib()
+            tomorrow   = _tomorrow_wib()
+            since      = _month_start_wib()
 
             if not sensor_ids:
                 return {'total_kwh': 0, 'since': str(since), 'until': str(today)}
@@ -171,8 +187,8 @@ class AnalyticsController:
                 db.query(func.sum(DailyEnergyView.total_energy_kwh))
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= since,
-                    DailyEnergyView.date <= today,
+                    _date_col(DailyEnergyView.date) >= since,
+                    _date_col(DailyEnergyView.date) <  tomorrow,
                 )
                 .scalar()
             ) or 0
@@ -210,12 +226,12 @@ class AnalyticsController:
             from collections import defaultdict
             date_phase: dict = defaultdict(lambda: {'R': 0.0, 'S': 0.0, 'T': 0.0})
 
-            # FIX: semua since pakai UTC
-            today = _today_utc()
+            today    = _today_wib()
+            tomorrow = _tomorrow_wib()
 
             if period == 'hourly':
-                now = datetime.now(timezone.utc)
-                since = now - timedelta(hours=24)
+                now   = datetime.now(_WIB)
+                since = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
                 rows = (
                     db.query(HourlyEnergyView)
@@ -230,7 +246,7 @@ class AnalyticsController:
 
                 for r in rows:
                     phase = phase_map.get(r.sensor_id, 'R')
-                    label = r.date.strftime('%H:%M')  # lebih bagus untuk hourly
+                    label = r.date.strftime('%H:%M')
                     date_phase[label][phase] += r.total_kwh or 0
 
             elif period == 'monthly':
@@ -239,8 +255,8 @@ class AnalyticsController:
                     db.query(DailyEnergyView)
                     .filter(
                         DailyEnergyView.sensor_id.in_(list(phase_map.keys())),
-                        DailyEnergyView.date >= year_start,
-                        DailyEnergyView.date <= today,
+                        _date_col(DailyEnergyView.date) >= year_start,
+                        _date_col(DailyEnergyView.date) <  tomorrow,
                     )
                     .order_by(DailyEnergyView.date)
                     .all()
@@ -256,15 +272,14 @@ class AnalyticsController:
                         date_phase[lbl] = {'R': 0.0, 'S': 0.0, 'T': 0.0}
 
             else:
-                # Daily
+                # Daily — [awal bulan, besok)
                 start_date = today.replace(day=1)
-                since = start_date
-                rows  = (
+                rows = (
                     db.query(DailyEnergyView)
                     .filter(
                         DailyEnergyView.sensor_id.in_(list(phase_map.keys())),
-                        DailyEnergyView.date >= since,
-                        DailyEnergyView.date <= today,  # FIX: tambah batas atas
+                        _date_col(DailyEnergyView.date) >= start_date,
+                        _date_col(DailyEnergyView.date) <  tomorrow,
                     )
                     .order_by(DailyEnergyView.date)
                     .all()
@@ -302,17 +317,17 @@ class AnalyticsController:
         try:
             sensors   = self._get_sensors(db)
             phase_map = {s.id: s.phase for s in sensors}
-            # FIX: pakai UTC
-            today = _today_utc()
+
+            today      = _today_wib()
+            tomorrow   = _tomorrow_wib()
             start_date = today.replace(day=1)
-            since = start_date
 
             rows = (
                 db.query(DailyEnergyView)
                 .filter(
                     DailyEnergyView.sensor_id.in_(list(phase_map.keys())),
-                    DailyEnergyView.date >= since,
-                    DailyEnergyView.date <= today,
+                    _date_col(DailyEnergyView.date) >= start_date,
+                    _date_col(DailyEnergyView.date) <  tomorrow,
                 )
                 .order_by(DailyEnergyView.date)
                 .all()
@@ -360,24 +375,17 @@ class AnalyticsController:
             if not sensor_ids:
                 return self._empty_peak_response()
 
-            today = _today_utc()
+            today    = _today_wib()
+            tomorrow = _tomorrow_wib()
 
-            # ===============================
-            # CURRENT PERIOD (month-to-date)
-            # ===============================
+            # Periode saat ini (month-to-date): [start_date, tomorrow)
             start_date = today.replace(day=1)
-            end_date = today + timedelta(days=1)  # EXCLUSIVE
 
-            # ===============================
-            # PREVIOUS PERIOD (day-aligned)
-            # ===============================
+            # Periode sebelumnya (day-aligned)
             prev_start_date = (start_date - timedelta(days=1)).replace(day=1)
-            days_elapsed = (today - start_date).days + 1
-            prev_end_date = prev_start_date + timedelta(days=days_elapsed)
+            prev_end_date   = start_date
 
-            # ===============================
-            # CURRENT DATA
-            # ===============================
+            # Data periode saat ini
             rows = (
                 db.query(
                     DailyEnergyView.date,
@@ -386,25 +394,20 @@ class AnalyticsController:
                 )
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= start_date,
-                    DailyEnergyView.date < end_date,
+                    _date_col(DailyEnergyView.date) >= start_date,
+                    _date_col(DailyEnergyView.date) <  tomorrow,
                 )
                 .group_by(DailyEnergyView.date)
                 .order_by(DailyEnergyView.date)
                 .all()
             )
 
-            # chart
-            labels = [r.date.strftime('%d %b') for r in rows]
-            values = [(r.peak_w or 0) / 1000 for r in rows]  # kW
-
-            # avg power (3-phase sudah dijumlahkan)
+            labels       = [r.date.strftime('%d %b') for r in rows]
+            values       = [(r.peak_w or 0) / 1000 for r in rows]
             daily_avg_kw = [(r.avg_w or 0) / 1000 for r in rows]
-            curr_avg = sum(daily_avg_kw) / len(daily_avg_kw) if daily_avg_kw else 0
+            curr_avg     = sum(daily_avg_kw) / len(daily_avg_kw) if daily_avg_kw else 0
 
-            # ===============================
-            # PREVIOUS DATA (ALIGNED)
-            # ===============================
+            # Data periode sebelumnya
             prev_rows = (
                 db.query(
                     DailyEnergyView.date,
@@ -412,8 +415,8 @@ class AnalyticsController:
                 )
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= prev_start_date,
-                    DailyEnergyView.date < prev_end_date,
+                    _date_col(DailyEnergyView.date) >= prev_start_date,
+                    _date_col(DailyEnergyView.date) <  prev_end_date,
                 )
                 .group_by(DailyEnergyView.date)
                 .order_by(DailyEnergyView.date)
@@ -426,40 +429,30 @@ class AnalyticsController:
                 if prev_daily_avg_kw else 0
             )
 
-            # ===============================
-            # GROWTH (%)
-            # ===============================
-            if prev_avg > 0:
-                growth = ((curr_avg - prev_avg) / prev_avg) * 100
-            else:
-                growth = 0
+            growth = ((curr_avg - prev_avg) / prev_avg * 100) if prev_avg > 0 else 0
 
             return {
-                'labels': labels,
-                'values': [round(v, 2) for v in values],
-
-                # metrics
-                'avg_power_kw': round(curr_avg, 2),
+                'labels':            labels,
+                'values':            [round(v, 2) for v in values],
+                'avg_power_kw':      round(curr_avg, 2),
                 'prev_avg_power_kw': round(prev_avg, 2),
-                'growth_pct': round(growth, 1),
-
-                'current_month': start_date.strftime('%b %Y'),
-                'previous_month': prev_start_date.strftime('%b %Y'),
+                'growth_pct':        round(growth, 1),
+                'current_month':     start_date.strftime('%b %Y'),
+                'previous_month':    prev_start_date.strftime('%b %Y'),
             }
 
         except Exception as e:
             logger.error(f"get_peak_load_trend error: {e}", exc_info=True)
-            return {
-                'labels': [],
-                'values': [],
-                'avg_power_kw': 0,
-                'prev_avg_power_kw': 0,
-                'growth_pct': 0,
-                'current_month': '',
-                'previous_month': '',
-            }
+            return self._empty_peak_response()
         finally:
             db.close()
+
+    def _empty_peak_response(self):
+        return {
+            'labels': [], 'values': [],
+            'avg_power_kw': 0, 'prev_avg_power_kw': 0,
+            'growth_pct': 0, 'current_month': '', 'previous_month': '',
+        }
 
     # ── Power Factor History ──────────────────────────────────────────────────
 
@@ -475,9 +468,9 @@ class AnalyticsController:
         db = get_session()
         try:
             sensor_ids = self._sensor_ids(db)
-            # FIX: pakai UTC
-            today = _today_utc()
-            since = today - timedelta(days=days)
+            today      = _today_wib()
+            tomorrow   = _tomorrow_wib()
+            since      = today - timedelta(days=days)
 
             rows = (
                 db.query(
@@ -486,8 +479,8 @@ class AnalyticsController:
                 )
                 .filter(
                     DailyEnergyView.sensor_id.in_(sensor_ids),
-                    DailyEnergyView.date >= since,
-                    DailyEnergyView.date <= today,
+                    _date_col(DailyEnergyView.date) >= since,
+                    _date_col(DailyEnergyView.date) <  tomorrow,
                 )
                 .group_by(DailyEnergyView.date)
                 .order_by(DailyEnergyView.date)
