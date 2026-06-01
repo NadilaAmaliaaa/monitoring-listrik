@@ -469,8 +469,8 @@ async function fetchSummary() {
     updateValueWithAnimation(
       'power-value',
       ((data.power || 0) / 1000).toLocaleString('id-ID', {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
       })
     );
     
@@ -485,8 +485,8 @@ async function fetchSummary() {
       updateValueWithAnimation(
         'energy-value',
         Number(data.energy).toLocaleString('id-ID', {
-          minimumFractionDigits: 1,
-          maximumFractionDigits: 1
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
         })
       );
     }
