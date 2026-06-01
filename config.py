@@ -51,7 +51,7 @@ class Config:
     MQTT_TOPIC_PREDICT_RESULT = os.getenv('MQTT_TOPIC_PREDICT_RESULT', 'predict/result')
     
     # Energy Calculation
-    TARIF_PER_KWH = float(os.getenv('TARIF_PER_KWH', '1500.0'))
+    TARIF_PER_KWH = float(os.getenv('TARIF_PER_KWH', '1533.0'))
     PPJ = float(os.getenv('PPJ', '0.05'))  # 5%
     
     # Aggregation Configuration
