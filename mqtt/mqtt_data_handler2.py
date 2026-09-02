@@ -116,7 +116,7 @@ class SensorDataHandler:
         try:
             energi_wh  = power_watt * (duration_sec / 3600.0)
             energi_kwh = energi_wh / 1000.0
-            biaya      = energi_kwh * TARIF_PER_KWH * (1 + PPJ)
+            biaya      = energi_kwh * TARIF_PER_KWH
             return energi_kwh, biaya
         except Exception as e:
             logger.error(f"Error calculating energy/cost: {e}")
@@ -304,15 +304,18 @@ class AggregationBuffer:
     def accumulate_data(sensor_id: int, data: dict):
         """
         Akumulasi satu sampel MQTT ke bucket menit yang sesuai.
-
-        Energy dan cost dihitung berdasarkan durasi aktual antar sampel
-        (bukan hardcoded 5 detik) sehingga tetap akurat saat ada
-        packet-loss, reconnect, atau jitter.
+        
         """
         now         = datetime.utcnow().replace(tzinfo=timezone.utc)
         now_ts      = now.timestamp()
         bucket_time = now.replace(second=0, microsecond=0)
         bucket_ts   = bucket_time.timestamp()
+        
+        logger.info(
+            f"[RAW MQTT] Sensor={sensor_id} "
+            f"Time={now.strftime('%Y-%m-%d %H:%M:%S')} "
+            f"Payload={data}"
+        )
 
         with agg_lock:
             if sensor_id not in agg_buffer:
@@ -413,7 +416,6 @@ class AggregationBuffer:
                     f"Error accumulating data for sensor {sensor_id}: {e}"
                 )
 
-        # Flush evicted bucket DI LUAR agg_lock untuk hindari deadlock
         if evicted_buf is not None:
             AggregationBuffer._flush_bucket_to_db(sensor_id, evicted_buf)
 
