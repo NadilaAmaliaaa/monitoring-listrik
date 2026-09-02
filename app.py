@@ -153,6 +153,10 @@ def create_app():
         app.register_blueprint(notifications_bp, url_prefix='/notifications')
         logger.info("✓ Notifications blueprint registered")
         
+        from views.users import users_bp
+        app.register_blueprint(users_bp)
+        logger.info("✓ Users blueprint registered")
+        
         from views.viewmode import viewmode_bp
         app.register_blueprint(viewmode_bp)
         logger.info("✓ Viewmode blueprint registered")
@@ -324,6 +328,7 @@ def create_app():
             'current_building':  current_building,
             'current_user_name': session.get('user_name', ''),
             'current_username':  session.get('username', ''),
+            'is_super_admin':    session.get('is_super_admin', False),
         }
 
     # ================================

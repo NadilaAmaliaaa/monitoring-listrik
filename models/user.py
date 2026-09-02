@@ -1,5 +1,5 @@
 # models/user.py
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -13,6 +13,8 @@ class User(Base):
     name        = Column(String(100), nullable=False)
     username    = Column(String(30), nullable=False, unique=True)
     password    = Column(String(255), nullable=False)
+    
+    is_super_admin = Column(Boolean, nullable=False, default=False)
 
     # building = relationship("Building", back_populates="users")
 
@@ -32,6 +34,7 @@ class User(Base):
             "building_id": self.building_id,
             "name":        self.name,
             "username":    self.username,
+            "is_super_admin": self.is_super_admin,
         }
 
     def __repr__(self):

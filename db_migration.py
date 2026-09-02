@@ -97,10 +97,10 @@ def migrate():
 
     # 8️⃣ Index tambahan untuk performa
     print("🔍 Membuat index...")
-    cur.execute("""
-        CREATE INDEX IF NOT EXISTS idx_sensor_time
-        ON sensor_readings (sensor_id, timestamp DESC);
-    """)
+    # cur.execute("""
+    #     CREATE INDEX IF NOT EXISTS idx_sensor_time
+    #     ON sensor_readings (sensor_id, timestamp DESC);
+    # """)
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_alarm_sensor_time
         ON alarm_events (sensor_id, timestamp DESC);
