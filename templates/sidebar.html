@@ -36,6 +36,13 @@
         <span class="material-symbols-outlined">settings</span>
         <span class="nav-text">Ubah Nilai Ambang</span>
       </a>
+      {% if is_super_admin %}
+        <div class="nav-divider"></div>
+        <a href="/users" class="nav-item" data-page="users">
+          <span class="material-symbols-outlined">manage_accounts</span>
+          <span class="nav-text">Kelola Pengguna</span>
+        </a>
+      {% endif %}
     </nav>
 
     <!-- User Profile -->
