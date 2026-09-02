@@ -219,23 +219,32 @@
   // ── Init Charts ────────────────────────────────────────────────────────────
   function initCharts() {
     chartEnergy = new Chart(document.getElementById('chartEnergyTrend'), {
-      type: 'bar',
+      type: 'line',
       data: { labels: [], datasets: [] },
       options: {
         ...chartDefaults,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         scales: {
           x: {
             ...chartDefaults.scales.x,
-            stacked: true,
           },
           y: {
             ...chartDefaults.scales.y,
-            stacked: true,
-            title: { display: true, text: 'kWh', font: { size: 9 }, color: '#94a3b8' },
-          },
-        },
-      },
+            title: {
+              display: true,
+              text: 'kWh',
+              font: { size: 9 },
+              color: '#94a3b8'
+            }
+          }
+        }
+      }
     });
 
     chartBalance = new Chart(document.getElementById('chartPhaseBalance'), {
@@ -251,7 +260,7 @@
     });
 
     chartPeak = new Chart(document.getElementById('chartPeakLoad'), {
-      type: 'bar',
+      type: 'line',
       data: { labels: [], datasets: [] },
       options: {
         ...chartDefaults,
@@ -269,7 +278,7 @@
         ...chartDefaults,
         scales: {
           x: { ...chartDefaults.scales.x },
-          y: { ...chartDefaults.scales.y, min: 0, max: 1.05 },
+          y: { ...chartDefaults.scales.y, min: 0, max: 1.02},
         },
       },
     });
@@ -318,16 +327,25 @@
       .then(r => r.json())
       .then(d => {
         chartEnergy.data.labels   = d.labels;
-        chartEnergy.data.datasets = ['R', 'S', 'T'].map((ph, i) => ({
-          label:           `Fasa ${ph}`,
-          data:            d.series[ph],
-          backgroundColor: COLORS[ph].bg,
-          borderColor:     COLORS[ph].border,
-          borderWidth:     { top: 2, left: 0, right: 0, bottom: 0 },
-          borderSkipped:   false,
-          borderRadius:    i === 2 ? { topLeft: 4, topRight: 4 } : 0,
-          barPercentage:   0.55,
-          categoryPercentage: 0.8,
+        chartEnergy.data.datasets = ['R', 'S', 'T'].map(ph => ({
+          label: `Fasa ${ph}`,
+          data: d.series[ph],
+
+          borderColor: COLORS[ph].border,
+          backgroundColor: COLORS[ph].border,
+
+          fill: false,
+          tension: 0.35,
+
+          borderWidth: 2.5,
+
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBorderWidth: 2,
+          pointBackgroundColor: '#ffffff',
+          pointBorderColor: COLORS[ph].border,
+
+          spanGaps: true,
         }));
         chartEnergy.update();
         handleEmptyChart(chartEnergy);
@@ -367,17 +385,35 @@
       .then(r => r.json())
       .then(d => {
         chartPeak.data.labels   = d.labels;
+        const maxIndex = d.values.indexOf(Math.max(...d.values));
         chartPeak.data.datasets = [{
-          label:           'Peak kW',
-          data:            d.values,
-          backgroundColor: d.values.map((v, i) =>
-            i === d.values.indexOf(Math.max(...d.values))
-              ? '#136dec'
-              : 'rgba(19,109,236,0.15)'
+          label: 'Peak Load',
+          data: d.values,
+
+          borderColor: '#136dec',
+          backgroundColor: 'rgba(19,109,236,0.12)',
+
+          fill: true,
+          tension: 0.35,
+          borderWidth: 3,
+
+          pointRadius: d.values.map((_, i) =>
+            i === maxIndex ? 6 : 3
           ),
-          borderColor:   '#136dec',
-          borderWidth:   1.5,
-          borderRadius:  3,
+
+          pointHoverRadius: d.values.map((_, i) =>
+            i === maxIndex ? 8 : 5
+          ),
+
+          pointBackgroundColor: d.values.map((_, i) =>
+            i === maxIndex ? '#ef4444' : '#ffffff'
+          ),
+
+          pointBorderColor: d.values.map((_, i) =>
+            i === maxIndex ? '#ef4444' : '#136dec'
+          ),
+
+          pointBorderWidth: 2,
         }];
         chartPeak.update();
         handleEmptyChart(chartPeak);
