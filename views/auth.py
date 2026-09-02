@@ -14,6 +14,17 @@ auth_bp = Blueprint('auth', __name__)
 
 
 # ── Decorator ─────────────────────────────────────────────────────────────────
+def superadmin_required(f):
+    """Decorator untuk route yang hanya bisa diakses superadmin."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('auth.login'))
+        if not session.get('is_super_admin'):
+            from flask import abort
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
 
 def login_required(f):
     """
@@ -81,6 +92,7 @@ def login():
                     session['building_id']   = user.building_id
                     session['building_name'] = building.name if building else ''
                     session['building_code'] = building.code if building else ''
+                    session['is_super_admin'] = bool(user.is_super_admin)
 
                     # Simpan daftar semua building untuk dropdown navbar
                     # (hanya id, name, code — tidak ada object SQLAlchemy)
